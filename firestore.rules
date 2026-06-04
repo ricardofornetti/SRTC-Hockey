@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permitir lecturas y escrituras públicas para simular el cambio de roles (Admin/Coach/Público) 
+    // sin requerir un login obligatorio de Google en el entorno de pruebas.
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

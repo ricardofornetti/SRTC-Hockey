@@ -1,0 +1,6 @@
+{
+  "name": "San Rafael Tenis Club Hockey",
+  "description": "Aplicación oficial del San Rafael Tenis Club Hockey con resultados en tiempo real, fixture, estadísticas de jugadoras y control de planillas de convocadas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

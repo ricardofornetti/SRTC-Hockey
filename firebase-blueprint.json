@@ -1,0 +1,178 @@
+{
+  "entities": {
+    "Player": {
+      "title": "Player",
+      "description": "Ficha y estadísticas de una jugadora",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "apellido": { "type": "string" },
+        "numeroCamiseta": { "type": "integer" },
+        "posicion": { "type": "string", "enum": ["Arquera", "Defensora", "Volante", "Delantera"] },
+        "fechaNacimiento": { "type": "string" },
+        "fotoUrl": { "type": "string" },
+        "partidosJugados": { "type": "integer" },
+        "goles": { "type": "integer" },
+        "asistencias": { "type": "integer" },
+        "tarjetaVerde": { "type": "integer" },
+        "tarjetaAmarilla": { "type": "integer" },
+        "tarjetaRoja": { "type": "integer" },
+        "categoria": { "type": "string", "enum": ["7ma", "6ta", "5ta", "Intermedia", "Primera"] },
+        "destacada": { "type": "boolean" }
+      },
+      "required": ["id", "nombre", "apellido", "numeroCamiseta", "posicion", "categoria"]
+    },
+    "Match": {
+      "title": "Match",
+      "description": "Partido programado o finalizado",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fecha": { "type": "string" },
+        "hora": { "type": "string" },
+        "rival": { "type": "string" },
+        "rivalLogo": { "type": "string" },
+        "categoria": { "type": "string", "enum": ["7ma", "6ta", "5ta", "Intermedia", "Primera"] },
+        "esLocal": { "type": "boolean" },
+        "cancha": { "type": "string" },
+        "golesPropios": { "type": "integer" },
+        "golesRival": { "type": "integer" },
+        "estado": { "type": "string", "enum": ["Programado", "En juego", "Finalizado", "Suspendido"] },
+        "localNombre": { "type": "string" },
+        "visitanteNombre": { "type": "string" },
+        "mvpId": { "type": "string" },
+        "goleadorasIds": {
+          "type": "array"
+        },
+        "asistidorasIds": {
+          "type": "array"
+        },
+        "tarjetas": {
+          "type": "array"
+        },
+        "fechaNumero": { "type": "integer" }
+      },
+      "required": ["id", "fecha", "hora", "rival", "categoria", "esLocal", "estado"]
+    },
+    "Standing": {
+      "title": "Standing",
+      "description": "Posición en la tabla general de posiciones",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "equipo": { "type": "string" },
+        "pj": { "type": "integer" },
+        "pg": { "type": "integer" },
+        "pe": { "type": "integer" },
+        "pp": { "type": "integer" },
+        "gf": { "type": "integer" },
+        "gc": { "type": "integer" },
+        "dg": { "type": "integer" },
+        "pts": { "type": "integer" },
+        "categoria": { "type": "string", "enum": ["7ma", "6ta", "5ta", "Intermedia", "Primera"] },
+        "esOficialClub": { "type": "boolean" }
+      },
+      "required": ["id", "equipo", "pj", "pg", "pe", "pp", "gf", "gc", "dg", "pts", "categoria"]
+    },
+    "NewsItem": {
+      "title": "NewsItem",
+      "description": "Noticia o comunicado del club",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "titulo": { "type": "string" },
+        "contenido": { "type": "string" },
+        "imagenUrl": { "type": "string" },
+        "fecha": { "type": "string" },
+        "autor": { "type": "string" },
+        "esConvocatoria": { "type": "boolean" }
+      },
+      "required": ["id", "titulo", "contenido", "fecha", "autor"]
+    },
+    "GalleryItem": {
+      "title": "GalleryItem",
+      "description": "Foto o elemento de galería multimedial",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "titulo": { "type": "string" },
+        "imagenUrl": { "type": "string" },
+        "fecha": { "type": "string" },
+        "partidoRelacionado": { "type": "string" },
+        "torneo": { "type": "string" }
+      },
+      "required": ["id", "titulo", "imagenUrl", "fecha", "torneo"]
+    },
+    "Convocation": {
+      "title": "Convocation",
+      "description": "Convocatoria para un encuentro deportivo",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fecha": { "type": "string" },
+        "rival": { "type": "string" },
+        "categoria": { "type": "string", "enum": ["7ma", "6ta", "5ta", "Intermedia", "Primera"] },
+        "estadosJugadoras": { "type": "object" }
+      },
+      "required": ["id", "fecha", "rival", "categoria", "estadosJugadoras"]
+    },
+    "NotificationLog": {
+      "title": "NotificationLog",
+      "description": "Log de notificaciones enviadas a usuarios",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "titulo": { "type": "string" },
+        "cuerpo": { "type": "string" },
+        "fecha": { "type": "string" },
+        "tipo": { "type": "string", "enum": ["noticia", "resultado", "horario", "convocatoria"] }
+      },
+      "required": ["id", "titulo", "cuerpo", "fecha", "tipo"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Configuraciones globales de la app",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "value": { "type": "string" }
+      },
+      "required": ["id", "value"]
+    }
+  },
+  "firestore": {
+    "/players/{playerId}": {
+      "schema": "Player",
+      "description": "Colección de jugadoras registradas en el club"
+    },
+    "/matches/{matchId}": {
+      "schema": "Match",
+      "description": "Cronograma de encuentros y partidos disputados"
+    },
+    "/standings/{standingId}": {
+      "schema": "Standing",
+      "description": "Tabla de posiciones general por categoría"
+    },
+    "/news/{newsId}": {
+      "schema": "NewsItem",
+      "description": "Novedades y artículos periodísticos del club"
+    },
+    "/gallery/{galleryId}": {
+      "schema": "GalleryItem",
+      "description": "Galería de fotos de partidos y entrenamientos"
+    },
+    "/convocations/{convocationId}": {
+      "schema": "Convocation",
+      "description": "Delegaciones oficiales convocadas a cada fecha"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "NotificationLog",
+      "description": "Registro de alertas push enviadas"
+    },
+    "/settings/{settingId}": {
+      "schema": "Settings",
+      "description": "Colección de configuraciones globales (por ejemplo: logo personalizado)"
+    }
+  }
+}
