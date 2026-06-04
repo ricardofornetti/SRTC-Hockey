@@ -704,37 +704,37 @@ export default function App() {
       />
 
       {/* 2. Header de la Aplicación */}
-      <header id="main-header" className="bg-neutral-900 border-b border-neutral-850 px-5 py-5 md:py-6 shadow-xl relative z-40">
+      <header id="main-header" className="bg-indigo-900 border-b border-indigo-950 px-5 py-5 md:py-6 shadow-xl relative z-40">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
           
           {/* Logo y Nombre del Club */}
           <div className="flex items-center gap-4.5 select-none cursor-pointer group" onClick={() => setActiveTab('inicio')}>
             {/* Highly prominent and glowing official club logo card */}
-            <div className="w-16 h-16 shrink-0 p-1.5 bg-gradient-to-tr from-neutral-900 to-neutral-800 border-2 border-neutral-750 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/10 group-hover:border-indigo-400/60 transition-all duration-300 hover:scale-105">
+            <div className="w-16 h-16 shrink-0 p-1.5 bg-gradient-to-tr from-indigo-950 to-indigo-900 border-2 border-indigo-500/30 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/10 group-hover:border-indigo-400/60 transition-all duration-300 hover:scale-105">
               <SrtcLogo className="w-13 h-13" />
             </div>
             <div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <h1 className="text-2xl md:text-3xl font-sports-condensed font-black text-white tracking-widest uppercase group-hover:text-indigo-400 transition-colors duration-300">
+                <h1 className="text-2xl md:text-3xl font-sports-condensed font-black text-white tracking-widest uppercase group-hover:text-amber-300 transition-colors duration-300">
                   SAN RAFAEL TENIS CLUB
                 </h1>
-                <span className="self-start sm:self-auto text-[10px] bg-indigo-400/15 text-indigo-400 border border-indigo-400/25 font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider font-sports-condensed shadow-inner">
+                <span className="self-start sm:self-auto text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider font-sports-condensed shadow-inner">
                   HOCKEY CLUB
                 </span>
               </div>
-              <p className="text-xs text-neutral-400 font-bold leading-normal mt-1 flex items-center gap-2">
+              <p className="text-xs text-indigo-200/80 font-bold leading-normal mt-1 flex items-center gap-2">
                 <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse shadow-glow shadow-indigo-400/55"></span>
-                <span className="font-sports-condensed uppercase tracking-wider text-[11px]">Sitio Oficial de Hockey • Mendoza</span>
+                <span className="font-sports-condensed uppercase tracking-wider text-[11px] text-indigo-100">Sitio Oficial de Hockey • Mendoza</span>
               </p>
             </div>
           </div>
 
           {/* Persistent Category Switcher in Header for High Visibility */}
-          <div className="flex flex-col items-center md:items-end gap-1 px-2 py-1.5 bg-neutral-950/60 rounded-xl border border-neutral-800/80">
-            <span className="text-[9px] uppercase font-black text-indigo-400 tracking-wider font-sports-condensed">
+          <div className="flex flex-col items-center md:items-end gap-1 px-3 py-1.5 bg-indigo-950 rounded-xl border border-indigo-850">
+            <span className="text-[9px] uppercase font-black text-indigo-200 tracking-wider font-sports-condensed">
               Categoría / División Activa
             </span>
-            <div className="flex flex-wrap items-center gap-0.5 bg-neutral-950 p-0.5 rounded-lg border border-neutral-850">
+            <div className="flex flex-wrap items-center gap-0.5 bg-indigo-950 p-0.5 rounded-lg border border-indigo-900">
               {(['7ma', '6ta', '5ta', 'Intermedia', 'Primera'] as Category[]).map((cat) => (
                 <button
                   key={cat}
@@ -742,7 +742,7 @@ export default function App() {
                   className={`px-2.5 py-1 rounded text-[10px] font-black tracking-wide uppercase transition-all duration-200 cursor-pointer font-sports-condensed ${
                     selectedCategory === cat
                       ? 'bg-indigo-600 text-white shadow'
-                      : 'text-neutral-400 hover:text-white hover:bg-neutral-900/50'
+                      : 'text-indigo-300 hover:text-white hover:bg-indigo-900/50'
                   }`}
                 >
                   {cat}
@@ -760,8 +760,8 @@ export default function App() {
       </main>
 
       {/* 4. Unified Bottom Navigation Bar */}
-      <nav id="unified-bottom-navigation" className="fixed bottom-0 left-0 right-0 bg-neutral-950 backdrop-blur-xl border-t border-neutral-850 py-3 px-3 sm:px-6 z-45 shadow-2xl select-none">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 md:gap-4 w-full">
+      <nav id="unified-bottom-navigation" className="fixed bottom-0 left-0 right-0 bg-indigo-600 border-t border-indigo-700 py-3.5 px-3 sm:px-6 z-45 shadow-2xl select-none">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 md:gap-5 w-full">
           {tabsConfig.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -769,14 +769,14 @@ export default function App() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-2 py-3.5 sm:py-4 px-2 rounded-none border text-xs font-bold transition-all duration-150 cursor-pointer ${
+                className={`flex-1 flex flex-col items-center justify-center gap-2 py-4 sm:py-5 px-3 rounded-2xl border text-xs font-bold transition-all duration-150 cursor-pointer ${
                   isActive
-                    ? 'bg-neutral-800 text-white border-indigo-500 shadow-lg ring-1 ring-indigo-500/30'
-                    : 'bg-neutral-900/60 text-neutral-400 border-neutral-800 hover:text-neutral-200 hover:bg-neutral-800/40 hover:border-neutral-700'
+                    ? 'bg-indigo-800 text-white border-white/30 shadow-lg ring-1 ring-white/10 scale-102'
+                    : 'bg-indigo-700/30 text-indigo-100 border-transparent hover:text-white hover:bg-indigo-700/70'
                 }`}
               >
-                <Icon className={`w-5.5 h-5.5 sm:w-6 sm:h-6 ${isActive ? 'text-indigo-400' : 'text-neutral-400'}`} />
-                <span className={`text-[10px] sm:text-xs font-black font-sports-condensed uppercase tracking-wider text-center ${isActive ? 'text-white' : 'text-neutral-400'}`}>
+                <Icon className={`w-6 h-6 sm:w-6.5 sm:h-6.5 ${isActive ? 'text-white' : 'text-indigo-200'}`} />
+                <span className={`text-[10px] sm:text-xs font-black font-sports-condensed uppercase tracking-wider text-center ${isActive ? 'text-white' : 'text-indigo-100/90'}`}>
                   {tab.label}
                 </span>
               </button>

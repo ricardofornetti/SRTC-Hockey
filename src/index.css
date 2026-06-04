@@ -6,20 +6,53 @@
   --font-display: "Archivo", sans-serif;
   --font-sport: "Barlow Condensed", sans-serif;
 
-  /* Overwrite indigo with SRTC's Royal Blue & Emerald Green representing our mascot colors */
-  --color-indigo-50: #eff6ff;
-  --color-indigo-100: #dbeafe;
-  --color-indigo-200: #93c5fd;
-  --color-indigo-300: #34d399; /* Vibrant Mint Green for subtle highlighted text */
-  --color-indigo-400: #10b981; /* Official Emerald Green from the flag! */
-  --color-indigo-400-hover: #059669;
-  
-  --color-indigo-500: #2563eb; /* Official Brilliant Blue */
-  --color-indigo-600: #1d4ed8; /* Brand Navy/Royal Blue */
-  --color-indigo-600-hover: #1e40af;
-  --color-indigo-700: #1d4ed8;
-  --color-indigo-800: #1e3a8a;
-  --color-indigo-900: #1e3a8a;
+  /* Premium Emerald Green Sports Palette (Neutral mappings for background & cards) */
+  --color-neutral-950: #f0faf6; /* Soft, beautiful minty turf green background */
+  --color-neutral-900: #ffffff; /* Fresh highlight white card containers */
+  --color-neutral-850: #def3eb; /* Subtle soft active selection tint */
+  --color-neutral-800: #c2ebd9; /* Elegant border and separating lines */
+  --color-neutral-750: #a7dec5; /* Hover states for border elements */
+  --color-neutral-700: #427e65; /* Standard metadata context green */
+  --color-neutral-600: #10b981; /* High contrast energetic Emerald Green accent */
+  --color-neutral-550: #059669; /* Richer green hover states */
+  --color-neutral-500: #034e36; /* Dark moss green for strong subheadings */
+  --color-neutral-450: #022319;
+  --color-neutral-400: #2d5045; /* Clean body text - superb contrast against light mint */
+  --color-neutral-300: #173b30; /* Dark green headings */
+  --color-neutral-200: #0d2820; /* Heavy high-contrast main headings */
+  --color-neutral-100: #061a14; /* Deep solid charcoal-green for absolute readability */
+  --color-neutral-50: #010604;
+
+  /* Replicate custom zinc matches to green palette for maximum coverage */
+  --color-zinc-950: #f0faf6;
+  --color-zinc-900: #ffffff;
+  --color-zinc-850: #def3eb;
+  --color-zinc-800: #c2ebd9;
+  --color-zinc-750: #a7dec5;
+  --color-zinc-700: #427e65;
+  --color-zinc-650: #10b981;
+  --color-zinc-600: #059669;
+  --color-zinc-500: #034e36;
+  --color-zinc-400: #2d5045;
+  --color-zinc-300: #173b30;
+  --color-zinc-200: #0d2820;
+  --color-zinc-100: #061a14;
+  --color-zinc-50: #010604;
+
+  /* Premium Sports Greens mapping for Indigo variables used in top bars and navigators */
+  --color-indigo-50: #f4fdfa;
+  --color-indigo-100: #edfdf7;
+  --color-indigo-200: #def7ec;
+  --color-indigo-300: #a7f3d0;
+  --color-indigo-400: #6ee7b7;
+  --color-indigo-400-hover: #34d399;
+  --color-indigo-500: #10b981; /* Club Emerald Active Indicator */
+  --color-indigo-600: #059669; /* Energetic header action / button greens */
+  --color-indigo-600-hover: #047857;
+  --color-indigo-700: #047857;
+  --color-indigo-800: #065f46;
+  --color-indigo-900: #044e39; /* Deep majestic official club forest-green header */
+  --color-indigo-950: #022c20;
 }
 
 @layer utilities {
@@ -33,7 +66,7 @@
   
   /* High contrast sports highlights */
   .text-shadow-glow {
-    text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    text-shadow: 0 0 10px rgba(79, 70, 229, 0.4);
   }
   
   .font-sports-condensed {
