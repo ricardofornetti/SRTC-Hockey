@@ -77,7 +77,7 @@ export default function App() {
     return (saved as UserRole) || 'public';
   });
   
-  const [selectedCategory, setSelectedCategory] = useState<Category>('Primera');
+  const [selectedCategory, setSelectedCategory] = useState<Category>('7ma');
   const [activeTab, setActiveTab] = useState<string>('inicio');
 
   // Shared status banners / alerts
@@ -380,22 +380,44 @@ export default function App() {
           {/* Logo y Nombre del Club */}
           <div className="flex items-center gap-4.5 select-none cursor-pointer group" onClick={() => setActiveTab('inicio')}>
             {/* Highly prominent and glowing official club logo card */}
-            <div className="w-16 h-16 shrink-0 p-1.5 bg-gradient-to-tr from-neutral-900 to-neutral-800 border-2 border-neutral-750 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/10 group-hover:border-indigo-500/60 transition-all duration-300 hover:scale-105">
+            <div className="w-16 h-16 shrink-0 p-1.5 bg-gradient-to-tr from-neutral-900 to-neutral-800 border-2 border-neutral-750 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/10 group-hover:border-indigo-400/60 transition-all duration-300 hover:scale-105">
               <SrtcLogo className="w-13 h-13" />
             </div>
             <div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <h1 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase group-hover:text-indigo-400 transition-colors duration-300">
+                <h1 className="text-2xl md:text-3xl font-sports-condensed font-black text-white tracking-widest uppercase group-hover:text-indigo-400 transition-colors duration-300">
                   SAN RAFAEL TENIS CLUB
                 </h1>
-                <span className="self-start sm:self-auto text-[9.5px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/35 font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest shadow-inner">
+                <span className="self-start sm:self-auto text-[10px] bg-indigo-400/15 text-indigo-400 border border-indigo-400/25 font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider font-sports-condensed shadow-inner">
                   HOCKEY CLUB
                 </span>
               </div>
               <p className="text-xs text-neutral-400 font-bold leading-normal mt-1 flex items-center gap-2">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-glow shadow-emerald-500/50"></span>
-                <span>Sitio Oficial de Hockey • Mendoza</span>
+                <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse shadow-glow shadow-indigo-400/55"></span>
+                <span className="font-sports-condensed uppercase tracking-wider text-[11px]">Sitio Oficial de Hockey • Mendoza</span>
               </p>
+            </div>
+          </div>
+
+          {/* Persistent Category Switcher in Header for High Visibility */}
+          <div className="flex flex-col items-center md:items-end gap-1 px-2 py-1.5 bg-neutral-950/60 rounded-xl border border-neutral-800/80">
+            <span className="text-[9px] uppercase font-black text-indigo-400 tracking-wider font-sports-condensed">
+              Categoría / División Activa
+            </span>
+            <div className="flex flex-wrap items-center gap-0.5 bg-neutral-950 p-0.5 rounded-lg border border-neutral-850">
+              {(['7ma', '6ta', '5ta', 'Intermedia', 'Primera'] as Category[]).map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => handleCategoryChange(cat)}
+                  className={`px-2.5 py-1 rounded text-[10px] font-black tracking-wide uppercase transition-all duration-200 cursor-pointer font-sports-condensed ${
+                    selectedCategory === cat
+                      ? 'bg-indigo-600 text-white shadow'
+                      : 'text-neutral-400 hover:text-white hover:bg-neutral-900/50'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
 

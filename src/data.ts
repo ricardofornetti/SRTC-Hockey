@@ -171,7 +171,7 @@ export const INITIAL_PLAYERS: Player[] = [
     id: 'p11',
     nombre: 'Julia',
     apellido: 'Pérez Toledo',
-    numeroCamiseta: 14,
+    numeroCamiseta: 0,
     posicion: 'Delantera',
     fechaNacimiento: '2013-09-15',
     fotoUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200',

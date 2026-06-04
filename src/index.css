@@ -1,1 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,450;0,600;0,700;0,900;1,450;1,700;1,900&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,800;0,900;1,800;1,900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Archivo", sans-serif;
+  --font-sport: "Barlow Condensed", sans-serif;
+
+  /* Overwrite indigo with SRTC's Royal Blue & Emerald Green representing our mascot colors */
+  --color-indigo-50: #eff6ff;
+  --color-indigo-100: #dbeafe;
+  --color-indigo-200: #93c5fd;
+  --color-indigo-300: #34d399; /* Vibrant Mint Green for subtle highlighted text */
+  --color-indigo-400: #10b981; /* Official Emerald Green from the flag! */
+  --color-indigo-400-hover: #059669;
+  
+  --color-indigo-500: #2563eb; /* Official Brilliant Blue */
+  --color-indigo-600: #1d4ed8; /* Brand Navy/Royal Blue */
+  --color-indigo-600-hover: #1e40af;
+  --color-indigo-700: #1d4ed8;
+  --color-indigo-800: #1e3a8a;
+  --color-indigo-900: #1e3a8a;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* High contrast sports highlights */
+  .text-shadow-glow {
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+  }
+  
+  .font-sports-condensed {
+    font-family: "Barlow Condensed", sans-serif;
+  }
+}
