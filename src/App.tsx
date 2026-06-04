@@ -77,7 +77,7 @@ export default function App() {
     return (saved as UserRole) || 'public';
   });
   
-  const [selectedCategory, setSelectedCategory] = useState<Category>('7ma');
+  const [selectedCategory, setSelectedCategory] = useState<Category>('Primera');
   const [activeTab, setActiveTab] = useState<string>('inicio');
 
   // Shared status banners / alerts
@@ -374,38 +374,29 @@ export default function App() {
       />
 
       {/* 2. Header de la Aplicación */}
-      <header id="main-header" className="bg-neutral-900 border-b border-neutral-850 px-4 py-4 md:py-6 shadow-md relative z-40">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <header id="main-header" className="bg-neutral-900 border-b border-neutral-850 px-5 py-5 md:py-6 shadow-xl relative z-40">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
           
           {/* Logo y Nombre del Club */}
-          <div className="flex items-center gap-3.5 select-none cursor-pointer" onClick={() => setActiveTab('inicio')}>
-            <div className="w-11 h-11 shrink-0 p-1 bg-neutral-850 border border-neutral-750 rounded-xl flex items-center justify-center shadow-lg">
-              <SrtcLogo className="w-9 h-9" />
+          <div className="flex items-center gap-4.5 select-none cursor-pointer group" onClick={() => setActiveTab('inicio')}>
+            {/* Highly prominent and glowing official club logo card */}
+            <div className="w-16 h-16 shrink-0 p-1.5 bg-gradient-to-tr from-neutral-900 to-neutral-800 border-2 border-neutral-750 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/10 group-hover:border-indigo-500/60 transition-all duration-300 hover:scale-105">
+              <SrtcLogo className="w-13 h-13" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-black text-white tracking-tight uppercase">SRTC</h1>
-                <span className="text-[10px] bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 font-black px-2 py-0.5 rounded-full uppercase tracking-wider">HOCKEY APP</span>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <h1 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase group-hover:text-indigo-400 transition-colors duration-300">
+                  SAN RAFAEL TENIS CLUB
+                </h1>
+                <span className="self-start sm:self-auto text-[9.5px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/35 font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest shadow-inner">
+                  HOCKEY CLUB
+                </span>
               </div>
-              <p className="text-[11px] text-neutral-450 font-bold leading-normal">San Rafael Tenis Club • Mendoza</p>
+              <p className="text-xs text-neutral-400 font-bold leading-normal mt-1 flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-glow shadow-emerald-500/50"></span>
+                <span>Sitio Oficial de Hockey • Mendoza</span>
+              </p>
             </div>
-          </div>
-
-          {/* Selector de División / Categoría */}
-          <div className="flex items-center gap-1.5 bg-neutral-950 p-1 rounded-xl border border-neutral-850 shadow-inner w-full md:w-auto overflow-x-auto no-scrollbar">
-            {(['7ma', '6ta', '5ta', 'Intermedia', 'Primera'] as Category[]).map((cat) => (
-              <button
-                key={cat}
-                onClick={() => handleCategoryChange(cat)}
-                className={`flex-1 md:flex-none text-[11px] font-black px-3.5 py-1.5 rounded-lg transition-all duration-200 uppercase tracking-widest cursor-pointer ${
-                  selectedCategory === cat
-                    ? 'bg-indigo-600 text-white shadow-md border border-indigo-500'
-                    : 'text-neutral-400 hover:text-white hover:bg-neutral-900 border border-transparent'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
           </div>
 
         </div>

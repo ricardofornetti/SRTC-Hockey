@@ -26,14 +26,6 @@ export default function RoleSelector({ currentRole, onChangeRole, currentUserEma
       desc: 'Acceso de solo lectura para familias, jugadoras y simpatizantes.',
     },
     {
-      id: 'coach' as UserRole,
-      label: 'Entrenador',
-      icon: User,
-      color: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
-      badgeColor: 'bg-indigo-600 text-white',
-      desc: 'Puede cargar resultados en tiempo real, cambiar estadísticas de jugadoras y definir convocatorias.',
-    },
-    {
       id: 'admin' as UserRole,
       label: 'Administrador Web',
       icon: Shield,
