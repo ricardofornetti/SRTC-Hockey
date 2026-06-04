@@ -408,12 +408,12 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
   return (
     <div id="fixture-tab" className="space-y-6">
       {/* Search and Filters Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-neutral-900 p-4 rounded-xl border border-neutral-800 shadow-md">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-club-gradient-elements p-4 rounded-xl border border-white/10 shadow-lg">
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setFilter('todos')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
-              filter === 'todos' ? 'bg-indigo-600 text-white shadow' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+              filter === 'todos' ? 'bg-club-gradient text-white shadow border border-white/10' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white'
             }`}
           >
             Todos
@@ -421,7 +421,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
           <button
             onClick={() => setFilter('proximos')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
-              filter === 'proximos' ? 'bg-indigo-600 text-white shadow' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+              filter === 'proximos' ? 'bg-club-gradient text-white shadow border border-white/10' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white'
             }`}
           >
             Próximos
@@ -429,13 +429,11 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
           <button
             onClick={() => setFilter('jugados')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
-              filter === 'jugados' ? 'bg-indigo-600 text-white shadow' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+              filter === 'jugados' ? 'bg-club-gradient text-white shadow border border-white/10' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white'
             }`}
           >
             Jugados
           </button>
-
-
         </div>
 
         {/* Admin or Coach Create Match button */}
@@ -774,9 +772,9 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
           if (sortedKeys.length === 0) {
             return (
-              <div className="text-center py-10 bg-neutral-900 border border-neutral-800 rounded-2xl">
-                <Trophy className="w-10 h-10 text-neutral-600 mx-auto mb-2" />
-                <p className="text-neutral-400 font-medium text-xs">No se encontraron partidos para esta categoría con los filtros aplicados.</p>
+              <div className="text-center py-10 bg-club-gradient-elements border border-white/10 rounded-2xl">
+                <Trophy className="w-10 h-10 text-indigo-200/40 mx-auto mb-2" />
+                <p className="text-indigo-200 font-medium text-xs">No se encontraron partidos para esta categoría con los filtros aplicados.</p>
               </div>
             );
           }
@@ -786,8 +784,8 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
             return (
               <div key={fechaNum} className="space-y-4">
                 {/* Fecha Group Header Banner */}
-                <div className="flex items-center gap-3 border-l-4 border-indigo-500 pl-3 py-1 bg-neutral-900/50 rounded-r-lg pr-4 w-fit shadow-sm">
-                  <h3 className="font-extrabold text-sm tracking-wider text-indigo-400 uppercase">
+                <div className="flex items-center gap-3 border-l-4 border-emerald-500 pl-3 py-1 bg-club-gradient-elements/60 rounded-r-lg pr-4 w-fit shadow-md border border-white/5">
+                  <h3 className="font-extrabold text-sm tracking-wider text-emerald-300 uppercase">
                     Fecha {fechaNum}
                   </h3>
                 </div>
@@ -823,23 +821,23 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                     return (
                       <div
                         key={match.id}
-                        className={`bg-neutral-900 border ${
-                          isLive ? 'border-emerald-500 shadow-emerald-500/10' : 'border-neutral-800'
-                        } rounded-2xl p-5 shadow-lg relative flex flex-col justify-between transition hover:border-neutral-700 w-full`}
+                        className={`bg-club-gradient-elements border ${
+                          isLive ? 'border-emerald-500 shadow-emerald-500/15 scale-[1.01]' : 'border-white/10'
+                        } rounded-2xl p-5 shadow-xl relative flex flex-col justify-between transition duration-350 hover:border-emerald-500/30 w-full hover:-translate-y-0.5`}
                       >
                         {/* Upper row: Date & status */}
-                        <div className="flex items-center justify-between mb-4 border-b border-neutral-800/40 pb-2 flex-wrap gap-2 text-left">
+                        <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2 flex-wrap gap-2 text-left">
                           <div className="flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-neutral-500" />
-                            <span className="text-xs font-semibold text-neutral-300">{formatFechaDdmmyyyy(match.fecha)}</span>
-                            <span className="text-neutral-600">•</span>
-                            <Clock className="w-3.5 h-3.5 text-neutral-500" />
-                            <span className="text-xs font-semibold text-neutral-300">{match.hora} Hs</span>
+                            <Calendar className="w-3.5 h-3.5 text-emerald-450" />
+                            <span className="text-xs font-semibold text-indigo-150">{formatFechaDdmmyyyy(match.fecha)}</span>
+                            <span className="text-indigo-200/30">•</span>
+                            <Clock className="w-3.5 h-3.5 text-emerald-450" />
+                            <span className="text-xs font-semibold text-indigo-150">{match.hora} Hs</span>
                           </div>
 
                           <div className="flex items-center gap-2">
                             {getStatusBadge(match.estado)}
-                            <span className="text-[10px] font-bold text-neutral-400 bg-neutral-800 px-2 py-0.5 rounded-full border border-neutral-700 uppercase font-sans">
+                            <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/25 uppercase font-sans">
                               {match.categoria}ª Div
                             </span>
                           </div>
@@ -849,35 +847,35 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                         <div className="flex items-center justify-between py-2 gap-2">
                           {/* Left Logo and name */}
                           <div className="flex flex-col items-center w-5/12 text-center">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-neutral-950 border border-neutral-800 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
-                              <ClubLogo teamName={localTeam} className="w-16 h-16 sm:w-20 sm:h-20" />
+                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-white border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
+                              <ClubLogo teamName={localTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
                             </div>
                             <span className="text-xs sm:text-sm font-black text-white mt-3 block leading-tight tracking-tight w-full break-words">
                               {localTeam}
                             </span>
-                            <span className="text-[10px] text-neutral-500 uppercase mt-1 font-bold tracking-wider">Local</span>
+                            <span className="text-[10px] text-indigo-250 uppercase mt-1 font-bold tracking-wider">Local</span>
                           </div>
 
                           {/* Mid stats/scores (Highlighted Scoreboard) */}
-                          <div className="flex flex-col items-center justify-center px-4 py-2.5 bg-neutral-950 border border-neutral-800/60 rounded-xl min-w-[90px] sm:min-w-[120px] shadow-2xl relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-gradient-to-b from-neutral-900/10 to-neutral-950/40 pointer-events-none" />
+                          <div className="flex flex-col items-center justify-center px-4 py-2.5 bg-black/25 border border-white/10 rounded-xl min-w-[90px] sm:min-w-[120px] shadow-2xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/10 pointer-events-none" />
                             {isPlayed ? (
                               <div className="flex items-center justify-center gap-2 sm:gap-3.5 text-3xl sm:text-5xl font-extrabold font-mono tracking-tighter leading-none z-10">
-                                <span className={isLocalSrtc ? "text-emerald-400 filter drop-shadow-[0_0_8px_rgba(106,143,82,0.4)]" : "text-white"}>{localGoles}</span>
-                                <span className="text-neutral-600 font-normal text-xl sm:text-2xl">-</span>
-                                <span className={isVisitorSrtc ? "text-emerald-400 filter drop-shadow-[0_0_8px_rgba(106,143,82,0.4)]" : "text-white"}>{visitorGoles}</span>
+                                <span className={isLocalSrtc ? "text-emerald-400 filter drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" : "text-white"}>{localGoles}</span>
+                                <span className="text-indigo-200/30 font-normal text-xl sm:text-2xl">-</span>
+                                <span className={isVisitorSrtc ? "text-emerald-400 filter drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" : "text-white"}>{visitorGoles}</span>
                               </div>
                             ) : isLive ? (
                               <div className="flex flex-col items-center gap-1 z-10">
                                 <div className="flex items-center gap-2 text-2xl sm:text-4xl font-black text-amber-500 animate-pulse font-mono leading-none">
                                   <span>{localGoles}</span>
-                                  <span className="text-neutral-600 text-sm">-</span>
+                                  <span className="text-indigo-200/30 text-sm">-</span>
                                   <span>{visitorGoles}</span>
                                 </div>
                                 <span className="text-[8px] font-black text-amber-500 animate-pulse uppercase tracking-widest leading-none">VIVO</span>
                               </div>
                             ) : (
-                              <div className="text-neutral-400 font-mono font-black text-sm sm:text-base tracking-widest z-10">
+                              <div className="text-indigo-200/50 font-mono font-black text-sm sm:text-base tracking-widest z-10">
                                 VS
                               </div>
                             )}
@@ -885,20 +883,20 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
                           {/* Right Logo and name */}
                           <div className="flex flex-col items-center w-5/12 text-center">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-neutral-950 border border-neutral-800 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
-                              <ClubLogo teamName={visitorTeam} className="w-16 h-16 sm:w-20 sm:h-20" />
+                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-white border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
+                              <ClubLogo teamName={visitorTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
                             </div>
                             <span className="text-xs sm:text-sm font-black text-white mt-3 block leading-tight tracking-tight w-full break-words">
                               {visitorTeam}
                             </span>
-                            <span className="text-[10px] text-neutral-500 uppercase mt-1 font-bold tracking-wider">Visitante</span>
+                            <span className="text-[10px] text-indigo-250 uppercase mt-1 font-bold tracking-wider">Visitante</span>
                           </div>
                         </div>
 
                         {/* Beautiful list of scorers listed vertically (uno debajo del otro) */}
                         {isPlayed && match.goleadorasIds && match.goleadorasIds.length > 0 && (
-                          <div className="mt-4 bg-neutral-950/40 rounded-xl p-3 border border-neutral-800/50 text-left">
-                            <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2 flex items-center gap-1.5 border-b border-neutral-800/40 pb-1.5">
+                          <div className="mt-4 bg-black/20 rounded-xl p-3 border border-white/10 text-left">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2 flex items-center gap-1.5 border-b border-white/5 pb-1.5">
                               {/* Hockey ball SVG representing a real white dimpled hockey puck/ball */}
                               <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-white shrink-0 inline-block filter drop-shadow-[0_1px_2px_rgba(255,255,255,0.25)]">
                                 <circle cx="12" cy="12" r="9.5" fill="#FFFFFF" stroke="#b9d3ed" strokeWidth="1" />
@@ -910,17 +908,17 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                                 <circle cx="12" cy="7.5" r="0.8" fill="#94a3b8" />
                                 <circle cx="12" cy="16.5" r="0.8" fill="#94a3b8" />
                               </svg>
-                              <span className="text-neutral-300 font-semibold uppercase font-display select-none">Goles del Club (SRTC)</span>
+                              <span className="text-indigo-100 font-semibold uppercase font-display select-none">Goles del Club (SRTC)</span>
                             </div>
                             <div className="flex flex-col gap-2 pl-0.5">
                               {match.goleadorasIds.map((val) => {
                                 const p = players.find(x => x.id === val.jugadorId);
                                 if (!p) return null;
                                 return (
-                                  <div key={val.jugadorId} className="flex items-center justify-between text-xs font-semibold py-1 border-b border-neutral-850/30 last:border-0">
+                                  <div key={val.jugadorId} className="flex items-center justify-between text-xs font-semibold py-1 border-b border-white/5 last:border-0">
                                     <div className="flex items-center gap-2">
                                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                                      <span className="text-neutral-200 select-all font-sans text-xs">{p.nombre} {p.apellido}</span>
+                                      <span className="text-white select-all font-sans text-xs">{p.nombre} {p.apellido}</span>
                                     </div>
                                     <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono px-2 py-0.5 rounded font-black shrink-0 tracking-wider">
                                       {val.cantidad === 1 ? '1 GOL' : `${val.cantidad} GOLES`}
@@ -933,17 +931,17 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                         )}
 
                         {/* Foot indicators */}
-                        <div className="mt-4 pt-3 border-t border-neutral-850 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs text-neutral-400">
+                        <div className="mt-4 pt-3 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs text-indigo-200">
                           <div className="flex items-center gap-1.5 justify-start text-left">
-                            <MapPin className="w-4 h-4 text-neutral-500 shrink-0" />
-                            <span>Cancha: <strong className="text-neutral-200">{match.cancha}</strong></span>
+                            <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <span>Cancha: <strong className="text-white">{match.cancha}</strong></span>
                           </div>
 
                           {/* Operational actions */}
                           <div className="flex items-center justify-end gap-2 shrink-0 pt-2 sm:pt-0">
                             <button
                                onClick={() => handleShareResultDirect(match)}
-                               className="px-2.5 py-1.5 rounded bg-neutral-800 hover:bg-neutral-750 text-neutral-300 transition text-[11px] font-bold cursor-pointer"
+                               className="px-2.5 py-1.5 rounded bg-white/10 hover:bg-white/20 text-white font-extrabold transition text-[11px] font-bold cursor-pointer"
                             >
                               Compartir
                             </button>
@@ -951,14 +949,14 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                               <>
                                 <button
                                   onClick={() => handleStartEdit(match)}
-                                  className="px-2.5 py-1.5 rounded bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600 hover:text-white transition text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                                  className="px-2.5 py-1.5 rounded bg-emerald-500/20 text-emerald-300 hover:bg-emerald-505 hover:text-white transition text-[11px] font-bold flex items-center gap-1 cursor-pointer"
                                 >
                                   <Edit3 className="w-3 h-3" /> Cargar
                                 </button>
                                 {userRole === 'admin' && (
                                   <button
                                     onClick={() => handleDelete(match.id)}
-                                    className="px-2.5 py-1.5 rounded bg-rose-600/10 text-rose-400 hover:bg-rose-600 hover:text-white transition text-[11px] font-bold cursor-pointer"
+                                    className="px-2.5 py-1.5 rounded bg-rose-600/15 text-rose-400 hover:bg-rose-600 hover:text-white transition text-[11px] font-bold cursor-pointer"
                                     title="Eliminar Partido"
                                   >
                                     <Trash2 className="w-3 h-3" />

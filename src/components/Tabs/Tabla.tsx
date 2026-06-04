@@ -463,45 +463,45 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
   return (
     <div id="standings-tab" className="space-y-6">
       {/* Visual Header Panel */}
-      <div className="bg-gradient-to-r from-neutral-900 to-emerald-950/20 p-5 rounded-2xl border border-neutral-800 shadow-md flex items-center justify-between gap-4 flex-wrap">
+      <div className="bg-club-gradient-elements p-5 rounded-2xl border border-white/10 shadow-lg flex items-center justify-between gap-4 flex-wrap">
         <div className="space-y-1 text-left">
           <h2 className="font-extrabold text-white text-base flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-500" />
-            Posiciones
+            <Trophy className="w-5 h-5 text-emerald-400" />
+            POSICIONES
           </h2>
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-indigo-150">
             Asociación Sanrafaelina de Hockey - Torneo Apertura. Categoría {selectedCategory}.
           </p>
         </div>
 
         <button 
           onClick={handleShareStandings}
-          className="text-xs text-neutral-300 bg-neutral-850 hover:bg-neutral-750 px-3 py-1.5 rounded-lg border border-neutral-700 transition cursor-pointer font-bold flex items-center gap-1.5"
+          className="text-xs text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg border border-white/10 transition cursor-pointer font-bold flex items-center gap-1.5 shadow-sm"
         >
-          <Share2 className="w-3.5 h-3.5 text-neutral-400" />
+          <Share2 className="w-3.5 h-3.5 text-emerald-300" />
           Compartir Tabla
         </button>
       </div>
 
       {/* Main Stats Table - Extra Large Standings Columns */}
-      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-lg">
+      <div className="bg-club-gradient-elements border border-white/10 rounded-2xl overflow-hidden shadow-lg">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-neutral-950 border-b border-neutral-800 text-neutral-400 font-bold uppercase text-[10px] tracking-wider">
+              <tr className="bg-black/20 border-b border-white/10 text-indigo-200 font-bold uppercase text-[10px] tracking-wider">
                 <th className="py-4 px-4 text-center w-14">Pos</th>
                 <th className="py-4 px-4 min-w-[200px]">Equipo</th>
                 <th className="py-4 px-3 text-center w-12">PJ</th>
-                <th className="py-4 px-3 text-center text-green-400 w-12">PG</th>
+                <th className="py-4 px-3 text-center text-green-400 w-12 font-black">PG</th>
                 <th className="py-4 px-3 text-center text-amber-400 w-12">PE</th>
-                <th className="py-4 px-3 text-center text-rose-500 w-12">PP</th>
-                <th className="py-4 px-3 text-center text-neutral-500 hidden sm:table-cell w-12">GF</th>
-                <th className="py-4 px-3 text-center text-neutral-500 hidden sm:table-cell w-12">GC</th>
+                <th className="py-4 px-3 text-center text-rose-450 w-12">PP</th>
+                <th className="py-4 px-3 text-center text-indigo-200/50 hidden sm:table-cell w-12">GF</th>
+                <th className="py-4 px-3 text-center text-indigo-200/50 hidden sm:table-cell w-12">GC</th>
                 <th className="py-4 px-3.5 text-center w-14">DG</th>
-                <th className="py-4 px-5 text-center font-black text-emerald-450 w-16">PTS</th>
+                <th className="py-4 px-5 text-center font-black text-emerald-300 w-16">PTS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-850">
+            <tbody className="divide-y divide-white/5">
               {sortedStandings.map((row, index) => {
                 const isSrtc = row.esOficialClub;
                 const pos = index + 1;
@@ -511,8 +511,8 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                     key={row.id || row.equipo} 
                     className={`${
                       isSrtc 
-                        ? 'bg-emerald-950/20 text-emerald-300 border-l-4 border-l-emerald-500 font-extrabold hover:bg-emerald-950/30' 
-                        : 'text-neutral-300 hover:bg-neutral-850/40'
+                        ? 'bg-emerald-500/10 text-emerald-300 border-l-4 border-l-emerald-500 font-extrabold hover:bg-emerald-500/20' 
+                        : 'text-indigo-150 hover:bg-white/5'
                     } transition-colors`}
                   >
                     {/* Position Label Column */}
@@ -527,7 +527,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                             {pos}
                           </span>
                         ) : (
-                          <span className="text-neutral-500 font-semibold">{pos}</span>
+                          <span className="text-indigo-200/50 font-semibold">{pos}</span>
                         )}
                       </div>
                     </td>
@@ -536,7 +536,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                     <td className="py-3.5 px-4 font-bold">
                       <div className="flex items-center justify-between gap-3 w-full">
                         <div className="flex items-center gap-3.5">
-                          <ClubLogo teamName={row.equipo} className="w-12 h-12 flex-shrink-0 shadow-md ring-2 ring-neutral-800 rounded-full" />
+                          <ClubLogo teamName={row.equipo} className="w-12 h-12 flex-shrink-0 shadow-md ring-2 ring-white/10 bg-white rounded-full" />
                           <span className={`${
                             isSrtc ? 'text-emerald-400 font-extrabold' : 'text-neutral-200'
                           } text-sm sm:text-base font-extrabold tracking-tight`}>
@@ -546,7 +546,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                         {userRole === 'admin' && (
                           <button
                             onClick={() => handleOpenEditModal(row.equipo)}
-                            className="bg-neutral-850 hover:bg-neutral-750 border border-neutral-700 text-emerald-400 hover:text-emerald-300 p-1.5 rounded-lg transition shrink-0 flex items-center gap-1 text-[10px] uppercase font-bold"
+                            className="bg-white/5 hover:bg-white/10 border border-white/5 text-emerald-400 hover:text-emerald-350 p-1.5 rounded-lg transition shrink-0 flex items-center gap-1 text-[10px] uppercase font-bold"
                             title="Editar Escudo o Estadísticas"
                           >
                             <Camera className="w-3.5 h-3.5" />
