@@ -24,19 +24,19 @@ function normalizeTeamName(teamName: string): string {
   const name = teamName.toLowerCase().trim();
   if (name.includes('san rafael') || name.includes('srtc')) return 'SAN RAFAEL TENIS CLUB - A';
   if (name.includes('rivadavia')) return 'RIVADAVIA - A';
-  if (name.includes('los tordos - c') || name === 'los tordos c') return 'LOS TORDOS - C';
-  if (name.includes('los tordos - b') || name === 'los tordos b') return 'LOS TORDOS - B';
-  if (name.includes('mendoza r.c.') || name.includes('mendoza r. c.') || name.includes('mendoza rc') || name === 'mendoza') return 'Mendoza R.C.';
+  if (name.includes('los tordos - c') || name === 'los tordos c' || name.includes('los tordos c')) return 'LOS TORDOS - C';
+  if (name.includes('los tordos - b') || name === 'los tordos b' || name.includes('los tordos b')) return 'LOS TORDOS - B';
+  if (name.includes('mendoza r.c.') || name.includes('mendoza r. c.') || name.includes('mendoza rc') || name === 'mendoza') return 'MENDOZA R. C. - A';
   if (name.includes('marista b') || name.includes('maristas b') || name.includes('marista - b')) return 'MARISTA - B';
   if (name.includes('marista c') || name.includes('maristas c') || name.includes('marista - c')) return 'MARISTA - C';
-  if (name.includes('tacuru') || name === 'tacurú') return 'TACURU - A';
-  if (name.includes('bco mza - b') || name.includes('banco mendoza b') || name.includes('banco mendoza - b')) return 'BANCO MENDOZA - B';
-  if (name.includes('bco mza - c') || name.includes('banco mendoza c') || name.includes('banco mendoza - c')) return 'BANCO MENDOZA - C';
+  if (name.includes('tacuru') || name === 'tacurú' || name.includes('tacurú')) return 'TACURU - A';
+  if (name.includes('bco mza - b') || name.includes('bco mza b') || name.includes('banco mendoza b') || name.includes('banco mendoza - b')) return 'BANCO MENDOZA - B';
+  if (name.includes('bco mza - c') || name.includes('bco mza c') || name.includes('banco mendoza c') || name.includes('banco mendoza - c')) return 'BANCO MENDOZA - C';
   if (name.includes('pumai') || name.includes('peumayen') || name.includes('peumayén')) return 'PUMAI RUGBY CLUB - A';
   if (name.includes('san jorge s.r.') || name.includes('san jorge')) return 'SAN JORGE S.R. - A';
   if (name.includes('cabna')) return 'CABNA - A';
   if (name.includes('murialdo')) return 'MURIALDO - B';
-  if (name.includes('aleman') || name.includes('alemán')) return 'ALEMAN - B';
+  if (name.includes('aleman') || name.includes('alemán') || name.includes('alemán b')) return 'ALEMAN - B';
   if (name.includes('teqüe') || name.includes('teque')) return 'TEQÜE RUGBY CLUB - B';
   
   return teamName.toUpperCase().trim();
@@ -63,16 +63,16 @@ const BASELINE_MATCH_IDS = new Set<string>([
 export default function Tabla({ matches, selectedCategory, onShare, userRole, standings, onUpdateStandings }: TablaProps) {
   // 1. Standings Baseline state initialized from localStorage
   const [baselines, setBaselines] = useState<{ [teamName: string]: Omit<Standing, 'pj' | 'dg' | 'pts' | 'categoria'> }>(() => {
-    const saved = localStorage.getItem('srtc_standings_baseline_db_v3');
+    const saved = localStorage.getItem('srtc_standings_baseline_db_v5');
     if (saved) return JSON.parse(saved);
     
-    // Exact starting statistics copied from the Fecha 12 association standings spreadsheet
+    // Exact starting statistics copied from the association standings spreadsheet
     return {
-      'SAN RAFAEL TENIS CLUB - A': { id: 'srtc', equipo: 'SAN RAFAEL TENIS CLUB - A', pg: 11, pe: 1, pp: 0, gf: 45, gc: 6, esOficialClub: true },
-      'RIVADAVIA - A': { id: 'riva_a', equipo: 'RIVADAVIA - A', pg: 9, pe: 1, pp: 2, gf: 35, gc: 12 },
+      'RIVADAVIA - A': { id: 'riva_a', equipo: 'RIVADAVIA - A', pg: 12, pe: 0, pp: 0, gf: 103, gc: 1 },
+      'SAN RAFAEL TENIS CLUB - A': { id: 'srtc', equipo: 'SAN RAFAEL TENIS CLUB - A', pg: 8, pe: 4, pp: 0, gf: 29, gc: 7, esOficialClub: true },
       'LOS TORDOS - C': { id: 'ltod_c', equipo: 'LOS TORDOS - C', pg: 8, pe: 3, pp: 1, gf: 26, gc: 6 },
       'LOS TORDOS - B': { id: 'ltod_b', equipo: 'LOS TORDOS - B', pg: 8, pe: 2, pp: 2, gf: 28, gc: 11 },
-      'Mendoza R.C.': { id: 'mndz_a', equipo: 'Mendoza R.C.', pg: 7, pe: 4, pp: 1, gf: 36, gc: 8 },
+      'MENDOZA R. C. - A': { id: 'mndz_a', equipo: 'MENDOZA R. C. - A', pg: 7, pe: 4, pp: 1, gf: 36, gc: 8 },
       'MARISTA - B': { id: 'marb_b', equipo: 'MARISTA - B', pg: 7, pe: 2, pp: 3, gf: 21, gc: 15 },
       'TACURU - A': { id: 'tacu_a', equipo: 'TACURU - A', pg: 7, pe: 1, pp: 4, gf: 18, gc: 24 },
       'BANCO MENDOZA - B': { id: 'bmzb_b', equipo: 'BANCO MENDOZA - B', pg: 5, pe: 4, pp: 3, gf: 16, gc: 12 },
@@ -427,7 +427,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
     updatedBaselines[editingTeam].gc = editGC;
 
     setBaselines(updatedBaselines);
-    localStorage.setItem('srtc_standings_baseline_db_v3', JSON.stringify(updatedBaselines));
+    localStorage.setItem('srtc_standings_baseline_db_v5', JSON.stringify(updatedBaselines));
 
     // Force refresh ClubLogo by creating dummy state or triggering storage event
     window.dispatchEvent(new Event('storage'));
@@ -469,7 +469,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
             <Trophy className="w-5 h-5 text-emerald-400" />
             POSICIONES
           </h2>
-          <p className="text-xs text-indigo-150">
+          <p className="text-xs text-white">
             Asociación Sanrafaelina de Hockey - Torneo Apertura. Categoría {selectedCategory}.
           </p>
         </div>
@@ -488,17 +488,17 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-black/20 border-b border-white/10 text-indigo-200 font-bold uppercase text-[10px] tracking-wider">
+              <tr className="bg-black/20 border-b border-white/10 text-white font-bold uppercase text-xs sm:text-sm tracking-wider">
                 <th className="py-4 px-4 text-center w-14">Pos</th>
                 <th className="py-4 px-4 min-w-[200px]">Equipo</th>
                 <th className="py-4 px-3 text-center w-12">PJ</th>
-                <th className="py-4 px-3 text-center text-green-400 w-12 font-black">PG</th>
-                <th className="py-4 px-3 text-center text-amber-400 w-12">PE</th>
-                <th className="py-4 px-3 text-center text-rose-450 w-12">PP</th>
-                <th className="py-4 px-3 text-center text-indigo-200/50 hidden sm:table-cell w-12">GF</th>
-                <th className="py-4 px-3 text-center text-indigo-200/50 hidden sm:table-cell w-12">GC</th>
+                <th className="py-4 px-3 text-center w-12 font-black">PG</th>
+                <th className="py-4 px-3 text-center w-12">PE</th>
+                <th className="py-4 px-3 text-center w-12">PP</th>
+                <th className="py-4 px-3 text-center hidden sm:table-cell w-12">GF</th>
+                <th className="py-4 px-3 text-center hidden sm:table-cell w-12">GC</th>
                 <th className="py-4 px-3.5 text-center w-14">DG</th>
-                <th className="py-4 px-5 text-center font-black text-emerald-300 w-16">PTS</th>
+                <th className="py-4 px-5 text-center font-black w-16">PTS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -516,7 +516,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                     } transition-colors`}
                   >
                     {/* Position Label Column */}
-                    <td className="py-4 px-4 text-center font-mono font-bold">
+                    <td className="py-4 px-4 text-center font-bold text-xs sm:text-sm">
                       <div className="flex items-center justify-center">
                         {pos <= 3 ? (
                           <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs ${
@@ -527,7 +527,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                             {pos}
                           </span>
                         ) : (
-                          <span className="text-indigo-200/50 font-semibold">{pos}</span>
+                          <span className="text-white/80 font-semibold">{pos}</span>
                         )}
                       </div>
                     </td>
@@ -537,9 +537,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                       <div className="flex items-center justify-between gap-3 w-full">
                         <div className="flex items-center gap-3.5">
                           <ClubLogo teamName={row.equipo} className="w-12 h-12 flex-shrink-0 shadow-md ring-2 ring-white/10 bg-white rounded-full" />
-                          <span className={`${
-                            isSrtc ? 'text-emerald-400 font-extrabold' : 'text-neutral-200'
-                          } text-sm sm:text-base font-extrabold tracking-tight`}>
+                          <span className="text-white text-xs sm:text-sm font-extrabold tracking-tight">
                             {row.equipo}
                           </span>
                         </div>
@@ -556,22 +554,18 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                       </div>
                     </td>
 
-                    <td className="py-4 px-3 text-center font-bold font-mono text-xs sm:text-sm">{row.pj}</td>
-                    <td className="py-4 px-3 text-center font-semibold font-mono text-xs sm:text-sm text-green-400">{row.pg}</td>
-                    <td className="py-4 px-3 text-center font-semibold font-mono text-xs sm:text-sm text-amber-400">{row.pe}</td>
-                    <td className="py-4 px-3 text-center font-semibold font-mono text-xs sm:text-sm text-rose-500">{row.pp}</td>
-                    <td className="py-4 px-3 text-center text-neutral-450 font-mono text-xs hidden sm:table-cell">{row.gf}</td>
-                    <td className="py-4 px-3 text-center text-neutral-450 font-mono text-xs hidden sm:table-cell">{row.gc}</td>
+                    <td className="py-4 px-3 text-center font-bold text-xs sm:text-sm text-white">{row.pj}</td>
+                    <td className="py-4 px-3 text-center font-semibold text-xs sm:text-sm text-white">{row.pg}</td>
+                    <td className="py-4 px-3 text-center font-semibold text-xs sm:text-sm text-white">{row.pe}</td>
+                    <td className="py-4 px-3 text-center font-semibold text-xs sm:text-sm text-white">{row.pp}</td>
+                    <td className="py-4 px-3 text-center text-white/90 text-xs sm:text-sm hidden sm:table-cell">{row.gf}</td>
+                    <td className="py-4 px-3 text-center text-white/90 text-xs sm:text-sm hidden sm:table-cell">{row.gc}</td>
                     
-                    <td className={`py-4 px-3.5 text-center font-bold font-mono text-xs sm:text-sm ${
-                      row.dg > 0 ? 'text-green-400' : row.dg < 0 ? 'text-red-400' : 'text-neutral-500'
-                    }`}>
+                    <td className="py-4 px-3.5 text-center font-bold text-xs sm:text-sm text-white">
                       {row.dg > 0 ? `+${row.dg}` : row.dg}
                     </td>
 
-                    <td className={`py-4 px-5 text-center font-black font-mono text-sm sm:text-base ${
-                      isSrtc ? 'text-emerald-400' : 'text-neutral-100'
-                    }`}>
+                    <td className="py-4 px-5 text-center font-black text-xs sm:text-sm text-white">
                       {row.pts}
                     </td>
                   </tr>

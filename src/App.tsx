@@ -104,16 +104,7 @@ export default function App() {
     });
     const unsubStandings = subscribeToCollection<Standing>('standings', (data) => {
       if (data && data.length > 0) {
-        const riva = data.find(s => s.equipo.toLowerCase().includes('rivadavia'));
-        if (riva && (riva.pts === 36 || riva.gf === 103)) {
-          console.log("Outdated standings detected in Firestore. Recalculating/updating to place SRTC first...");
-          setStandings(INITIAL_STANDINGS);
-          syncCollection('standings', data, INITIAL_STANDINGS).catch(err => {
-            console.error("Failed to automatically update outdated standings in Firestore:", err);
-          });
-        } else {
-          setStandings(data);
-        }
+        setStandings(data);
       } else {
         setStandings(INITIAL_STANDINGS);
       }
@@ -243,13 +234,13 @@ export default function App() {
     }
 
     // 2. Recalculate and update Standings
-    const savedBaselines = localStorage.getItem('srtc_standings_baseline_db_v3');
+    const savedBaselines = localStorage.getItem('srtc_standings_baseline_db_v5');
     const baselinesMap = savedBaselines ? JSON.parse(savedBaselines) : {
-      'SAN RAFAEL TENIS CLUB - A': { id: 'srtc', equipo: 'SAN RAFAEL TENIS CLUB - A', pg: 11, pe: 1, pp: 0, gf: 45, gc: 6, esOficialClub: true },
-      'RIVADAVIA - A': { id: 'riva_a', equipo: 'RIVADAVIA - A', pg: 9, pe: 1, pp: 2, gf: 35, gc: 12 },
+      'RIVADAVIA - A': { id: 'riva_a', equipo: 'RIVADAVIA - A', pg: 12, pe: 0, pp: 0, gf: 103, gc: 1 },
+      'SAN RAFAEL TENIS CLUB - A': { id: 'srtc', equipo: 'SAN RAFAEL TENIS CLUB - A', pg: 8, pe: 4, pp: 0, gf: 29, gc: 7, esOficialClub: true },
       'LOS TORDOS - C': { id: 'ltod_c', equipo: 'LOS TORDOS - C', pg: 8, pe: 3, pp: 1, gf: 26, gc: 6 },
       'LOS TORDOS - B': { id: 'ltod_b', equipo: 'LOS TORDOS - B', pg: 8, pe: 2, pp: 2, gf: 28, gc: 11 },
-      'Mendoza R.C.': { id: 'mndz_a', equipo: 'Mendoza R.C.', pg: 7, pe: 4, pp: 1, gf: 36, gc: 8 },
+      'MENDOZA R. C. - A': { id: 'mndz_a', equipo: 'MENDOZA R. C. - A', pg: 7, pe: 4, pp: 1, gf: 36, gc: 8 },
       'MARISTA - B': { id: 'marb_b', equipo: 'MARISTA - B', pg: 7, pe: 2, pp: 3, gf: 21, gc: 15 },
       'TACURU - A': { id: 'tacu_a', equipo: 'TACURU - A', pg: 7, pe: 1, pp: 4, gf: 18, gc: 24 },
       'BANCO MENDOZA - B': { id: 'bmzb_b', equipo: 'BANCO MENDOZA - B', pg: 5, pe: 4, pp: 3, gf: 16, gc: 12 },
@@ -268,19 +259,19 @@ export default function App() {
       const name = teamName.toLowerCase().trim();
       if (name.includes('san rafael') || name.includes('srtc')) return 'SAN RAFAEL TENIS CLUB - A';
       if (name.includes('rivadavia')) return 'RIVADAVIA - A';
-      if (name.includes('los tordos - c') || name === 'los tordos c') return 'LOS TORDOS - C';
-      if (name.includes('los tordos - b') || name === 'los tordos b') return 'LOS TORDOS - B';
-      if (name.includes('mendoza r.c.') || name.includes('mendoza r. c.') || name.includes('mendoza rc') || name === 'mendoza') return 'Mendoza R.C.';
+      if (name.includes('los tordos - c') || name === 'los tordos c' || name.includes('los tordos c')) return 'LOS TORDOS - C';
+      if (name.includes('los tordos - b') || name === 'los tordos b' || name.includes('los tordos b')) return 'LOS TORDOS - B';
+      if (name.includes('mendoza r.c.') || name.includes('mendoza r. c.') || name.includes('mendoza rc') || name === 'mendoza') return 'MENDOZA R. C. - A';
       if (name.includes('marista b') || name.includes('maristas b') || name.includes('marista - b')) return 'MARISTA - B';
       if (name.includes('marista c') || name.includes('maristas c') || name.includes('marista - c')) return 'MARISTA - C';
-      if (name.includes('tacuru') || name === 'tacurú') return 'TACURU - A';
-      if (name.includes('bco mza - b') || name.includes('banco mendoza b') || name.includes('banco mendoza - b')) return 'BANCO MENDOZA - B';
-      if (name.includes('bco mza - c') || name.includes('banco mendoza c') || name.includes('banco mendoza - c')) return 'BANCO MENDOZA - C';
+      if (name.includes('tacuru') || name === 'tacurú' || name.includes('tacurú')) return 'TACURU - A';
+      if (name.includes('bco mza - b') || name.includes('bco mza b') || name.includes('banco mendoza b') || name.includes('banco mendoza - b')) return 'BANCO MENDOZA - B';
+      if (name.includes('bco mza - c') || name.includes('bco mza c') || name.includes('banco mendoza c') || name.includes('banco mendoza - c')) return 'BANCO MENDOZA - C';
       if (name.includes('pumai') || name.includes('peumayen') || name.includes('peumayén')) return 'PUMAI RUGBY CLUB - A';
       if (name.includes('san jorge s.r.') || name.includes('san jorge')) return 'SAN JORGE S.R. - A';
       if (name.includes('cabna')) return 'CABNA - A';
       if (name.includes('murialdo')) return 'MURIALDO - B';
-      if (name.includes('aleman') || name.includes('alemán')) return 'ALEMAN - B';
+      if (name.includes('aleman') || name.includes('alemán') || name.includes('alemán b')) return 'ALEMAN - B';
       if (name.includes('teqüe') || name.includes('teque')) return 'TEQÜE RUGBY CLUB - B';
       return teamName.toUpperCase().trim();
     }

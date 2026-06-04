@@ -1951,11 +1951,11 @@ export const INITIAL_MATCH_LIST: Match[] = [
 ];
 
 export const INITIAL_STANDINGS: Standing[] = [
-  { id: 'srtc', equipo: 'SAN RAFAEL TENIS CLUB - A', pj: 12, pg: 11, pe: 1, pp: 0, gf: 45, gc: 6, dg: 39, pts: 34, categoria: '7ma', esOficialClub: true },
-  { id: 'riva_a', equipo: 'RIVADAVIA - A', pj: 12, pg: 9, pe: 1, pp: 2, gf: 35, gc: 12, dg: 23, pts: 28, categoria: '7ma' },
+  { id: 'riva_a', equipo: 'RIVADAVIA - A', pj: 12, pg: 12, pe: 0, pp: 0, gf: 103, gc: 1, dg: 102, pts: 36, categoria: '7ma' },
+  { id: 'srtc', equipo: 'SAN RAFAEL TENIS CLUB - A', pj: 12, pg: 8, pe: 4, pp: 0, gf: 29, gc: 7, dg: 22, pts: 28, categoria: '7ma', esOficialClub: true },
   { id: 'ltod_c', equipo: 'LOS TORDOS - C', pj: 12, pg: 8, pe: 3, pp: 1, gf: 26, gc: 6, dg: 20, pts: 27, categoria: '7ma' },
   { id: 'ltod_b', equipo: 'LOS TORDOS - B', pj: 12, pg: 8, pe: 2, pp: 2, gf: 28, gc: 11, dg: 17, pts: 26, categoria: '7ma' },
-  { id: 'mndz_a', equipo: 'Mendoza R.C.', pj: 12, pg: 7, pe: 4, pp: 1, gf: 36, gc: 8, dg: 28, pts: 25, categoria: '7ma' },
+  { id: 'mndz_a', equipo: 'MENDOZA R. C. - A', pj: 12, pg: 7, pe: 4, pp: 1, gf: 36, gc: 8, dg: 28, pts: 25, categoria: '7ma' },
   { id: 'mar_b', equipo: 'MARISTA - B', pj: 12, pg: 7, pe: 2, pp: 3, gf: 21, gc: 15, dg: 6, pts: 23, categoria: '7ma' },
   { id: 'tacu_a', equipo: 'TACURU - A', pj: 12, pg: 7, pe: 1, pp: 4, gf: 18, gc: 24, dg: -6, pts: 22, categoria: '7ma' },
   { id: 'bmzb_b', equipo: 'BANCO MENDOZA - B', pj: 12, pg: 5, pe: 4, pp: 3, gf: 16, gc: 12, dg: 4, pts: 19, categoria: '7ma' },
