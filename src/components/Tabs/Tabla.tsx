@@ -63,13 +63,13 @@ const BASELINE_MATCH_IDS = new Set<string>([
 export default function Tabla({ matches, selectedCategory, onShare, userRole, standings, onUpdateStandings }: TablaProps) {
   // 1. Standings Baseline state initialized from localStorage
   const [baselines, setBaselines] = useState<{ [teamName: string]: Omit<Standing, 'pj' | 'dg' | 'pts' | 'categoria'> }>(() => {
-    const saved = localStorage.getItem('srtc_standings_baseline_db');
+    const saved = localStorage.getItem('srtc_standings_baseline_db_v3');
     if (saved) return JSON.parse(saved);
     
     // Exact starting statistics copied from the Fecha 12 association standings spreadsheet
     return {
-      'RIVADAVIA - A': { id: 'riva_a', equipo: 'RIVADAVIA - A', pg: 12, pe: 0, pp: 0, gf: 103, gc: 1 },
-      'SAN RAFAEL TENIS CLUB - A': { id: 'srtc', equipo: 'SAN RAFAEL TENIS CLUB - A', pg: 8, pe: 4, pp: 0, gf: 29, gc: 7, esOficialClub: true },
+      'SAN RAFAEL TENIS CLUB - A': { id: 'srtc', equipo: 'SAN RAFAEL TENIS CLUB - A', pg: 11, pe: 1, pp: 0, gf: 45, gc: 6, esOficialClub: true },
+      'RIVADAVIA - A': { id: 'riva_a', equipo: 'RIVADAVIA - A', pg: 9, pe: 1, pp: 2, gf: 35, gc: 12 },
       'LOS TORDOS - C': { id: 'ltod_c', equipo: 'LOS TORDOS - C', pg: 8, pe: 3, pp: 1, gf: 26, gc: 6 },
       'LOS TORDOS - B': { id: 'ltod_b', equipo: 'LOS TORDOS - B', pg: 8, pe: 2, pp: 2, gf: 28, gc: 11 },
       'Mendoza R.C.': { id: 'mndz_a', equipo: 'Mendoza R.C.', pg: 7, pe: 4, pp: 1, gf: 36, gc: 8 },
@@ -427,7 +427,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
     updatedBaselines[editingTeam].gc = editGC;
 
     setBaselines(updatedBaselines);
-    localStorage.setItem('srtc_standings_baseline_db', JSON.stringify(updatedBaselines));
+    localStorage.setItem('srtc_standings_baseline_db_v3', JSON.stringify(updatedBaselines));
 
     // Force refresh ClubLogo by creating dummy state or triggering storage event
     window.dispatchEvent(new Event('storage'));

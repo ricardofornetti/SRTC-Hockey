@@ -152,7 +152,7 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery }:
     <div id="gallery-tab" className="space-y-6 text-left">
       <div className="flex items-center justify-between bg-neutral-900 p-4 rounded-xl border border-neutral-800 shadow">
         <div>
-          <h2 className="font-extrabold text-white text-sm flex items-center gap-1.5 font-sans">
+          <h2 className="font-extrabold text-neutral-100 text-sm flex items-center gap-1.5 font-sans">
             <Image className="w-5 h-5 text-indigo-400" />
             Galería
           </h2>
@@ -191,7 +191,7 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery }:
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Ej. Festejo del Clásico de 7ma (Opcional)"
-                className="w-full bg-neutral-950 border border-neutral-850 p-2 text-xs text-white rounded-lg focus:outline-none"
+                className="w-full bg-neutral-950 border border-neutral-850 p-2 text-xs text-neutral-100 rounded-lg focus:outline-none"
               />
             </div>
 
@@ -203,7 +203,7 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery }:
                   value={torneo}
                   onChange={(e) => setTorneo(e.target.value)}
                   placeholder="Ej. Torneo Apertura"
-                  className="w-full bg-neutral-950 border border-neutral-850 p-2 text-xs text-white rounded-lg focus:outline-none"
+                  className="w-full bg-neutral-950 border border-neutral-850 p-2 text-xs text-neutral-100 rounded-lg focus:outline-none"
                 />
               </div>
               <div>
@@ -211,7 +211,7 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery }:
                 <select
                   value={partidoRelacionado}
                   onChange={(e) => setPartidoRelacionado(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-850 p-2 text-xs text-white rounded-lg focus:outline-none"
+                  className="w-full bg-neutral-950 border border-neutral-850 p-2 text-xs text-neutral-100 rounded-lg focus:outline-none"
                 >
                   <option value="">Ninguno / General</option>
                   {matches.filter(m => m.estado === 'Finalizado').map(m => (
@@ -279,7 +279,7 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery }:
                 value={imagenUrl.startsWith('data:') ? '' : imagenUrl}
                 onChange={(e) => setImagenUrl(e.target.value)}
                 placeholder="Pegar enlace url directo de foto..."
-                className="w-full bg-neutral-950 border border-neutral-850 p-2 text-xs text-white rounded-lg font-mono focus:outline-none"
+                className="w-full bg-neutral-950 border border-neutral-850 p-2 text-xs text-neutral-100 rounded-lg font-mono focus:outline-none"
               />
             </div>
 
@@ -450,7 +450,7 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery }:
             </div>
             
             <div className="space-y-1">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">¿Eliminar esta foto?</h3>
+              <h3 className="text-sm font-black text-neutral-100 uppercase tracking-wider">¿Eliminar esta foto?</h3>
               <p className="text-xs text-neutral-400 leading-relaxed">¿Estás seguro de que deseas eliminar esta imagen de la galería definitivamente? Esta acción no se puede deshacer.</p>
             </div>
 

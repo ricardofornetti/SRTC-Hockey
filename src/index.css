@@ -72,4 +72,21 @@
   .font-sports-condensed {
     font-family: "Barlow Condensed", sans-serif;
   }
+
+  /* Club visual gradient: richer/darker blue -> green -> blue (135deg diagonal top-left to bottom-right) */
+  .bg-club-gradient {
+    background: linear-gradient(135deg, #0f1c3f 0%, #0a3d25 50%, #0d1b38 100%) !important;
+    background-attachment: fixed !important;
+  }
+
+  /* Richer/darker gradient for header, navigation bar, buttons, and sections */
+  .bg-club-gradient-elements {
+    background: linear-gradient(135deg, #15264f 0%, #0d4f32 100%) !important;
+  }
+
+  /* Ultimate legibility standards: Soft white for dark layers, dark text for light elements */
+  .text-white-pure {
+    color: #ffffff !important;
+  }
 }
+

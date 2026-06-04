@@ -103,7 +103,20 @@ export default function App() {
       if (data && data.length > 0) setMatches(data);
     });
     const unsubStandings = subscribeToCollection<Standing>('standings', (data) => {
-      if (data && data.length > 0) setStandings(data);
+      if (data && data.length > 0) {
+        const riva = data.find(s => s.equipo.toLowerCase().includes('rivadavia'));
+        if (riva && (riva.pts === 36 || riva.gf === 103)) {
+          console.log("Outdated standings detected in Firestore. Recalculating/updating to place SRTC first...");
+          setStandings(INITIAL_STANDINGS);
+          syncCollection('standings', data, INITIAL_STANDINGS).catch(err => {
+            console.error("Failed to automatically update outdated standings in Firestore:", err);
+          });
+        } else {
+          setStandings(data);
+        }
+      } else {
+        setStandings(INITIAL_STANDINGS);
+      }
     });
     const unsubNews = subscribeToCollection<NewsItem>('news', (data) => {
       if (data && data.length > 0) setNews(data);
@@ -230,10 +243,10 @@ export default function App() {
     }
 
     // 2. Recalculate and update Standings
-    const savedBaselines = localStorage.getItem('srtc_standings_baseline_db');
+    const savedBaselines = localStorage.getItem('srtc_standings_baseline_db_v3');
     const baselinesMap = savedBaselines ? JSON.parse(savedBaselines) : {
-      'RIVADAVIA - A': { id: 'riva_a', equipo: 'RIVADAVIA - A', pg: 12, pe: 0, pp: 0, gf: 103, gc: 1 },
-      'SAN RAFAEL TENIS CLUB - A': { id: 'srtc', equipo: 'SAN RAFAEL TENIS CLUB - A', pg: 8, pe: 4, pp: 0, gf: 29, gc: 7, esOficialClub: true },
+      'SAN RAFAEL TENIS CLUB - A': { id: 'srtc', equipo: 'SAN RAFAEL TENIS CLUB - A', pg: 11, pe: 1, pp: 0, gf: 45, gc: 6, esOficialClub: true },
+      'RIVADAVIA - A': { id: 'riva_a', equipo: 'RIVADAVIA - A', pg: 9, pe: 1, pp: 2, gf: 35, gc: 12 },
       'LOS TORDOS - C': { id: 'ltod_c', equipo: 'LOS TORDOS - C', pg: 8, pe: 3, pp: 1, gf: 26, gc: 6 },
       'LOS TORDOS - B': { id: 'ltod_b', equipo: 'LOS TORDOS - B', pg: 8, pe: 2, pp: 2, gf: 28, gc: 11 },
       'Mendoza R.C.': { id: 'mndz_a', equipo: 'Mendoza R.C.', pg: 7, pe: 4, pp: 1, gf: 36, gc: 8 },
@@ -695,7 +708,7 @@ export default function App() {
   ];
 
   return (
-    <div id="app-root-container" className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans pb-28">
+    <div id="app-root-container" className="min-h-screen bg-club-gradient text-neutral-100 flex flex-col font-sans pb-28">
       {/* 1. Control de Rol / Simulación de Entorno */}
       <RoleSelector 
         currentRole={userRole} 
@@ -704,13 +717,13 @@ export default function App() {
       />
 
       {/* 2. Header de la Aplicación */}
-      <header id="main-header" className="bg-indigo-900 border-b border-indigo-950 px-5 py-5 md:py-6 shadow-xl relative z-40">
+      <header id="main-header" className="bg-club-gradient-elements border-b border-white/10 px-5 py-5 md:py-6 shadow-xl relative z-40">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
           
           {/* Logo y Nombre del Club */}
           <div className="flex items-center gap-4.5 select-none cursor-pointer group" onClick={() => setActiveTab('inicio')}>
             {/* Highly prominent and glowing official club logo card */}
-            <div className="w-16 h-16 shrink-0 p-1.5 bg-gradient-to-tr from-indigo-950 to-indigo-900 border-2 border-indigo-500/30 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/10 group-hover:border-indigo-400/60 transition-all duration-300 hover:scale-105">
+            <div className="w-16 h-16 shrink-0 p-1.5 bg-white border-2 border-white/20 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/10 group-hover:scale-105 transition-transform duration-300">
               <SrtcLogo className="w-13 h-13" />
             </div>
             <div>
@@ -722,27 +735,27 @@ export default function App() {
                   HOCKEY CLUB
                 </span>
               </div>
-              <p className="text-xs text-indigo-200/80 font-bold leading-normal mt-1 flex items-center gap-2">
-                <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse shadow-glow shadow-indigo-400/55"></span>
+              <p className="text-xs text-indigo-100/90 font-bold leading-normal mt-1 flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-450 rounded-full animate-pulse shadow-glow shadow-emerald-400/55"></span>
                 <span className="font-sports-condensed uppercase tracking-wider text-[11px] text-indigo-100">Sitio Oficial de Hockey • Mendoza</span>
               </p>
             </div>
           </div>
 
           {/* Persistent Category Switcher in Header for High Visibility */}
-          <div className="flex flex-col items-center md:items-end gap-1 px-3 py-1.5 bg-indigo-950 rounded-xl border border-indigo-850">
+          <div className="flex flex-col items-center md:items-end gap-1 px-3 py-1.5 bg-black/20 rounded-xl border border-white/10">
             <span className="text-[9px] uppercase font-black text-indigo-200 tracking-wider font-sports-condensed">
               Categoría / División Activa
             </span>
-            <div className="flex flex-wrap items-center gap-0.5 bg-indigo-950 p-0.5 rounded-lg border border-indigo-900">
+            <div className="flex flex-wrap items-center gap-0.5 bg-black/10 p-0.5 rounded-lg border border-black/15">
               {(['7ma', '6ta', '5ta', 'Intermedia', 'Primera'] as Category[]).map((cat) => (
                 <button
                   key={cat}
                   onClick={() => handleCategoryChange(cat)}
                   className={`px-2.5 py-1 rounded text-[10px] font-black tracking-wide uppercase transition-all duration-200 cursor-pointer font-sports-condensed ${
                     selectedCategory === cat
-                      ? 'bg-indigo-600 text-white shadow'
-                      : 'text-indigo-300 hover:text-white hover:bg-indigo-900/50'
+                      ? 'bg-club-gradient text-white font-extrabold shadow-md border border-white/10 scale-102 shadow-emerald-500/20'
+                      : 'text-indigo-200/80 hover:text-white hover:bg-white/5 border border-transparent'
                   }`}
                 >
                   {cat}
@@ -760,7 +773,7 @@ export default function App() {
       </main>
 
       {/* 4. Unified Bottom Navigation Bar */}
-      <nav id="unified-bottom-navigation" className="fixed bottom-0 left-0 right-0 bg-indigo-600 border-t border-indigo-700 py-3.5 px-3 sm:px-6 z-45 shadow-2xl select-none">
+      <nav id="unified-bottom-navigation" className="fixed bottom-0 left-0 right-0 bg-club-gradient-elements border-t border-white/10 py-3.5 px-3 sm:px-6 z-45 shadow-2xl select-none">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 md:gap-5 w-full">
           {tabsConfig.map((tab) => {
             const Icon = tab.icon;
@@ -771,12 +784,12 @@ export default function App() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 flex flex-col items-center justify-center gap-2 py-4 sm:py-5 px-3 rounded-2xl border text-xs font-bold transition-all duration-150 cursor-pointer ${
                   isActive
-                    ? 'bg-indigo-800 text-white border-white/30 shadow-lg ring-1 ring-white/10 scale-102'
-                    : 'bg-indigo-700/30 text-indigo-100 border-transparent hover:text-white hover:bg-indigo-700/70'
+                    ? 'bg-club-gradient text-white border-white/10 shadow-lg scale-102 font-extrabold shadow-emerald-500/10'
+                    : 'bg-white/5 text-indigo-200/70 border-transparent hover:text-white hover:bg-white/10'
                 }`}
               >
-                <Icon className={`w-6 h-6 sm:w-6.5 sm:h-6.5 ${isActive ? 'text-white' : 'text-indigo-200'}`} />
-                <span className={`text-[10px] sm:text-xs font-black font-sports-condensed uppercase tracking-wider text-center ${isActive ? 'text-white' : 'text-indigo-100/90'}`}>
+                <Icon className={`w-6 h-6 sm:w-6.5 sm:h-6.5 ${isActive ? 'text-white' : 'text-indigo-200/60'}`} />
+                <span className={`text-[10px] sm:text-xs font-black font-sports-condensed uppercase tracking-wider text-center ${isActive ? 'text-white' : 'text-indigo-200/90'}`}>
                   {tab.label}
                 </span>
               </button>
