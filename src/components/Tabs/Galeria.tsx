@@ -151,7 +151,7 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
   return (
     <div id="gallery-tab" className="space-y-6 text-left">
       {/* Go Back button */}
-      <div className="flex items-center justify-start">
+      <div className="flex items-center justify-end">
         <button
           onClick={() => onTabChange('inicio')}
           className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
@@ -163,7 +163,7 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
 
       <div className="flex items-center justify-between bg-club-gradient-elements p-4 rounded-2xl border border-white/10 shadow-lg">
         <div>
-          <h2 className="font-extrabold text-neutral-100 text-sm flex items-center gap-1.5 font-sans">
+          <h2 className="font-extrabold text-white text-sm flex items-center gap-1.5 font-sans">
             <Image className="w-5 h-5 text-emerald-400" />
             Galería
           </h2>

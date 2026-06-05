@@ -209,7 +209,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
   return (
     <div id="roster-tab" className="space-y-8">
       {/* Go Back button */}
-      <div className="flex items-center justify-start">
+      <div className="flex items-center justify-end">
         <button
           onClick={() => onTabChange('inicio')}
           className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
