@@ -450,12 +450,12 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
       {/* Editor Modal Overlay */}
       {(isCreating || editingMatch) && (
-        <div id="match-edit-modal" className="fixed inset-0 z-50 overflow-y-auto bg-neutral-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <div id="match-edit-modal" className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 transition-all duration-300">
+          <div className="bg-club-gradient border border-white/20 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] transition-transform duration-300 transform scale-100">
             {/* Header */}
-            <div className="bg-neutral-950 px-6 py-4 border-b border-neutral-800 flex items-center justify-between">
-              <h3 className="font-extrabold text-neutral-100 text-sm flex items-center gap-2">
-                <Edit3 className="w-4 h-4 text-indigo-400" />
+            <div className="bg-black/30 px-6 py-4 border-b border-white/10 flex items-center justify-between">
+              <h3 className="font-extrabold text-white text-sm flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-emerald-450 animate-pulse" />
                 {isCreating ? 'Agregar Nuevo Partido' : `Editar Partido vs ${editingMatch?.rival}`}
               </h3>
               <button
@@ -463,26 +463,20 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                   setEditingMatch(null);
                   setIsCreating(false);
                 }}
-                className="text-neutral-400 hover:text-white text-xs cursor-pointer font-bold px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700"
+                className="text-white hover:bg-white/20 bg-white/10 hover:text-white text-xs cursor-pointer font-bold px-3 py-1.5 rounded transition"
               >
                 Cerrar
               </button>
             </div>
 
             {/* Form Scroll Body */}
-            <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-5 flex-1 text-left">
+            <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-5 flex-1 text-left bg-transparent text-white">
               {/* Club selection with Realtime logo loader */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-neutral-950 p-4 rounded-xl border border-neutral-800">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-black/40 p-4 rounded-xl border border-white/10">
                 {/* Local Club Block */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="block text-[10px] uppercase font-extrabold tracking-wider text-neutral-400">Club Local</label>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] text-neutral-500 font-medium">Escudo:</span>
-                      <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-850 flex items-center justify-center p-0.5 animate-fade-in">
-                        <ClubLogo teamName={localClub === 'Otro' ? customLocalName : localClub} className="w-7 h-7 flex-shrink-0" />
-                      </div>
-                    </div>
+                    <label className="block text-[10px] uppercase font-extrabold tracking-wider text-emerald-300">Club Local</label>
                   </div>
                   <select
                     value={localClub}
@@ -492,12 +486,12 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                         setCustomLocalName('');
                       }
                     }}
-                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-600 cursor-pointer font-semibold"
+                    className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer font-semibold"
                   >
                     {POPULAR_CLUBS.map((club) => (
-                      <option key={club} value={club}>{club}</option>
+                      <option key={club} value={club} className="bg-[#0f1c3f] text-white">{club}</option>
                     ))}
-                    <option value="Otro">Otro club (escribir)...</option>
+                    <option value="Otro" className="bg-[#0f1c3f] text-white">Otro club (escribir)...</option>
                   </select>
                   {localClub === 'Otro' && (
                     <input
@@ -505,7 +499,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                       value={customLocalName}
                       onChange={(e) => setCustomLocalName(e.target.value)}
                       placeholder="Nombre del club local"
-                      className="w-full bg-neutral-900 border border-indigo-600 p-2 rounded-lg text-xs text-white focus:outline-none"
+                      className="w-full bg-[#0d4f32]/40 border border-emerald-500 p-2.5 rounded-lg text-xs text-white focus:outline-none"
                       required
                     />
                   )}
@@ -514,13 +508,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                 {/* Visiting Club Block */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="block text-[10px] uppercase font-extrabold tracking-wider text-neutral-400">Club Visitante</label>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] text-neutral-500 font-medium">Escudo:</span>
-                      <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-850 flex items-center justify-center p-0.5 animate-fade-in">
-                        <ClubLogo teamName={visitorClub === 'Otro' ? customVisitorName : visitorClub} className="w-7 h-7 flex-shrink-0" />
-                      </div>
-                    </div>
+                    <label className="block text-[10px] uppercase font-extrabold tracking-wider text-emerald-300">Club Visitante</label>
                   </div>
                   <select
                     value={visitorClub}
@@ -530,12 +518,12 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                         setCustomVisitorName('');
                       }
                     }}
-                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-600 cursor-pointer font-semibold"
+                    className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer font-semibold"
                   >
                     {POPULAR_CLUBS.map((club) => (
-                      <option key={club} value={club}>{club}</option>
+                      <option key={club} value={club} className="bg-[#0f1c3f] text-white">{club}</option>
                     ))}
-                    <option value="Otro">Otro club (escribir)...</option>
+                    <option value="Otro" className="bg-[#0f1c3f] text-white">Otro club (escribir)...</option>
                   </select>
                   {visitorClub === 'Otro' && (
                     <input
@@ -543,7 +531,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                       value={customVisitorName}
                       onChange={(e) => setCustomVisitorName(e.target.value)}
                       placeholder="Nombre del club visitante"
-                      className="w-full bg-neutral-900 border border-indigo-600 p-2 rounded-lg text-xs text-white focus:outline-none"
+                      className="w-full bg-[#0d4f32]/40 border border-emerald-500 p-2.5 rounded-lg text-xs text-white focus:outline-none"
                       required
                     />
                   )}
@@ -551,90 +539,90 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
               </div>
 
               {/* Event Details Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans text-white">
                 <div>
-                  <label className="block text-[10px] uppercase font-bold text-neutral-400 mb-1.5">Cancha</label>
+                  <label className="block text-[10px] uppercase font-bold text-white/80 mb-1.5">Cancha</label>
                   <input
                     type="text"
                     value={cancha}
                     onChange={(e) => setCancha(e.target.value)}
                     placeholder="Ej. Cancha Principal SRTC"
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-600 font-semibold"
+                    className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-semibold"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase font-bold text-neutral-400 mb-1.5">Fecha</label>
+                  <label className="block text-[10px] uppercase font-bold text-white/80 mb-1.5">Fecha</label>
                   <input
                     type="date"
                     value={matchDate}
                     onChange={(e) => setMatchDate(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-600"
+                    className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-semibold"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase font-bold text-neutral-400 mb-1.5">Hora</label>
+                  <label className="block text-[10px] uppercase font-bold text-white/80 mb-1.5">Hora</label>
                   <input
                     type="text"
                     value={matchTime}
                     onChange={(e) => setMatchTime(e.target.value)}
                     placeholder="Ej. 14:30"
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-600 font-semibold"
+                    className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-semibold"
                     required
                   />
                 </div>
               </div>
 
               {/* Match Status, Date Number & Realtime Result Scoreboard */}
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-neutral-950 p-4 rounded-xl border border-neutral-800">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-black/45 p-4 rounded-xl border border-white/10">
                 <div>
-                  <label className="block text-[10px] uppercase font-bold text-indigo-400 mb-1.5">Nº de Fecha</label>
+                  <label className="block text-[10px] uppercase font-bold text-indigo-300 mb-1.5 font-display">Nº de Fecha</label>
                   <input
                     type="number"
                     min="1"
                     max="50"
                     value={fechaNumeroInput}
                     onChange={(e) => setFechaNumeroInput(Number(e.target.value))}
-                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-550 font-bold"
+                    className="w-full bg-black/30 border border-white/15 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-emerald-550 font-bold"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] uppercase font-bold text-neutral-400 mb-1.5">Estado Partido</label>
+                  <label className="block text-[10px] uppercase font-bold text-white/85 mb-1.5">Estado Partido</label>
                   <select
-                    value={estado}
-                    onChange={(e) => setEstado(e.target.value as MatchState)}
-                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer font-semibold"
+                     value={estado}
+                     onChange={(e) => setEstado(e.target.value as MatchState)}
+                     className="w-full bg-black/30 border border-white/15 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer font-semibold"
                   >
-                    <option value="Programado">Programado</option>
-                    <option value="En juego">En juego</option>
-                    <option value="Finalizado">Finalizado</option>
-                    <option value="Suspendido">Suspendido</option>
+                    <option value="Programado" className="bg-[#0f1c3f] text-white">Programado</option>
+                    <option value="En juego" className="bg-[#0f1c3f] text-white">En juego</option>
+                    <option value="Finalizado" className="bg-[#0f1c3f] text-white">Finalizado</option>
+                    <option value="Suspendido" className="bg-[#0f1c3f] text-white">Suspendido</option>
                   </select>
                 </div>
 
                 {(estado === 'Finalizado' || estado === 'En juego') && (
                   <>
                     <div>
-                      <label className="block text-[10px] uppercase font-bold text-emerald-400 mb-1.5">Goles Local</label>
+                      <label className="block text-[10px] uppercase font-bold text-emerald-450 mb-1.5">Goles Local</label>
                       <input
                         type="number"
                         min="0"
                         value={golesLocal}
                         onChange={(e) => setGolesLocal(Number(e.target.value))}
-                        className="w-full bg-neutral-900 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-bold"
+                        className="w-full bg-black/30 border border-white/15 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-bold"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] uppercase font-bold text-indigo-400 mb-1.5">Goles Visitante</label>
+                      <label className="block text-[10px] uppercase font-bold text-indigo-300 mb-1.5 animate-pulse">Goles Visitante</label>
                       <input
                         type="number"
                         min="0"
                         value={golesVisitante}
                         onChange={(e) => setGolesVisitante(Number(e.target.value))}
-                        className="w-full bg-neutral-900 border border-neutral-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-bold"
+                        className="w-full bg-black/30 border border-white/15 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-bold"
                       />
                     </div>
                   </>
@@ -643,35 +631,35 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
               {/* Sub-form: Advanced Player performance details if Match is Finalizado */}
               {estado === 'Finalizado' && (
-                <div className="space-y-4 border-t border-neutral-850 pt-4">
-                  <h4 className="text-xs font-black text-amber-500 flex items-center gap-1">
-                    <Award className="w-4 h-4" /> Desempeño y Goles de Jugadoras
+                <div className="space-y-4 border-t border-white/10 pt-4">
+                  <h4 className="text-xs font-black text-emerald-400 flex items-center gap-1.5 uppercase tracking-wider font-display">
+                    <Award className="w-4 h-4 text-emerald-400 animate-bounce" /> Desempeño y Goles de Jugadoras (SRTC)
                   </h4>
 
                   <div className="grid grid-cols-1 gap-4">
                     {/* Quick Scorers tally list */}
                     <div>
-                      <label className="block text-[10px] uppercase font-bold text-neutral-400 mb-1.5">Goleadoras</label>
-                      <div className="bg-neutral-950 border border-neutral-800 rounded-lg p-2 max-h-36 overflow-y-auto space-y-1.5">
+                      <label className="block text-[10px] uppercase font-bold text-white/80 mb-1.5 font-display tracking-wide">Goleadoras</label>
+                      <div className="bg-black/40 border border-white/10 rounded-lg p-3 max-h-40 overflow-y-auto space-y-1.5 divide-y divide-white/5">
                         {players.map(p => {
                           const scorer = selectedScorers.find(s => s.jugadorId === p.id);
                           const quantity = scorer?.cantidad || 0;
                           return (
-                            <div key={p.id} className="flex items-center justify-between text-xs py-1">
-                              <span className="text-neutral-300">#{p.numeroCamiseta} {p.nombre} {p.apellido}</span>
+                            <div key={p.id} className="flex items-center justify-between text-xs py-1.5">
+                              <span className="text-white font-medium">#{p.numeroCamiseta} {p.nombre} {p.apellido}</span>
                               <div className="flex items-center gap-2">
                                 <button
                                   type="button"
                                   onClick={() => handleSubScorerGoal(p.id)}
-                                  className="w-5 h-5 bg-neutral-850 hover:bg-neutral-750 text-neutral-300 rounded font-black text-center cursor-pointer font-mono"
+                                  className="w-5 h-5 bg-white/10 hover:bg-white/20 text-white rounded font-mono font-black text-center cursor-pointer transition flex items-center justify-center text-xs"
                                 >
                                   -
                                 </button>
-                                <span className={`w-4 text-center font-bold ${quantity > 0 ? 'text-indigo-400' : 'text-neutral-500'}`}>{quantity}</span>
+                                <span className={`w-4 text-center font-bold font-mono ${quantity > 0 ? 'text-emerald-400 font-extrabold' : 'text-white/40'}`}>{quantity}</span>
                                 <button
                                   type="button"
                                   onClick={() => handleAddScorerGoal(p.id)}
-                                  className="w-5 h-5 bg-neutral-850 hover:bg-neutral-750 text-neutral-300 rounded font-black text-center cursor-pointer font-mono"
+                                  className="w-5 h-5 bg-white/10 hover:bg-white/20 text-white rounded font-mono font-black text-center cursor-pointer transition flex items-center justify-center text-xs"
                                 >
                                   +
                                 </button>
@@ -685,19 +673,19 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
                   {/* Cards logs toggler */}
                   <div>
-                    <label className="block text-[10px] uppercase font-bold text-neutral-400 mb-1.5">Tarjetas en el Encuentro</label>
-                    <div className="bg-neutral-950 border border-neutral-800 rounded-lg p-3 max-h-40 overflow-y-auto divide-y divide-neutral-900">
+                    <label className="block text-[10px] uppercase font-bold text-white/80 mb-1.5 font-display tracking-wide">Tarjetas en el Encuentro</label>
+                    <div className="bg-black/40 border border-white/10 rounded-lg p-3 max-h-40 overflow-y-auto divide-y divide-white/5">
                       {players.map(p => {
                         const cardState = selectedCards.find(c => c.jugadorId === p.id) || { verde: false, amarilla: false, roja: false };
                         return (
-                          <div key={p.id} className="flex items-center justify-between py-1.5 text-xs">
-                            <span className="text-neutral-300">{p.nombre} {p.apellido}</span>
+                          <div key={p.id} className="flex items-center justify-between py-2 text-xs">
+                            <span className="text-white font-medium">{p.nombre} {p.apellido}</span>
                             <div className="flex items-center gap-1.5">
                               <button
                                 type="button"
                                 onClick={() => handleToggleCard(p.id, 'verde')}
                                 className={`px-2 py-0.5 rounded text-[9px] font-bold transition cursor-pointer ${
-                                  cardState.verde ? 'bg-green-600 text-neutral-950' : 'bg-neutral-850 text-neutral-500'
+                                  cardState.verde ? 'bg-green-600 text-white shadow-sm' : 'bg-white/10 text-white/40'
                                 }`}
                               >
                                 Verde
@@ -706,7 +694,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                                 type="button"
                                 onClick={() => handleToggleCard(p.id, 'amarilla')}
                                 className={`px-2 py-0.5 rounded text-[9px] font-bold transition cursor-pointer ${
-                                  cardState.amarilla ? 'bg-amber-500 text-neutral-950' : 'bg-neutral-850 text-neutral-550'
+                                  cardState.amarilla ? 'bg-amber-500 text-neutral-950 shadow-sm' : 'bg-white/10 text-white/40'
                                 }`}
                               >
                                 Amarilla
@@ -715,7 +703,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                                 type="button"
                                 onClick={() => handleToggleCard(p.id, 'roja')}
                                 className={`px-2 py-0.5 rounded text-[9px] font-bold transition cursor-pointer ${
-                                  cardState.roja ? 'bg-rose-600 text-white' : 'bg-neutral-850 text-neutral-500'
+                                  cardState.roja ? 'bg-rose-600 text-white shadow-sm' : 'bg-white/10 text-white/40'
                                 }`}
                               >
                                 Roja
@@ -730,20 +718,20 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
               )}
 
               {/* Box actions */}
-              <div className="border-t border-neutral-800 pt-5 flex items-center justify-end gap-2.5">
+              <div className="border-t border-white/10 pt-5 flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => {
                     setEditingMatch(null);
                     setIsCreating(false);
                   }}
-                  className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-bold rounded-lg transition"
+                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-lg transition cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow-lg flex items-center gap-1.5"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-lg flex items-center gap-1.5 transition-colors duration-250 cursor-pointer"
                 >
                   <Save className="w-4 h-4" /> Guardar Cambios
                 </button>
@@ -828,11 +816,11 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                         {/* Upper row: Date & status */}
                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2 flex-wrap gap-2 text-left">
                           <div className="flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-emerald-450" />
-                            <span className="text-xs font-semibold text-indigo-150">{formatFechaDdmmyyyy(match.fecha)}</span>
-                            <span className="text-indigo-200/30">•</span>
-                            <Clock className="w-3.5 h-3.5 text-emerald-450" />
-                            <span className="text-xs font-semibold text-indigo-150">{match.hora} Hs</span>
+                            <Calendar className="w-3.5 h-3.5 text-white" />
+                            <span className="text-xs font-semibold text-white">{formatFechaDdmmyyyy(match.fecha)}</span>
+                            <span className="text-white/40">•</span>
+                            <Clock className="w-3.5 h-3.5 text-white" />
+                            <span className="text-xs font-semibold text-white">{match.hora} Hs</span>
                           </div>
 
                           <div className="flex items-center gap-2">
@@ -847,13 +835,13 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                         <div className="flex items-center justify-between py-2 gap-2">
                           {/* Left Logo and name */}
                           <div className="flex flex-col items-center w-5/12 text-center">
-                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-white border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
+                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
                               <ClubLogo teamName={localTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
                             </div>
                             <span className="text-xs sm:text-sm font-black text-white mt-3 block leading-tight tracking-tight w-full break-words">
-                              {localTeam}
+                              {localTeam.toUpperCase()}
                             </span>
-                            <span className="text-[10px] text-indigo-250 uppercase mt-1 font-bold tracking-wider">Local</span>
+                            <span className="text-[10px] text-white uppercase mt-1 font-bold tracking-wider">Local</span>
                           </div>
 
                           {/* Mid stats/scores (Highlighted Scoreboard) */}
@@ -883,13 +871,13 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
                           {/* Right Logo and name */}
                           <div className="flex flex-col items-center w-5/12 text-center">
-                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-white border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
+                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
                               <ClubLogo teamName={visitorTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
                             </div>
                             <span className="text-xs sm:text-sm font-black text-white mt-3 block leading-tight tracking-tight w-full break-words">
-                              {visitorTeam}
+                              {visitorTeam.toUpperCase()}
                             </span>
-                            <span className="text-[10px] text-indigo-250 uppercase mt-1 font-bold tracking-wider">Visitante</span>
+                            <span className="text-[10px] text-white uppercase mt-1 font-bold tracking-wider">Visitante</span>
                           </div>
                         </div>
 
@@ -949,9 +937,9 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                               <>
                                 <button
                                   onClick={() => handleStartEdit(match)}
-                                  className="px-2.5 py-1.5 rounded bg-emerald-500/20 text-emerald-300 hover:bg-emerald-505 hover:text-white transition text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                                  className="px-2.5 py-1.5 rounded bg-emerald-600/35 text-white hover:bg-emerald-500 hover:text-white transition text-[11px] font-bold flex items-center gap-1 cursor-pointer"
                                 >
-                                  <Edit3 className="w-3 h-3" /> Cargar
+                                  <Edit3 className="w-3 h-3 text-white" /> Cargar
                                 </button>
                                 {userRole === 'admin' && (
                                   <button

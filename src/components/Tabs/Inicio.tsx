@@ -72,8 +72,14 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
   const maxGoles = playersWithGoals.length > 0 ? Math.max(...playersWithGoals.map(p => p.goles || 0)) : 0;
   const topScorers = maxGoles > 0 ? categoryPlayers.filter(p => (p.goles || 0) === maxGoles) : [];
 
-  // Posición actual de SRTC en la tabla
-  const categoryStandings = standings.filter(s => s.categoria === activeCategory);
+  // Posición actual de SRTC en la tabla (ordenada exactamente como en la pestaña Tabla)
+  const categoryStandings = [...standings]
+    .filter(s => s.categoria === activeCategory)
+    .sort((a, b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      if (b.dg !== a.dg) return b.dg - a.dg;
+      return b.gf - a.gf;
+    });
   const srtcStanding = categoryStandings.find(s => s.equipo.toLowerCase().includes('san rafael') || s.equipo.toLowerCase().includes('srtc'));
   const srtcRank = categoryStandings.findIndex(s => s.equipo.toLowerCase().includes('san rafael') || s.equipo.toLowerCase().includes('srtc')) + 1;
 
@@ -149,7 +155,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
                 <Clock className="w-3 h-3 animate-pulse text-emerald-400" /> PRÓXIMO PARTIDO
               </span>
               {nextMatch && (
-                <span className="text-xs font-black text-indigo-150">
+                <span className="text-xs font-black text-white">
                   {formatFechaDdmmyyyy(nextMatch.fecha)}
                 </span>
               )}
@@ -164,7 +170,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
                       <ClubLogo teamName={nextMatchLocalTeam} className="w-16 h-16" />
                     </div>
                     <span className="text-xs font-black text-white mt-2 truncate max-w-full">
-                      {nextMatchLocalTeam}
+                      {nextMatchLocalTeam.toUpperCase()}
                     </span>
                   </div>
 
@@ -182,7 +188,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
                       <ClubLogo teamName={nextMatchVisitorTeam} className="w-16 h-16" />
                     </div>
                     <span className="text-xs font-black text-white mt-2 truncate max-w-full">
-                      {nextMatchVisitorTeam}
+                      {nextMatchVisitorTeam.toUpperCase()}
                     </span>
                   </div>
                 </div>
@@ -218,7 +224,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
                 ÚLTIMO RESULTADO
               </span>
               {lastResult && (
-                <span className="text-xs font-black text-indigo-150">
+                <span className="text-xs font-black text-white">
                   {formatFechaDdmmyyyy(lastResult.fecha)}
                 </span>
               )}
@@ -233,7 +239,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
                       <ClubLogo teamName={lastResultLocalTeam} className="w-12 h-12" />
                     </div>
                     <span className="text-[11px] font-black text-white mt-1.5 truncate max-w-full">
-                      {lastResultLocalTeam}
+                      {lastResultLocalTeam.toUpperCase()}
                     </span>
                     <span className="text-[9px] text-indigo-200/75 uppercase mt-0.5 font-bold">Local</span>
                   </div>
@@ -251,7 +257,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
                       <ClubLogo teamName={lastResultVisitorTeam} className="w-12 h-12" />
                     </div>
                     <span className="text-[11px] font-black text-white mt-1.5 truncate max-w-full">
-                      {lastResultVisitorTeam}
+                      {lastResultVisitorTeam.toUpperCase()}
                     </span>
                     <span className="text-[9px] text-indigo-200/75 uppercase mt-0.5 font-bold">Visitante</span>
                   </div>
@@ -340,7 +346,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
                     <tr key={row.id} className={isSrtc ? 'bg-emerald-500/10 text-white font-extrabold shadow-sm' : 'text-indigo-100 hover:bg-white/5'}>
                       <td className="py-2.5 px-3 flex items-center gap-1.5">
                         <span className={`font-mono w-4 font-bold ${isSrtc ? 'text-emerald-300' : 'text-indigo-200/55'}`}>{index + 1}</span>
-                        <span className="truncate max-w-[120px] sm:max-w-none">{row.equipo}</span>
+                        <span className="truncate max-w-[120px] sm:max-w-none">{row.equipo.toUpperCase()}</span>
                         {isSrtc && <span className="w-1.5 h-1.5 rounded-full bg-emerald-450 animate-pulse" />}
                       </td>
                       <td className="py-2.5 px-2 text-center font-bold">{row.pj}</td>
@@ -389,7 +395,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
                       <h4 className="font-black text-white text-sm">
                         {topScorers[0].nombre} {topScorers[0].apellido}
                       </h4>
-                      <span className="text-[10px] uppercase text-indigo-200 font-extrabold">{topScorers[0].posicion}</span>
+                      <span className="text-[10px] uppercase text-white font-extrabold">{topScorers[0].posicion}</span>
                     </div>
 
                     <div className="bg-black/20 p-2 text-center flex items-center justify-around rounded-lg text-[10px] border border-white/10">
@@ -427,7 +433,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
                           <h4 className="font-extrabold text-white text-xs truncate">
                             {player.nombre} {player.apellido}
                           </h4>
-                          <p className="text-[9px] text-indigo-250 uppercase font-bold">{player.posicion}</p>
+                          <p className="text-[9px] text-white uppercase font-bold">{player.posicion}</p>
                         </div>
                         <div className="text-right shrink-0">
                           <span className="text-[9px] text-indigo-200/60 font-black block">Goles</span>

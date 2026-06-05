@@ -468,6 +468,7 @@ export default function App() {
     });
 
     try {
+      setStandings(sortedStandings);
       await syncCollection('standings', standings, sortedStandings);
       console.log('Standings calculated and synchronized with Firestore.');
     } catch (err) {

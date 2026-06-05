@@ -165,7 +165,7 @@ export default function Estadisticas({ players, matches, selectedCategory }: Est
                     {player.nombre} {player.apellido}
                   </h4>
                   <p className="text-[10px] text-indigo-200/50 truncate">
-                    Camiseta #{player.numeroCamiseta} • {player.posicion}
+                    Camiseta #{player.numeroCamiseta} • <span className="text-white font-bold">{player.posicion}</span>
                   </p>
                 </div>
 
@@ -238,7 +238,7 @@ export default function Estadisticas({ players, matches, selectedCategory }: Est
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-indigo-350 w-3.5 text-right">{index + 1}º</span>
                           <span className="font-bold text-white">{player.nombre} {player.apellido}</span>
-                          <span className="text-[10px] text-indigo-200/50">#{player.numeroCamiseta} • {player.posicion}</span>
+                          <span className="text-[10px] text-indigo-200/50">#{player.numeroCamiseta} • <span className="text-white font-bold">{player.posicion}</span></span>
                         </div>
                         <span className="font-black text-emerald-400 text-sm font-mono">{player.goles}</span>
                       </div>

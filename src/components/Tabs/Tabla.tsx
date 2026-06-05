@@ -485,23 +485,23 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
 
       {/* Main Stats Table - Extra Large Standings Columns */}
       <div className="bg-club-gradient-elements border border-white/10 rounded-2xl overflow-hidden shadow-lg">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+        <div className="overflow-x-auto font-sans">
+          <table className="w-full text-left text-xs sm:text-sm border-collapse font-sans">
             <thead>
-              <tr className="bg-black/20 border-b border-white/10 text-white font-bold uppercase text-xs sm:text-sm tracking-wider">
-                <th className="py-4 px-4 text-center w-14">Pos</th>
-                <th className="py-4 px-4 min-w-[200px]">Equipo</th>
-                <th className="py-4 px-3 text-center w-12">PJ</th>
-                <th className="py-4 px-3 text-center w-12 font-black">PG</th>
-                <th className="py-4 px-3 text-center w-12">PE</th>
-                <th className="py-4 px-3 text-center w-12">PP</th>
-                <th className="py-4 px-3 text-center hidden sm:table-cell w-12">GF</th>
-                <th className="py-4 px-3 text-center hidden sm:table-cell w-12">GC</th>
-                <th className="py-4 px-3.5 text-center w-14">DG</th>
-                <th className="py-4 px-5 text-center font-black w-16">PTS</th>
+              <tr className="bg-black/20 border-b border-white/10 text-white uppercase text-xs sm:text-sm tracking-wider font-sans font-bold">
+                <th className="py-4 px-4 text-center w-14 font-sans font-bold text-xs sm:text-sm">Pos</th>
+                <th className="py-4 px-4 min-w-[200px] font-sans font-bold text-xs sm:text-sm">Equipo</th>
+                <th className="py-4 px-3 text-center w-12 font-sans font-bold text-xs sm:text-sm">PJ</th>
+                <th className="py-4 px-3 text-center w-12 font-sans font-bold text-xs sm:text-sm">PG</th>
+                <th className="py-4 px-3 text-center w-12 font-sans font-bold text-xs sm:text-sm">PE</th>
+                <th className="py-4 px-3 text-center w-12 font-sans font-bold text-xs sm:text-sm">PP</th>
+                <th className="py-4 px-3 text-center hidden sm:table-cell w-12 font-sans font-bold text-xs sm:text-sm">GF</th>
+                <th className="py-4 px-3 text-center hidden sm:table-cell w-12 font-sans font-bold text-xs sm:text-sm">GC</th>
+                <th className="py-4 px-3.5 text-center w-14 font-sans font-bold text-xs sm:text-sm">DG</th>
+                <th className="py-4 px-5 text-center w-16 font-sans font-bold text-xs sm:text-sm">PTS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-white/5 font-sans">
               {sortedStandings.map((row, index) => {
                 const isSrtc = row.esOficialClub;
                 const pos = index + 1;
@@ -511,61 +511,61 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                     key={row.id || row.equipo} 
                     className={`${
                       isSrtc 
-                        ? 'bg-emerald-500/10 text-emerald-300 border-l-4 border-l-emerald-500 font-extrabold hover:bg-emerald-500/20' 
+                        ? 'bg-emerald-500/10 text-emerald-300 border-l-4 border-l-emerald-500 font-bold hover:bg-emerald-500/20' 
                         : 'text-indigo-150 hover:bg-white/5'
-                    } transition-colors`}
+                    } transition-colors font-sans`}
                   >
                     {/* Position Label Column */}
-                    <td className="py-4 px-4 text-center font-bold text-xs sm:text-sm">
-                      <div className="flex items-center justify-center">
+                    <td className="py-4 px-4 text-center font-sans font-bold text-xs sm:text-sm">
+                      <div className="flex items-center justify-center font-sans">
                         {pos <= 3 ? (
-                          <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs ${
-                            pos === 1 ? 'bg-amber-500 text-neutral-950 font-black scale-105 shadow-md shadow-amber-500/10' :
+                          <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs sm:text-sm font-sans font-bold ${
+                            pos === 1 ? 'bg-amber-500 text-neutral-950 font-bold scale-105 shadow-md shadow-amber-500/10' :
                             pos === 2 ? 'bg-neutral-300 text-neutral-950 font-bold' :
                             'bg-amber-800 text-white font-bold'
                           }`}>
                             {pos}
                           </span>
                         ) : (
-                          <span className="text-white/80 font-semibold">{pos}</span>
+                          <span className="text-white/80 font-sans font-bold text-xs sm:text-sm">{pos}</span>
                         )}
                       </div>
                     </td>
                     
                     {/* Team Name Column - Extra Large Logos & Text */}
-                    <td className="py-3.5 px-4 font-bold">
-                      <div className="flex items-center justify-between gap-3 w-full">
-                        <div className="flex items-center gap-3.5">
-                          <ClubLogo teamName={row.equipo} className="w-12 h-12 flex-shrink-0 shadow-md ring-2 ring-white/10 bg-white rounded-full" />
-                          <span className="text-white text-xs sm:text-sm font-extrabold tracking-tight">
+                    <td className="py-3.5 px-4 font-sans font-bold">
+                      <div className="flex items-center justify-between gap-3 w-full font-sans">
+                        <div className="flex items-center gap-3.5 font-sans">
+                          <ClubLogo teamName={row.equipo} className="w-12 h-12 flex-shrink-0 shadow-md ring-2 ring-white/10 bg-[#0f1c3f] rounded-full" />
+                          <span className="text-white text-xs sm:text-sm font-bold tracking-tight font-sans">
                             {row.equipo}
                           </span>
                         </div>
                         {userRole === 'admin' && (
                           <button
                             onClick={() => handleOpenEditModal(row.equipo)}
-                            className="bg-white/5 hover:bg-white/10 border border-white/5 text-emerald-400 hover:text-emerald-350 p-1.5 rounded-lg transition shrink-0 flex items-center gap-1 text-[10px] uppercase font-bold"
-                            title="Editar Escudo o Estadísticas"
+                            className="bg-white/5 hover:bg-white/10 border border-white/5 text-emerald-400 hover:text-emerald-350 p-2 rounded-lg transition shrink-0 flex items-center gap-1.5 text-xs font-bold font-sans cursor-pointer"
+                            title="Editar Estadísticas"
                           >
                             <Camera className="w-3.5 h-3.5" />
-                            <span className="hidden md:inline">Cargar Logo</span>
+                            <span>Editar</span>
                           </button>
                         )}
                       </div>
                     </td>
 
-                    <td className="py-4 px-3 text-center font-bold text-xs sm:text-sm text-white">{row.pj}</td>
-                    <td className="py-4 px-3 text-center font-semibold text-xs sm:text-sm text-white">{row.pg}</td>
-                    <td className="py-4 px-3 text-center font-semibold text-xs sm:text-sm text-white">{row.pe}</td>
-                    <td className="py-4 px-3 text-center font-semibold text-xs sm:text-sm text-white">{row.pp}</td>
-                    <td className="py-4 px-3 text-center text-white/90 text-xs sm:text-sm hidden sm:table-cell">{row.gf}</td>
-                    <td className="py-4 px-3 text-center text-white/90 text-xs sm:text-sm hidden sm:table-cell">{row.gc}</td>
+                    <td className="py-4 px-3 text-center font-bold text-xs sm:text-sm text-white font-sans">{row.pj}</td>
+                    <td className="py-4 px-3 text-center font-bold text-xs sm:text-sm text-white font-sans">{row.pg}</td>
+                    <td className="py-4 px-3 text-center font-bold text-xs sm:text-sm text-white font-sans">{row.pe}</td>
+                    <td className="py-4 px-3 text-center font-bold text-xs sm:text-sm text-white font-sans">{row.pp}</td>
+                    <td className="py-4 px-3 text-center text-white text-xs sm:text-sm hidden sm:table-cell font-bold font-sans">{row.gf}</td>
+                    <td className="py-4 px-3 text-center text-white text-xs sm:text-sm hidden sm:table-cell font-bold font-sans">{row.gc}</td>
                     
-                    <td className="py-4 px-3.5 text-center font-bold text-xs sm:text-sm text-white">
+                    <td className="py-4 px-3.5 text-center font-bold text-xs sm:text-sm text-white font-sans">
                       {row.dg > 0 ? `+${row.dg}` : row.dg}
                     </td>
 
-                    <td className="py-4 px-5 text-center font-black text-xs sm:text-sm text-white">
+                    <td className="py-4 px-5 text-center font-bold text-xs sm:text-sm text-white font-sans">
                       {row.pts}
                     </td>
                   </tr>
@@ -576,213 +576,115 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
         </div>
       </div>
 
-
-
-      {/* Admin Panel Modal for Uploading Logos and Customizing Standings values */}
+      {/* Admin Panel Modal for Customizing Standings values */}
       {editingTeam && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300">
+          <div className="bg-club-gradient border border-white/20 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             {/* Modal Header */}
-            <div className="p-5 border-b border-neutral-800 flex items-center justify-between bg-neutral-950">
+            <div className="p-5 border-b border-white/10 flex items-center justify-between bg-black/30">
               <div>
-                <h3 className="font-extrabold text-white text-base">Cargar Logo y Estadísticas</h3>
-                <p className="text-xs text-neutral-400 mt-1">Configura el equipo {editingTeam}</p>
+                <h3 className="font-extrabold text-white text-base">Editar Estadísticas</h3>
+                <p className="text-xs text-white/70 mt-1">Configura el equipo {editingTeam}</p>
               </div>
               <button 
                 onClick={() => setEditingTeam(null)}
-                className="text-neutral-400 hover:text-white p-1 rounded-lg hover:bg-neutral-800 transition"
+                className="text-white hover:bg-white/20 p-2 rounded-lg bg-white/10 transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 space-y-5 overflow-y-auto flex-1 text-left">
+            <div className="p-6 space-y-5 overflow-y-auto flex-1 text-left text-white bg-transparent">
               
-              {/* CURRENT LOGO PREVIEW */}
-              <div className="flex items-center gap-4 bg-neutral-950 p-4 rounded-xl border border-neutral-800">
-                <ClubLogo teamName={editingTeam} className="w-18 h-18 shadow-md ring-2 ring-emerald-500 rounded-full" />
-                <div>
-                  <h4 className="font-bold text-white text-sm">Vista Previa Actual</h4>
-                  <p className="text-xs text-neutral-400 mt-0.5">Se actualizará en todas las vistas de partidos y posiciones.</p>
-                  {(logoBase64 || logoUrl) && (
-                    <button
-                      onClick={handleDeleteLogo}
-                      className="text-[10px] text-red-400 hover:text-red-300 font-extrabold uppercase mt-2.5 flex items-center gap-1"
-                    >
-                      Restablecer Logo Original
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* LOGO INPUT SWITCH TYPE */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider block">Método de Carga de Logo</label>
-                <div className="grid grid-cols-2 gap-2 bg-neutral-950 p-1 rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => setLogoInputType('upload')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                      logoInputType === 'upload' 
-                        ? 'bg-emerald-500 text-neutral-950' 
-                        : 'text-neutral-400 hover:text-white hover:bg-neutral-850'
-                    }`}
-                  >
-                    <Upload className="w-3.5 h-3.5" />
-                    Cargar Archivo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLogoInputType('url')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                      logoInputType === 'url' 
-                        ? 'bg-emerald-500 text-neutral-950' 
-                        : 'text-neutral-400 hover:text-white hover:bg-neutral-850'
-                    }`}
-                  >
-                    <Edit3 className="w-3.5 h-3.5" />
-                    Pega una URL
-                  </button>
-                </div>
-              </div>
-
-              {/* INPUT FIELDS ACCORDING TO SWITCH */}
-              {logoInputType === 'upload' ? (
-                <div 
-                  onDragEnter={handleDrag}
-                  onDragOver={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDrop={handleDrop}
-                  className={`border-2 border-dashed rounded-xl p-6 text-center transition flex flex-col items-center justify-center gap-2.5 cursor-pointer ${
-                    dragActive 
-                      ? 'border-emerald-400 bg-emerald-950/10' 
-                      : 'border-neutral-700 hover:border-neutral-500 bg-neutral-950'
-                  }`}
-                >
-                  <Upload className="w-8 h-8 text-neutral-400 animate-pulse" />
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-neutral-200">Arrastra tu logo aquí o busca un archivo</p>
-                    <p className="text-[10px] text-neutral-500">Soporta PNG, JPG, GIF o SVG</p>
-                  </div>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleFileChange} 
-                    className="hidden" 
-                    id="admin-logo-upload-input" 
-                  />
-                  <label 
-                    htmlFor="admin-logo-upload-input"
-                    className="mt-2 bg-neutral-800 hover:bg-neutral-700 text-[10px] text-white font-extrabold uppercase px-3 py-1.5 rounded-lg border border-neutral-700 transition cursor-pointer"
-                  >
-                    Buscar Archivo
-                  </label>
-                  {logoBase64 && (
-                    <div className="text-[10px] text-emerald-400 font-semibold mt-1">¡Imagen seleccionada correctamente!</div>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <label className="text-[11px] text-neutral-400 font-bold block">Enlace de imagen de Internet</label>
-                  <input
-                    type="url"
-                    placeholder="https://ejemplo.com/logo-equipo.png"
-                    value={logoUrl}
-                    onChange={(e) => setLogoUrl(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-              )}
-
               {/* DIRECT MANUAL STANDINGS OVERRIDES */}
-              <div className="space-y-3 pt-3 border-t border-neutral-800">
+              <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-emerald-450 shrink-0" />
                   <h4 className="font-extrabold text-white text-xs uppercase tracking-wider">Estadísticas de la Asociación</h4>
                 </div>
-                <p className="text-[11px] text-neutral-400">
+                <p className="text-xs text-white/80">
                   Sobrescribe los valores ganados, empatados, perdidos y diferencia de goles para este equipo en la liga. El total de partidos (PJ), diferencia de goles (DG) y puntos (PTS) se recalculan automáticamente en base a tu entrada.
                 </p>
 
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] text-neutral-400 font-bold block">PG (Ganados)</label>
+                    <label className="text-[10px] text-white/80 font-bold block">PG (Ganados)</label>
                     <input
                       type="number"
                       min={0}
                       value={editPG}
                       onChange={(e) => setEditPG(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg py-1.5 px-2.5 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                      className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] text-neutral-400 font-bold block">PE (Empatados)</label>
+                    <label className="text-[10px] text-white/80 font-bold block">PE (Empatados)</label>
                     <input
                       type="number"
                       min={0}
                       value={editPE}
                       onChange={(e) => setEditPE(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg py-1.5 px-2.5 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                      className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] text-neutral-400 font-bold block">PP (Perdidos)</label>
+                    <label className="text-[10px] text-white/80 font-bold block">PP (Perdidos)</label>
                     <input
                       type="number"
                       min={0}
                       value={editPP}
                       onChange={(e) => setEditPP(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg py-1.5 px-2.5 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono font-bold"
+                      className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono font-bold"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <div className="space-y-1">
-                    <label className="text-[10px] text-neutral-400 font-bold block">GF (Goles Favor)</label>
+                    <label className="text-[10px] text-white/80 font-bold block">GF (Goles Favor)</label>
                     <input
                       type="number"
                       min={0}
                       value={editGF}
                       onChange={(e) => setEditGF(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg py-1.5 px-2.5 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-green-400"
+                      className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-emerald-300 font-extrabold"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] text-neutral-400 font-bold block">GC (Goles Contra)</label>
+                    <label className="text-[10px] text-white/80 font-bold block">GC (Goles Contra)</label>
                     <input
                       type="number"
                       min={0}
                       value={editGC}
                       onChange={(e) => setEditGC(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg py-1.5 px-2.5 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-rose-500"
+                      className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-rose-300 font-extrabold"
                     />
                   </div>
                 </div>
 
-                <div className="bg-neutral-950 p-3 rounded-lg flex justify-between items-center text-xs border border-neutral-850 font-mono">
-                  <span className="text-neutral-450">PJ Calculado: <strong className="text-neutral-200">{editPG + editPE + editPP}</strong></span>
-                  <span className="text-neutral-450">DG: <strong className={editGF - editGC >= 0 ? "text-green-400" : "text-rose-400"}>{editGF - editGC}</strong></span>
-                  <span className="text-neutral-450">Puntos: <strong className="text-emerald-400 font-black">{(editPG * 3) + editPE}</strong></span>
+                <div className="bg-black/35 p-4 rounded-lg flex justify-between items-center text-xs border border-white/10 font-mono">
+                  <span className="text-white/70">PJ: <strong className="text-white font-bold">{editPG + editPE + editPP}</strong></span>
+                  <span className="text-white/70">DG: <strong className={editGF - editGC >= 0 ? "text-emerald-450 font-bold" : "text-rose-400 font-bold"}>{editGF - editGC}</strong></span>
+                  <span className="text-white/70">Puntos: <strong className="text-emerald-450 font-black">{(editPG * 3) + editPE}</strong></span>
                 </div>
               </div>
 
             </div>
 
             {/* Modal Footer */}
-            <div className="p-5 border-t border-neutral-800 bg-neutral-950 flex justify-end gap-3.5">
+            <div className="p-5 border-t border-white/10 bg-black/20 flex justify-end gap-3.5">
               <button
                 type="button"
                 onClick={() => setEditingTeam(null)}
-                className="bg-neutral-800 hover:bg-neutral-750 border border-neutral-750 text-neutral-300 text-xs font-bold uppercase py-2.5 px-4 rounded-xl transition"
+                className="bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-bold uppercase py-2.5 px-4 rounded-xl transition cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleSaveEdit}
-                className="bg-emerald-500 hover:bg-emerald-400 text-neutral-950 text-xs font-black uppercase py-2.5 px-4.5 rounded-xl transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/10"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase py-2.5 px-4.5 rounded-xl transition flex items-center gap-1.5 shadow-lg cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 Guardar Cambios
