@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Calendar, MapPin, Clock, Edit3, Plus, Trophy, Save, Trash2, Award, CheckCircle2, AlertTriangle, Play } from 'lucide-react';
+import { Calendar, MapPin, Clock, Edit3, Plus, Trophy, Save, Trash2, Award, CheckCircle2, AlertTriangle, Play, ChevronLeft } from 'lucide-react';
 import { Match, Player, UserRole, MatchState, Category } from '../../types';
 import SrtcLogo from '../SrtcLogo';
 import ClubLogo from '../ClubLogo';
@@ -16,6 +16,7 @@ interface FixtureProps {
   selectedCategory: Category;
   onUpdateMatches: (updatedMatches: Match[]) => void;
   onShare: (title: string, text: string) => void;
+  onTabChange: (tab: string) => void;
 }
 
 export function getMatchFechaNumber(match: Match): number {
@@ -92,7 +93,7 @@ const POPULAR_CLUBS = [
   'Teqüe Rugby Club'
 ];
 
-export default function Fixture({ matches, players, userRole, selectedCategory, onUpdateMatches, onShare }: FixtureProps) {
+export default function Fixture({ matches, players, userRole, selectedCategory, onUpdateMatches, onShare, onTabChange }: FixtureProps) {
   const [filter, setFilter] = useState<'todos' | 'proximos' | 'jugados'>('todos');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   
@@ -407,6 +408,17 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
   return (
     <div id="fixture-tab" className="space-y-6">
+      {/* Go Back button */}
+      <div className="flex items-center justify-start">
+        <button
+          onClick={() => onTabChange('inicio')}
+          className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
+        >
+          <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
+          Volver
+        </button>
+      </div>
+
       {/* Search and Filters Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-club-gradient-elements p-4 rounded-xl border border-white/10 shadow-lg">
         <div className="flex items-center gap-1.5 flex-wrap">

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Trophy, HelpCircle, Share2, Camera, Save, X, Upload, Edit3, ShieldAlert } from 'lucide-react';
+import { Trophy, HelpCircle, Share2, Camera, Save, X, Upload, Edit3, ShieldAlert, ChevronLeft } from 'lucide-react';
 import { Match, Standing, Category } from '../../types';
 import { INITIAL_MATCH_LIST } from '../../data';
 import ClubLogo from '../ClubLogo';
@@ -16,6 +16,7 @@ interface TablaProps {
   userRole?: string;
   standings?: Standing[];
   onUpdateStandings?: (standings: Standing[]) => void;
+  onTabChange: (tab: string) => void;
 }
 
 // Resilient name normalization resolver to align matches database spellings to spreadsheet standards
@@ -60,7 +61,7 @@ const BASELINE_MATCH_IDS = new Set<string>([
   'm_f1_g_bmz_b_cabna', 'm_f3_g_bmz_b_alem_b', 'm_f8_g_marc_bmz_b'
 ]);
 
-export default function Tabla({ matches, selectedCategory, onShare, userRole, standings, onUpdateStandings }: TablaProps) {
+export default function Tabla({ matches, selectedCategory, onShare, userRole, standings, onUpdateStandings, onTabChange }: TablaProps) {
   // 1. Standings Baseline state initialized from localStorage
   const [baselines, setBaselines] = useState<{ [teamName: string]: Omit<Standing, 'pj' | 'dg' | 'pts' | 'categoria'> }>(() => {
     const saved = localStorage.getItem('srtc_standings_baseline_db_v5');
@@ -462,6 +463,17 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
 
   return (
     <div id="standings-tab" className="space-y-6">
+      {/* Go Back button */}
+      <div className="flex items-center justify-start">
+        <button
+          onClick={() => onTabChange('inicio')}
+          className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
+        >
+          <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
+          Volver
+        </button>
+      </div>
+
       {/* Visual Header Panel */}
       <div className="bg-club-gradient-elements p-5 rounded-2xl border border-white/10 shadow-lg flex items-center justify-between gap-4 flex-wrap">
         <div className="space-y-1 text-left">

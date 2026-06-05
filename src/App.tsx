@@ -618,6 +618,7 @@ export default function App() {
             selectedCategory={selectedCategory} 
             onUpdateMatches={handleUpdateMatches} 
             onShare={handleShare} 
+            onTabChange={setActiveTab}
           />
         );
       case 'tabla':
@@ -629,6 +630,7 @@ export default function App() {
             userRole={userRole} 
             standings={standings} 
             onUpdateStandings={handleUpdateStandings} 
+            onTabChange={setActiveTab}
           />
         );
       case 'plantel':
@@ -638,6 +640,7 @@ export default function App() {
             userRole={userRole} 
             selectedCategory={selectedCategory} 
             onUpdatePlayers={handleUpdatePlayers} 
+            onTabChange={setActiveTab}
           />
         );
       case 'estadisticas':
@@ -646,6 +649,7 @@ export default function App() {
             players={players} 
             matches={matches} 
             selectedCategory={selectedCategory} 
+            onTabChange={setActiveTab}
           />
         );
       case 'convocatorias':
@@ -666,6 +670,7 @@ export default function App() {
             matches={matches} 
             userRole={userRole} 
             onUpdateGallery={handleUpdateGallery} 
+            onTabChange={setActiveTab}
           />
         );
       case 'mas':

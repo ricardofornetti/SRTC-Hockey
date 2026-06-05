@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Users, Search, Plus, Edit2, Trash2, ShieldAlert, Save, Upload } from 'lucide-react';
+import { Users, Search, Plus, Edit2, Trash2, ShieldAlert, Save, Upload, ChevronLeft } from 'lucide-react';
 import { Player, UserRole, Category } from '../../types';
 
 interface PlantelProps {
@@ -12,9 +12,10 @@ interface PlantelProps {
   userRole: UserRole;
   selectedCategory: Category;
   onUpdatePlayers: (updatedPlayers: Player[]) => void;
+  onTabChange: (tab: string) => void;
 }
 
-export default function Plantel({ players, userRole, selectedCategory, onUpdatePlayers }: PlantelProps) {
+export default function Plantel({ players, userRole, selectedCategory, onUpdatePlayers, onTabChange }: PlantelProps) {
   const [search, setSearch] = useState('');
   const [positionFilter, setPositionFilter] = useState<'Todos' | 'Arquera' | 'Defensora' | 'Volante' | 'Delantera'>('Todos');
   
@@ -207,6 +208,17 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
 
   return (
     <div id="roster-tab" className="space-y-8">
+      {/* Go Back button */}
+      <div className="flex items-center justify-start">
+        <button
+          onClick={() => onTabChange('inicio')}
+          className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
+        >
+          <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
+          Volver
+        </button>
+      </div>
+
       {/* Control Toolbar */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-club-gradient-elements p-4 rounded-2xl border border-white/10 shadow-lg">
         <div className="relative w-full md:w-72">

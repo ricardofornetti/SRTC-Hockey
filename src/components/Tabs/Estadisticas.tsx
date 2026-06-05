@@ -4,16 +4,17 @@
  */
 
 import React, { useState } from 'react';
-import { AreaChart, BarChart3, Award, Trophy, Users, ShieldAlert, Star, Shield, ThumbsUp } from 'lucide-react';
+import { AreaChart, BarChart3, Award, Trophy, Users, ShieldAlert, Star, Shield, ThumbsUp, ChevronLeft } from 'lucide-react';
 import { Player, Match, Category } from '../../types';
 
 interface EstadisticasProps {
   players: Player[];
   matches: Match[];
   selectedCategory: Category;
+  onTabChange: (tab: string) => void;
 }
 
-export default function Estadisticas({ players, matches, selectedCategory }: EstadisticasProps) {
+export default function Estadisticas({ players, matches, selectedCategory, onTabChange }: EstadisticasProps) {
   const [activeBoard, setActiveBoard] = useState<'goles' | 'asistencias' | 'presencias' | 'tarjetas'>('goles');
 
   // Filter players by current category
@@ -82,6 +83,17 @@ export default function Estadisticas({ players, matches, selectedCategory }: Est
 
   return (
     <div id="statistics-tab" className="space-y-6 text-left">
+      {/* Go Back button */}
+      <div className="flex items-center justify-start">
+        <button
+          onClick={() => onTabChange('inicio')}
+          className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
+        >
+          <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
+          Volver
+        </button>
+      </div>
+
       {/* Visual Bento Dashboard Header (4 elements grid) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total stats counters */}
