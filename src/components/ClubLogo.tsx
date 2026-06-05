@@ -1,11 +1,78 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ClubLogoProps {
   teamName: string;
   className?: string;
 }
 
+function normalizeTeamName(teamName: string): string {
+  if (!teamName) return '';
+  const name = teamName.toLowerCase().trim();
+  if (name.includes('san rafael') || name.includes('srtc')) return 'SAN RAFAEL TENIS CLUB - A';
+  if (name.includes('rivadavia')) return 'RIVADAVIA - A';
+  if (name.includes('los tordos - c') || name === 'los tordos c' || name.includes('los tordos c')) return 'LOS TORDOS - C';
+  if (name.includes('los tordos - b') || name === 'los tordos b' || name.includes('los tordos b')) return 'LOS TORDOS - B';
+  if (name.includes('mendoza r.c.') || name.includes('mendoza r. c.') || name.includes('mendoza rc') || name === 'mendoza') return 'MENDOZA R. C. - A';
+  if (name.includes('marista b') || name.includes('maristas b') || name.includes('marista - b')) return 'MARISTA - B';
+  if (name.includes('marista c') || name.includes('maristas c') || name.includes('marista - c')) return 'MARISTA - C';
+  if (name.includes('tacuru') || name === 'tacurú' || name.includes('tacurú')) return 'TACURU - A';
+  if (name.includes('bco mza - b') || name.includes('bco mza b') || name.includes('banco mendoza b') || name.includes('banco mendoza - b')) return 'BANCO MENDOZA - B';
+  if (name.includes('bco mza - c') || name.includes('bco mza c') || name.includes('banco mendoza c') || name.includes('banco mendoza - c')) return 'BANCO MENDOZA - C';
+  if (name.includes('pumai') || name.includes('peumayen') || name.includes('peumayén')) return 'PUMAI RUGBY CLUB - A';
+  if (name.includes('san jorge s.r.') || name.includes('san jorge')) return 'SAN JORGE S.R. - A';
+  if (name.includes('cabna')) return 'CABNA - A';
+  if (name.includes('murialdo')) return 'MURIALDO - B';
+  if (name.includes('aleman') || name.includes('alemán') || name.includes('alemán b')) return 'ALEMAN - B';
+  if (name.includes('teqüe') || name.includes('teque')) return 'TEQÜE RUGBY CLUB - B';
+  
+  return teamName.toUpperCase().trim();
+}
+
 export default function ClubLogo({ teamName, className = 'w-12 h-12' }: ClubLogoProps) {
+  const [logo, setLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadLogo = () => {
+      try {
+        const normalized = normalizeTeamName(teamName);
+        const savedLogosStr = localStorage.getItem('srtc_team_logos_db');
+        if (savedLogosStr) {
+          const savedLogos = JSON.parse(savedLogosStr);
+          if (savedLogos[normalized]) {
+            setLogo(savedLogos[normalized]);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      setLogo(null);
+    };
+
+    loadLogo();
+
+    // Listen for storage changes to update logos dynamically
+    const handleStorageChange = () => {
+      loadLogo();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [teamName]);
+
+  if (logo) {
+    return (
+      <img
+        src={logo}
+        alt={`Logo de ${teamName}`}
+        referrerPolicy="no-referrer"
+        className={`${className} object-cover rounded-full border border-white/20 shadow-md shrink-0`}
+      />
+    );
+  }
+
   // Generate clean 2-3 letter initials for the fallback badge
   let displayInitials = '';
   if (teamName) {

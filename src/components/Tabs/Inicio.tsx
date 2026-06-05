@@ -113,7 +113,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
                 <div className="flex items-center justify-between">
                   {/* Local Team */}
                   <div className="flex flex-col items-center w-5/12 text-center p-2">
-                    <div className="w-20 h-20 bg-white border border-white/10 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105">
+                    <div className="w-20 h-20 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105">
                       <ClubLogo teamName={nextMatchLocalTeam} className="w-16 h-16" />
                     </div>
                     <span className="text-xs font-black text-white mt-2 truncate max-w-full">
@@ -131,7 +131,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
 
                   {/* Away Team */}
                   <div className="flex flex-col items-center w-5/12 text-center p-2">
-                    <div className="w-20 h-20 bg-white border border-white/10 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105">
+                    <div className="w-20 h-20 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105">
                       <ClubLogo teamName={nextMatchVisitorTeam} className="w-16 h-16" />
                     </div>
                     <span className="text-xs font-black text-white mt-2 truncate max-w-full">
@@ -182,7 +182,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
                 <div className="flex items-center justify-between bg-black/20 p-4 rounded-xl border border-white/10">
                   {/* Local Team */}
                   <div className="flex flex-col items-center w-5/12 text-center">
-                    <div className="w-16 h-16 bg-white border border-white/10 rounded-full flex items-center justify-center shadow-md">
+                    <div className="w-16 h-16 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-md">
                       <ClubLogo teamName={lastResultLocalTeam} className="w-12 h-12" />
                     </div>
                     <span className="text-[11px] font-black text-white mt-1.5 truncate max-w-full">
@@ -200,7 +200,7 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
 
                   {/* Away Team */}
                   <div className="flex flex-col items-center w-5/12 text-center">
-                    <div className="w-16 h-16 bg-white border border-white/10 rounded-full flex items-center justify-center shadow-md">
+                    <div className="w-16 h-16 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-md">
                       <ClubLogo teamName={lastResultVisitorTeam} className="w-12 h-12" />
                     </div>
                     <span className="text-[11px] font-black text-white mt-1.5 truncate max-w-full">

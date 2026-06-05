@@ -553,16 +553,14 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                             {row.equipo}
                           </span>
                         </div>
-                        {userRole === 'admin' && (
-                          <button
-                            onClick={() => handleOpenEditModal(row.equipo)}
-                            className="bg-white/5 hover:bg-white/10 border border-white/5 text-emerald-400 hover:text-emerald-350 p-2 rounded-lg transition shrink-0 flex items-center gap-1.5 text-xs font-bold font-sans cursor-pointer"
-                            title="Editar Estadísticas"
-                          >
-                            <Camera className="w-3.5 h-3.5" />
-                            <span>Editar</span>
-                          </button>
-                        )}
+                        <button
+                          onClick={() => handleOpenEditModal(row.equipo)}
+                          className="bg-white/5 hover:bg-white/10 border border-white/5 text-emerald-400 hover:text-emerald-350 p-2 rounded-lg transition shrink-0 flex items-center gap-1.5 text-xs font-bold font-sans cursor-pointer"
+                          title={userRole === 'admin' ? "Editar Estadísticas y Logo" : "Cargar Logo del Club"}
+                        >
+                          <Camera className="w-3.5 h-3.5" />
+                          <span>{userRole === 'admin' ? 'Editar' : 'Logo'}</span>
+                        </button>
                       </div>
                     </td>
 
@@ -588,108 +586,232 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
         </div>
       </div>
 
-      {/* Admin Panel Modal for Customizing Standings values */}
+      {/* Admin & Logo configuration modal */}
       {editingTeam && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300">
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300">
           <div className="bg-club-gradient border border-white/20 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             {/* Modal Header */}
             <div className="p-5 border-b border-white/10 flex items-center justify-between bg-black/30">
               <div>
-                <h3 className="font-extrabold text-white text-base">Editar Estadísticas</h3>
-                <p className="text-xs text-white/70 mt-1">Configura el equipo {editingTeam}</p>
+                <h3 className="font-extrabold text-white text-base">
+                  {userRole === 'admin' ? 'Editar Equipo' : 'Cargar Logo de Club'}
+                </h3>
+                <p className="text-xs text-white/70 mt-1">Configurar {editingTeam}</p>
               </div>
               <button 
                 onClick={() => setEditingTeam(null)}
-                className="text-white hover:bg-white/20 p-2 rounded-lg bg-white/10 transition"
+                className="text-white hover:bg-white/20 p-2 rounded-lg bg-white/10 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 space-y-5 overflow-y-auto flex-1 text-left text-white bg-transparent">
+            <div className="p-6 space-y-6 overflow-y-auto flex-1 text-left text-white bg-transparent">
               
-              {/* DIRECT MANUAL STANDINGS OVERRIDES */}
+              {/* DIRECT MANUAL STANDINGS OVERRIDES - ADMIN ONLY */}
+              {userRole === 'admin' && (
+                <div className="space-y-4 pb-5 border-b border-white/10">
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 text-emerald-450 shrink-0" />
+                    <h4 className="font-extrabold text-white text-xs uppercase tracking-wider">Estadísticas de la Asociación</h4>
+                  </div>
+                  <p className="text-xs text-indigo-200/90 leading-relaxed font-sans">
+                    Sobrescribe los valores ganados, empatados, perdidos y diferencia de goles para este equipo en la liga. El total de partidos (PJ), diferencia de goles (DG) y puntos (PTS) se recalculan automáticamente en base a tu entrada.
+                  </p>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-indigo-250 font-bold block">PG (Ganados)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={editPG}
+                        onChange={(e) => setEditPG(Math.max(0, parseInt(e.target.value) || 0))}
+                        className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-indigo-250 font-bold block">PE (Empatados)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={editPE}
+                        onChange={(e) => setEditPE(Math.max(0, parseInt(e.target.value) || 0))}
+                        className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-indigo-250 font-bold block">PP (Perdidos)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={editPP}
+                        onChange={(e) => setEditPP(Math.max(0, parseInt(e.target.value) || 0))}
+                        className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-indigo-250 font-bold block">GF (Goles Favor)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={editGF}
+                        onChange={(e) => setEditGF(Math.max(0, parseInt(e.target.value) || 0))}
+                        className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-emerald-300 font-extrabold"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-indigo-250 font-bold block">GC (Goles Contra)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={editGC}
+                        onChange={(e) => setEditGC(Math.max(0, parseInt(e.target.value) || 0))}
+                        className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-rose-300 font-extrabold"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="bg-black/35 p-4 rounded-lg flex justify-between items-center text-xs border border-white/10 font-mono">
+                    <span className="text-white/70">PJ: <strong className="text-white font-bold">{editPG + editPE + editPP}</strong></span>
+                    <span className="text-white/70">DG: <strong className={editGF - editGC >= 0 ? "text-emerald-450 font-bold" : "text-rose-400 font-bold"}>{editGF - editGC}</strong></span>
+                    <span className="text-white/70">Puntos: <strong className="text-emerald-450 font-black">{(editPG * 3) + editPE}</strong></span>
+                  </div>
+                </div>
+              )}
+
+              {/* CLUB LOGO CONFIGURATION - AVAILABLE TO ALL */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 text-emerald-450 shrink-0" />
-                  <h4 className="font-extrabold text-white text-xs uppercase tracking-wider">Estadísticas de la Asociación</h4>
+                  <Upload className="w-4.5 h-4.5 text-emerald-400 shrink-0" />
+                  <h4 className="font-extrabold text-white text-xs uppercase tracking-wider">Logo / Escudo del Club</h4>
                 </div>
-                <p className="text-xs text-white/80">
-                  Sobrescribe los valores ganados, empatados, perdidos y diferencia de goles para este equipo en la liga. El total de partidos (PJ), diferencia de goles (DG) y puntos (PTS) se recalculan automáticamente en base a tu entrada.
+
+                <p className="text-xs text-indigo-150/90 leading-relaxed font-sans">
+                  Sube el escudo oficial de <strong>{editingTeam}</strong> para personalizar su presencia visual en todas las pantallas de la aplicación.
                 </p>
 
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-white/80 font-bold block">PG (Ganados)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={editPG}
-                      onChange={(e) => setEditPG(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-white/80 font-bold block">PE (Empatados)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={editPE}
-                      onChange={(e) => setEditPE(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-white/80 font-bold block">PP (Perdidos)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={editPP}
-                      onChange={(e) => setEditPP(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono font-bold"
-                    />
-                  </div>
+                {/* Input Type selection tabs */}
+                <div className="flex border-b border-white/10 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setLogoInputType('upload')}
+                    className={`pb-2 px-3.5 text-xs font-bold transition-all border-b-2 hover:text-white cursor-pointer ${
+                      logoInputType === 'upload' ? 'border-emerald-500 text-white' : 'border-transparent text-white/50'
+                    }`}
+                  >
+                    Subir Archivo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLogoInputType('url')}
+                    className={`pb-2 px-3.5 text-xs font-bold transition-all border-b-2 hover:text-white cursor-pointer ${
+                      logoInputType === 'url' ? 'border-emerald-500 text-white' : 'border-transparent text-white/50'
+                    }`}
+                  >
+                    Enlace URL
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-1">
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-white/80 font-bold block">GF (Goles Favor)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={editGF}
-                      onChange={(e) => setEditGF(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-emerald-300 font-extrabold"
-                    />
+                {/* Tab Content: Upload File */}
+                {logoInputType === 'upload' && (
+                  <div className="space-y-3">
+                    <div
+                      onDragEnter={handleDrag}
+                      onDragOver={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDrop={handleDrop}
+                      className={`border-2 border-dashed rounded-xl p-6 text-center transition duration-300 cursor-pointer ${
+                        dragActive ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/15 hover:border-white/35 bg-black/25'
+                      }`}
+                      onClick={() => document.getElementById('logo-file-input')?.click()}
+                    >
+                      <input
+                        id="logo-file-input"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleFileChange}
+                      />
+                      <div className="flex flex-col items-center gap-2">
+                        <Upload className="w-8 h-8 text-indigo-300/50 animate-pulse" />
+                        <span className="text-xs text-white/80 font-semibold font-sans">Arrastra tu imagen aquí o haz click para explorar</span>
+                        <span className="text-[10px] text-indigo-200/50 font-mono">JPG, PNG o SVG (Se redimensionará automáticamente)</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-white/80 font-bold block">GC (Goles Contra)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={editGC}
-                      onChange={(e) => setEditGC(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-center text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-rose-300 font-extrabold"
-                    />
-                  </div>
-                </div>
+                )}
 
-                <div className="bg-black/35 p-4 rounded-lg flex justify-between items-center text-xs border border-white/10 font-mono">
-                  <span className="text-white/70">PJ: <strong className="text-white font-bold">{editPG + editPE + editPP}</strong></span>
-                  <span className="text-white/70">DG: <strong className={editGF - editGC >= 0 ? "text-emerald-450 font-bold" : "text-rose-400 font-bold"}>{editGF - editGC}</strong></span>
-                  <span className="text-white/70">Puntos: <strong className="text-emerald-450 font-black">{(editPG * 3) + editPE}</strong></span>
+                {/* Tab Content: IMAGE URL */}
+                {logoInputType === 'url' && (
+                  <div className="space-y-2">
+                    <label className="text-[10px] text-indigo-200 font-bold block text-left">Dirección URL de la Imagen</label>
+                    <input
+                      type="url"
+                      placeholder="https://ejemplo.com/logo-club.png"
+                      value={logoUrl}
+                      onChange={(e) => setLogoUrl(e.target.value)}
+                      className="w-full bg-black/20 border border-white/15 rounded-lg py-2.5 px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-sans"
+                    />
+                  </div>
+                )}
+
+                {/* PREVIEW CONTAINER */}
+                <div className="bg-black/35 p-4 rounded-xl border border-white/10 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    {/* Live Preview Image or Initials */}
+                    <div className="relative shrink-0">
+                      {(logoInputType === 'upload' && logoBase64) || (logoInputType === 'url' && logoUrl.trim()) ? (
+                        <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-emerald-500 shadow-lg flex items-center justify-center bg-[#0f1c3f]">
+                          <img
+                            src={logoInputType === 'upload' ? logoBase64 : logoUrl}
+                            alt="Vista Previa"
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-14 h-14 bg-club-gradient-elements border border-white/20 rounded-full flex items-center justify-center font-extrabold text-white text-sm shadow-md">
+                          {editingTeam ? editingTeam.substring(0, 2).toUpperCase() : 'FC'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-left">
+                      <span className="text-xs font-bold font-sans text-white block">Vista Previa</span>
+                      <span className="text-[10px] text-indigo-200/60 block font-normal font-sans">
+                        Se actualizará en todas las secciones simultáneamente.
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Reset/Remove option */}
+                  {((logoInputType === 'upload' && logoBase64) || (logoInputType === 'url' && logoUrl.trim())) && (
+                    <button
+                      type="button"
+                      onClick={handleDeleteLogo}
+                      className="text-rose-400 hover:text-rose-350 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all duration-300 font-sports-condensed cursor-pointer shrink-0"
+                    >
+                      Remover Logo
+                    </button>
+                  )}
                 </div>
               </div>
 
             </div>
 
             {/* Modal Footer */}
-            <div className="p-5 border-t border-white/10 bg-black/20 flex justify-end gap-3.5">
+            <div className="p-5 border-t border-white/10 bg-black/20 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setEditingTeam(null)}
-                className="bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-bold uppercase py-2.5 px-4 rounded-xl transition cursor-pointer"
+                className="bg-white/10 hover:bg-white/25 border border-white/10 text-white text-xs font-bold uppercase py-2.5 px-4 rounded-xl transition cursor-pointer"
               >
                 Cancelar
               </button>
