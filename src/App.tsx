@@ -725,7 +725,7 @@ export default function App() {
             </div>
             <div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <h1 className="text-2xl md:text-3xl font-sports-condensed font-black text-white tracking-widest uppercase group-hover:text-amber-300 transition-colors duration-300">
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-sports-condensed font-black text-white tracking-widest uppercase group-hover:text-amber-300 transition-colors duration-300">
                   SAN RAFAEL TENIS CLUB
                 </h1>
                 <span className="self-start sm:self-auto text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider font-sports-condensed shadow-inner">
@@ -763,6 +763,103 @@ export default function App() {
 
         </div>
       </header>
+
+      {/* 2.5 Quick Navigation Actions (Sticky/Fixed on scroll) */}
+      <div className="sticky top-0 z-30 bg-club-gradient/95 backdrop-blur-md border-b border-white/10 py-3 px-4 shadow-xl">
+        <div className="max-w-7xl mx-auto container">
+          <div className="flex overflow-x-auto no-scrollbar sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-3 bg-club-gradient-elements p-2 rounded-2xl border border-white/10 shadow-inner snap-x scroll-smooth">
+            <button 
+              onClick={() => setActiveTab('inicio')} 
+              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
+                activeTab === 'inicio' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              }`}
+            >
+              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
+                <Home className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Inicio</span>
+                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'inicio' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Principal</span>
+              </div>
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('fixture')} 
+              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
+                activeTab === 'fixture' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              }`}
+            >
+              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
+                <Calendar className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Fixture</span>
+                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'fixture' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Partidos</span>
+              </div>
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('tabla')} 
+              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
+                activeTab === 'tabla' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              }`}
+            >
+              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
+                <Trophy className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Tabla</span>
+                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'tabla' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Posiciones</span>
+              </div>
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('plantel')} 
+              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
+                activeTab === 'plantel' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              }`}
+            >
+              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Plantel</span>
+                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'plantel' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Jugadoras</span>
+              </div>
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('estadisticas')} 
+              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
+                activeTab === 'estadisticas' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              }`}
+            >
+              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
+                <BarChart3 className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Estadísticas</span>
+                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'estadisticas' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Rendimiento</span>
+              </div>
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('galeria')} 
+              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
+                activeTab === 'galeria' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              }`}
+            >
+              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
+                <ImageIcon className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Galería</span>
+                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'galeria' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Fotos</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* 3. Main Tab View Area */}
       <main id="app-viewport" className="flex-1 max-w-7xl w-full mx-auto px-4 py-6">

@@ -38,7 +38,7 @@ export default function RoleSelector({ currentRole, onChangeRole, currentUserEma
   const activeRoleConfig = roles.find(r => r.id === currentRole) || roles[0];
 
   return (
-    <div id="role-selector-container" className="bg-neutral-900/40 backdrop-blur-sm border-b border-neutral-850 text-xs text-neutral-300 select-none z-50 sticky top-0 shadow-sm">
+    <div id="role-selector-container" className="bg-neutral-900/40 backdrop-blur-sm border-b border-neutral-850 text-xs text-neutral-300 select-none z-50 relative shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-1.5 flex justify-end items-center">
         <div className="relative">
           <button
