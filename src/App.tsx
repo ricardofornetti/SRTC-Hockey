@@ -700,7 +700,7 @@ export default function App() {
   ];
 
   return (
-    <div id="app-root-container" className="min-h-screen bg-club-gradient text-neutral-100 flex flex-col font-sans pb-28">
+    <div id="app-root-container" className="min-h-screen bg-club-gradient text-neutral-100 flex flex-col font-sans pb-10">
       {/* 1. Control de Rol / Simulación de Entorno */}
       <RoleSelector 
         currentRole={userRole} 
@@ -764,37 +764,11 @@ export default function App() {
         {renderTabContent()}
       </main>
 
-      {/* 4. Unified Bottom Navigation Bar */}
-      <nav id="unified-bottom-navigation" className="fixed bottom-0 left-0 right-0 bg-club-gradient-elements border-t border-white/10 py-3.5 px-3 sm:px-6 z-45 shadow-2xl select-none">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 md:gap-5 w-full">
-          {tabsConfig.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-2 py-4 sm:py-5 px-3 rounded-2xl border text-xs font-bold transition-all duration-150 cursor-pointer ${
-                  isActive
-                    ? 'bg-club-gradient text-white border-white/10 shadow-lg scale-102 font-extrabold shadow-emerald-500/10'
-                    : 'bg-white/5 text-indigo-200/70 border-transparent hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <Icon className={`w-6 h-6 sm:w-6.5 sm:h-6.5 ${isActive ? 'text-white' : 'text-indigo-200/60'}`} />
-                <span className={`text-[10px] sm:text-xs font-black font-sports-condensed uppercase tracking-wider text-center ${isActive ? 'text-white' : 'text-indigo-200/90'}`}>
-                  {tab.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
-
       {/* 6. Dynamic Toast Banner Panel */}
       {toast && (
         <div 
           id="toast-notification-panel" 
-          className="fixed bottom-20 md:bottom-8 right-4 left-4 md:left-auto md:w-96 bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-2xl flex gap-3 items-start animate-in slide-in-from-bottom-5 fade-in duration-300 z-50 transform"
+          className="fixed bottom-4 md:bottom-8 right-4 left-4 md:left-auto md:w-96 bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-2xl flex gap-3 items-start animate-in slide-in-from-bottom-5 fade-in duration-300 z-50 transform"
         >
           <div className="shrink-0 mt-0.5">
             {toast.type === 'success' ? (

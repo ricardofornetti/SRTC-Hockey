@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Calendar, MapPin, Trophy, Users, BarChart3, Image, ChevronRight, Clock, Share2, Award } from 'lucide-react';
+import { Calendar, MapPin, Trophy, Users, BarChart3, Image, ChevronRight, Clock, Share2, Award, Home } from 'lucide-react';
 import { Player, Match, Standing, GalleryItem, Category } from '../../types';
 import ClubLogo from '../ClubLogo';
 import SrtcLogo from '../SrtcLogo';
@@ -91,7 +91,20 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
   return (
     <div id="inicio-tab" className="space-y-6">
       {/* Row: Quick Navigation Actions - Re-sized to match other sections beautifully */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-club-gradient-elements p-3 sm:p-3.5 rounded-2xl border border-white/10 shadow-lg">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 bg-club-gradient-elements p-3 sm:p-3.5 rounded-2xl border border-white/10 shadow-lg">
+        <button 
+          onClick={() => onTabChange('inicio')} 
+          className="flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5"
+        >
+          <div className="w-11 h-11 bg-white/15 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/10 shadow-inner">
+            <Home className="w-5.5 h-5.5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-xs sm:text-sm font-black text-white tracking-wide uppercase block truncate font-sports-condensed">Inicio</span>
+            <span className="text-[9px] text-indigo-200 font-semibold block truncate">Principal</span>
+          </div>
+        </button>
+
         <button 
           onClick={() => onTabChange('fixture')} 
           className="flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5"
@@ -132,18 +145,32 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
         </button>
 
         <button 
-          onClick={() => onTabChange('convocatorias')} 
+          onClick={() => onTabChange('estadisticas')} 
           className="flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5"
         >
           <div className="w-11 h-11 bg-white/15 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/10 shadow-inner">
-            <Award className="w-5.5 h-5.5 text-white" />
+            <BarChart3 className="w-5.5 h-5.5 text-white" />
           </div>
           <div className="min-w-0">
-            <span className="text-xs sm:text-sm font-black text-white tracking-wide uppercase block truncate font-sports-condensed">Convocatorias</span>
-            <span className="text-[9px] text-indigo-200 font-semibold block truncate">Delegaciones</span>
+            <span className="text-xs sm:text-sm font-black text-white tracking-wide uppercase block truncate font-sports-condensed">Estadísticas</span>
+            <span className="text-[9px] text-indigo-200 font-semibold block truncate">Rendimiento</span>
+          </div>
+        </button>
+
+        <button 
+          onClick={() => onTabChange('galeria')} 
+          className="flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5"
+        >
+          <div className="w-11 h-11 bg-white/15 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/10 shadow-inner">
+            <Image className="w-5.5 h-5.5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-xs sm:text-sm font-black text-white tracking-wide uppercase block truncate font-sports-condensed">Galería</span>
+            <span className="text-[9px] text-indigo-200 font-semibold block truncate">Fotos</span>
           </div>
         </button>
       </div>
+
 
       {/* Row de dos tarjetas: Próximo Partido & Último Resultado */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
