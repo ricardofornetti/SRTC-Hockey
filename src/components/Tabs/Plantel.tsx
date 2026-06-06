@@ -497,46 +497,46 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
 
       {/* DT Edit Modal Overlay */}
       {isEditingDt && (
-        <div id="dt-edit-modal" className="fixed inset-0 z-50 bg-neutral-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
-            <div className="bg-neutral-950 px-6 py-4 border-b border-neutral-800 flex items-center justify-between">
+        <div id="dt-edit-modal" className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto w-full h-full">
+          <div className="bg-[#121c38] border border-white/10 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] my-auto container-class">
+            <div className="bg-[#0c1228] px-6 py-4 border-b border-white/10 flex items-center justify-between">
               <h3 className="font-extrabold text-white text-sm flex items-center gap-2 font-sports-condensed uppercase tracking-wider">
-                <Edit2 className="w-4 h-4 text-indigo-400" />
+                <Edit2 className="w-4 h-4 text-emerald-400" />
                 Editar Ficha de Director Técnico
               </h3>
               <button
                 onClick={() => setIsEditingDt(false)}
-                className="text-neutral-400 hover:text-white bg-neutral-850 px-3 py-1 text-xs rounded transition font-black font-sports-condensed uppercase tracking-wide"
+                className="text-white hover:text-emerald-350 bg-white/10 hover:bg-white/15 px-3 py-1 text-xs rounded transition font-black font-sports-condensed uppercase tracking-wide cursor-pointer"
               >
                 Cerrar
               </button>
             </div>
 
-            <form onSubmit={handleSaveDt} className="p-6 space-y-4 text-left font-sans">
+            <form onSubmit={handleSaveDt} className="p-6 overflow-y-auto space-y-4 text-left">
               <div>
-                <label className="block text-[10px] uppercase font-black text-neutral-400 tracking-wider mb-1.5 font-sports-condensed">Nombre del DT</label>
+                <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider mb-1.5 font-sports-condensed">Nombre del DT</label>
                 <input
                   type="text"
                   value={dtFormName}
                   onChange={(e) => setDtFormName(e.target.value)}
                   placeholder="Ej. Sebastián"
-                  className="w-full bg-neutral-950 border border-neutral-850 rounded-lg p-2.5 text-xs text-white focus:outline-none"
+                  className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors font-sans"
                   required
                 />
               </div>
 
               {/* DT Photo Upload */}
-              <div className="bg-neutral-950 p-3 rounded-lg border border-neutral-850 space-y-3 font-sans">
-                <label className="block text-[10px] uppercase font-black text-neutral-400 tracking-wider font-sports-condensed">Foto de Perfil del DT</label>
-                <div className="flex flex-col items-stretch gap-3">
+              <div className="bg-black/30 p-3 rounded-lg border border-white/10 space-y-3 font-sans">
+                <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider font-sports-condensed">Foto de Perfil del DT</label>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   {dtFormFotoUrl && (
                     <img
                       src={dtFormFotoUrl}
                       alt="Vista previa DT"
-                      className="w-20 h-20 rounded-2xl object-cover border-2 border-indigo-455 border-indigo-500 shadow shadow-indigo-500/20 shrink-0 self-center"
+                      className="w-16 h-16 rounded-xl object-cover border-2 border-emerald-500 shadow shadow-emerald-500/20 shrink-0 self-center"
                     />
                   )}
-                  <div className="space-y-2">
+                  <div className="flex-1 space-y-2">
                     <div className="relative">
                       <input
                         type="file"
@@ -547,35 +547,35 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                       />
                       <label
                         htmlFor="dt-image-file"
-                        className="flex items-center justify-center gap-2 w-full bg-neutral-850 hover:bg-neutral-800 border border-neutral-700 hover:border-indigo-400 text-neutral-200 text-xs font-bold py-2 px-3 rounded-lg cursor-pointer transition"
+                        className="flex items-center justify-center gap-2 w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-500 text-white text-xs font-bold py-2 px-3 rounded-lg cursor-pointer transition"
                       >
-                        <Upload className="w-4 h-4 text-indigo-400" />
-                        Cargar Foto del Dispositivo
+                        <Upload className="w-4 h-4 text-emerald-400" />
+                        Seleccionar de mi dispositivo
                       </label>
                     </div>
-                    <p className="text-[9px] text-neutral-500 text-center font-sans">o pegue dirección URL:</p>
+                    <p className="text-[10px] text-white/60 text-center">o pegue dirección URL:</p>
                     <input
                       type="url"
                       value={dtFormFotoUrl}
                       onChange={(e) => setDtFormFotoUrl(e.target.value)}
-                      placeholder="Pegar dirección URL de foto..."
-                      className="w-full bg-neutral-900 border border-neutral-805 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-400 font-mono"
+                      placeholder="https://images.unsplash.com/..."
+                      className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-lg p-2 text-xs text-white focus:outline-none font-mono transition-colors"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="border-t border-neutral-850 pt-4 flex items-center justify-end gap-2.5">
+              <div className="border-t border-white/10 pt-4 flex items-center justify-end gap-2.5 font-sans">
                 <button
                   type="button"
                   onClick={() => setIsEditingDt(false)}
-                  className="px-4 py-2 bg-neutral-800 hover:bg-neutral-750 text-neutral-300 text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg transition cursor-pointer"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg transition cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg shadow-lg flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-440 hover:bg-emerald-400 text-neutral-950 text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg shadow-lg flex items-center gap-1.5 cursor-pointer"
                 >
                   <Save className="w-4 h-4" /> Guardar Cambios
                 </button>
