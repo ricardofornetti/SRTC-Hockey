@@ -80,11 +80,10 @@ service cloud.firestore {
     }
 
     function isValidSettings(data) {
-      return data.keys().hasAll(['id'])
-        && data.id is string && data.id.size() <= 128
-        && (!data.keys().hasAny(['value']) || (data.value is string && data.value.size() <= 5000000))
-        && (!data.keys().hasAny(['name']) || (data.name is string && data.name.size() <= 200))
-        && (!data.keys().hasAny(['fotoUrl']) || (data.fotoUrl is string && data.fotoUrl.size() <= 2000));
+      return data.id is string && data.id.size() <= 128
+        && (!('value' in data) || (data.value is string && data.value.size() <= 5000000))
+        && (!('name' in data) || (data.name is string && data.name.size() <= 200))
+        && (!('fotoUrl' in data) || (data.fotoUrl is string && data.fotoUrl.size() <= 2000));
     }
 
     // Default catch-all rule: Deny all access
