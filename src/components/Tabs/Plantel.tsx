@@ -498,11 +498,11 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
       {/* DT Edit Modal Overlay */}
       {isEditingDt && (
         <div id="dt-edit-modal" className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto w-full h-full">
-          <div className="bg-[#121c38] border border-white/10 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] my-auto container-class">
+          <div className="bg-[#121c38] border border-white/10 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] my-auto">
             <div className="bg-[#0c1228] px-6 py-4 border-b border-white/10 flex items-center justify-between">
               <h3 className="font-extrabold text-white text-sm flex items-center gap-2 font-sports-condensed uppercase tracking-wider">
-                <Edit2 className="w-4 h-4 text-emerald-400" />
-                Editar Ficha de Director Técnico
+                <Users className="w-4 h-4 text-emerald-400" />
+                Ficha de Director Técnico
               </h3>
               <button
                 onClick={() => setIsEditingDt(false)}
@@ -513,16 +513,18 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
             </div>
 
             <form onSubmit={handleSaveDt} className="p-6 overflow-y-auto space-y-4 text-left">
-              <div>
-                <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider mb-1.5 font-sports-condensed">Nombre del DT</label>
-                <input
-                  type="text"
-                  value={dtFormName}
-                  onChange={(e) => setDtFormName(e.target.value)}
-                  placeholder="Ej. Sebastián"
-                  className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors font-sans"
-                  required
-                />
+              <div className="grid grid-cols-1 gap-4 font-sans">
+                <div>
+                  <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider mb-1.5 font-sports-condensed">Nombre del DT</label>
+                  <input
+                    type="text"
+                    value={dtFormName}
+                    onChange={(e) => setDtFormName(e.target.value)}
+                    placeholder="Ej. Sebastián"
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors font-sans"
+                    required
+                  />
+                </div>
               </div>
 
               {/* DT Photo Upload */}
@@ -575,9 +577,9 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-440 hover:bg-emerald-400 text-neutral-950 text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg shadow-lg flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg shadow-lg flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Save className="w-4 h-4" /> Guardar Cambios
+                  <Save className="w-4 h-4" /> Guardar Ficha
                 </button>
               </div>
             </form>
