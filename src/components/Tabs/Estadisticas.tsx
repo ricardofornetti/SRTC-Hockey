@@ -82,12 +82,12 @@ export default function Estadisticas({ players, matches, selectedCategory, onTab
   const topScorersList = maxTeamGoals > 0 ? activePlayers.filter(p => p.goles === maxTeamGoals) : [];
 
   return (
-    <div id="statistics-tab" className="space-y-6 text-left">
-      {/* Go Back button */}
-      <div className="flex items-center justify-end">
+    <div id="statistics-tab" className="space-y-4 text-left">
+      {/* Control row matching the exact layout style of other screens */}
+      <div className="flex items-center justify-end bg-club-gradient-elements p-3 rounded-xl border border-white/10 shadow-lg">
         <button
           onClick={() => onTabChange('inicio')}
-          className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
         >
           <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
           Volver

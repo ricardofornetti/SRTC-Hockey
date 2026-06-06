@@ -207,18 +207,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
     : [positionFilter];
 
   return (
-    <div id="roster-tab" className="space-y-8">
-      {/* Go Back button */}
-      <div className="flex items-center justify-end">
-        <button
-          onClick={() => onTabChange('inicio')}
-          className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
-        >
-          <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
-          Volver
-        </button>
-      </div>
-
+    <div id="roster-tab" className="space-y-4">
       {/* Control Toolbar */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-club-gradient-elements p-4 rounded-2xl border border-white/10 shadow-lg">
         <div className="relative w-full md:w-72">
@@ -249,15 +238,25 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
           ))}
         </div>
 
-        {/* Action Button */}
-        {(userRole === 'admin' || userRole === 'coach') && (
+        {/* Action Button & Volver */}
+        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+          {(userRole === 'admin' || userRole === 'coach') && (
+            <button
+              onClick={handleStartCreate}
+              className="flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-3.5 py-1.5 rounded-lg text-xs font-black font-sports-condensed uppercase tracking-wider cursor-pointer transition shadow-md shadow-emerald-500/10"
+            >
+              <Plus className="w-3.5 h-3.5" /> Agregar Jugadora
+            </button>
+          )}
+
           <button
-            onClick={handleStartCreate}
-            className="w-full md:w-auto flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-4.5 py-2 rounded-lg text-xs font-black font-sports-condensed uppercase tracking-wider cursor-pointer transition shadow-md shadow-emerald-500/10"
+            onClick={() => onTabChange('inicio')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
           >
-            <Plus className="w-4 h-4" /> Agregar Jugadora
+            <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
+            Volver
           </button>
-        )}
+        </div>
       </div>
 
       {/* Profile Form Modal Overlay */}

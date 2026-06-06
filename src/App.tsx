@@ -764,29 +764,50 @@ export default function App() {
         currentUserEmail="fornettiricardo@gmail.com" 
       />
 
-      {activeTab === 'fixture' || activeTab === 'tabla' ? (
-        /* Standalone Page View for Fixture & Tabla tabs */
+      {activeTab !== 'inicio' ? (
+        /* Standalone Page View for sub-tabs */
         <div className="animate-in fade-in duration-300 flex flex-col flex-1">
           <main id="app-viewport" className="flex-1 max-w-7xl w-full mx-auto px-4 pt-4 pb-8">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
               <div>
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-                  {activeTab === 'fixture' ? (
+                  {activeTab === 'fixture' && (
                     <>
                       <Calendar className="w-8 h-8 text-emerald-450" />
                       CALENDARIO
                     </>
-                  ) : (
+                  )}
+                  {activeTab === 'tabla' && (
                     <>
                       <Trophy className="w-8 h-8 text-emerald-450" />
                       POSICIONES
                     </>
                   )}
+                  {activeTab === 'plantel' && (
+                    <>
+                      <Users className="w-8 h-8 text-emerald-450" />
+                      JUGADORAS
+                    </>
+                  )}
+                  {activeTab === 'estadisticas' && (
+                    <>
+                      <BarChart3 className="w-8 h-8 text-emerald-450" />
+                      ESTADISTICAS
+                    </>
+                  )}
+                  {activeTab === 'galeria' && (
+                    <>
+                      <ImageIcon className="w-8 h-8 text-emerald-450" />
+                      IMAGENES
+                    </>
+                  )}
                 </h2>
                 <p className="text-xs sm:text-sm text-indigo-200 mt-1 uppercase tracking-wider font-semibold">
-                  {activeTab === 'fixture' 
-                    ? 'Torneo Apertura "Damas B"' 
-                    : 'Torneo Apertura Damas B 2026. 7ma Categoria'}
+                  {activeTab === 'fixture' && 'Torneo Apertura "Damas B"'}
+                  {activeTab === 'tabla' && 'Torneo Apertura Damas B 2026. 7ma Categoria'}
+                  {activeTab === 'plantel' && '7ma Division - San Rafael Tenis Club'}
+                  {activeTab === 'estadisticas' && 'Torneo Apertura Damas B 2026. 7ma Categoria'}
+                  {activeTab === 'galeria' && 'Capturas, festejos y entrenamientos'}
                 </p>
               </div>
             </div>

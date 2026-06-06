@@ -149,36 +149,27 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
     }
   };
   return (
-    <div id="gallery-tab" className="space-y-6 text-left">
-      {/* Go Back button */}
-      <div className="flex items-center justify-end">
-        <button
-          onClick={() => onTabChange('inicio')}
-          className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
-        >
-          <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
-          Volver
-        </button>
-      </div>
+    <div id="gallery-tab" className="space-y-4 text-left">
+      {/* Control row matching the exact layout style of other screens */}
+      <div className="flex bg-club-gradient-elements p-3 rounded-xl border border-white/10 shadow-lg justify-end">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          {(userRole === 'admin' || userRole === 'coach') && (
+            <button
+              onClick={handleStartCreate}
+              className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-3.5 py-1.5 rounded-lg text-xs font-black font-sports-condensed uppercase tracking-wider transition shadow-md cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> Subir Foto
+            </button>
+          )}
 
-      <div className="flex items-center justify-between bg-club-gradient-elements p-4 rounded-2xl border border-white/10 shadow-lg">
-        <div>
-          <h2 className="font-extrabold text-white text-sm flex items-center gap-1.5 font-sans">
-            <Image className="w-5 h-5 text-emerald-400" />
-            Galería
-          </h2>
-          <p className="text-[11px] text-indigo-200/50">Capturas, festejos y entrenamientos de la Séptima división.</p>
-        </div>
-
-        {/* Create link */}
-        {(userRole === 'admin' || userRole === 'coach') && (
           <button
-            onClick={handleStartCreate}
-            className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-3.5 py-2 rounded-lg text-xs font-black font-sports-condensed uppercase tracking-wider transition shadow-md cursor-pointer"
+            onClick={() => onTabChange('inicio')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
           >
-            <Plus className="w-4 h-4" /> Subir Foto
+            <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
+            Volver
           </button>
-        )}
+        </div>
       </div>
 
       {/* Editor Upload Panel overlay */}
