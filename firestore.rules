@@ -83,7 +83,7 @@ service cloud.firestore {
       return data.id is string && data.id.size() <= 128
         && (!('value' in data) || (data.value is string && data.value.size() <= 5000000))
         && (!('name' in data) || (data.name is string && data.name.size() <= 200))
-        && (!('fotoUrl' in data) || (data.fotoUrl is string && data.fotoUrl.size() <= 2000));
+        && (!('fotoUrl' in data) || (data.fotoUrl is string && data.fotoUrl.size() <= 5000000));
     }
 
     // Default catch-all rule: Deny all access
