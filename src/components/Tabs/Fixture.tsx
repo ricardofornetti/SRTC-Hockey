@@ -788,11 +788,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                   </h3>
                 </div>
 
-                <div className={`grid gap-5 ${
-                  userRole === 'admin' || userRole === 'coach'
-                    ? 'grid-cols-1 lg:grid-cols-2 lg:gap-4'
-                    : 'grid-cols-1 max-w-4xl mx-auto w-full'
-                }`}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
                   {matchesInFecha.map((match) => {
                     const isPlayed = match.estado === 'Finalizado';
                     const isLive = match.estado === 'En juego';
