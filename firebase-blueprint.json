@@ -136,9 +136,11 @@
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "value": { "type": "string" }
+        "value": { "type": "string" },
+        "name": { "type": "string" },
+        "fotoUrl": { "type": "string" }
       },
-      "required": ["id", "value"]
+      "required": ["id"]
     }
   },
   "firestore": {

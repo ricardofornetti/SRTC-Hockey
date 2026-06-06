@@ -80,9 +80,14 @@ service cloud.firestore {
     }
 
     function isValidSettings(data) {
-      return data.keys().hasAll(['id', 'value'])
-        && data.id is string
-        && data.value is string;
+      return (
+        data.keys().hasAll(['id'])
+        && data.id is string && data.id.size() <= 128
+      ) && (
+        (data.keys().hasAll(['value']) && data.keys().size() == 2 && data.value is string && data.value.size() <= 5000000)
+        ||
+        (data.keys().hasAll(['name', 'fotoUrl']) && data.keys().size() == 3 && data.name is string && data.name.size() <= 200 && data.fotoUrl is string && data.fotoUrl.size() <= 2000)
+      );
     }
 
     // Default catch-all rule: Deny all access
