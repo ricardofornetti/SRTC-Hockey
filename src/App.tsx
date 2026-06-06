@@ -43,7 +43,9 @@ import {
 import { 
   subscribeToCollection, 
   seedInitialDataIfCollectionIsEmpty, 
-  syncCollection 
+  syncCollection,
+  saveDocument,
+  deleteDocument
 } from './firebase';
 
 import RoleSelector from './components/RoleSelector';
@@ -83,6 +85,11 @@ export default function App() {
   // Shared status banners / alerts
   const [toast, setToast] = useState<{ title: string; body: string; type: 'success' | 'info' | 'error' } | null>(null);
 
+  const [customClubLogo, setCustomClubLogo] = useState<string | null>(() => {
+    return localStorage.getItem('srtc_custom_club_logo');
+  });
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
+
   // Trigger seeding and bind real-time Firestore synchronization on load
   useEffect(() => {
     const initializeApp = async () => {
@@ -121,6 +128,15 @@ export default function App() {
     const unsubNotifications = subscribeToCollection<NotificationLog>('notifications', (data) => {
       if (data && data.length > 0) setNotifications(data);
     });
+    
+    const unsubSettings = subscribeToCollection<{ id: string; value: string }>('settings', (data) => {
+      const logoSetting = data?.find(item => item.id === 'logo');
+      if (logoSetting && logoSetting.value) {
+        setCustomClubLogo(logoSetting.value);
+        localStorage.setItem('srtc_custom_club_logo', logoSetting.value);
+        window.dispatchEvent(new Event('srtc_logo_updated'));
+      }
+    });
 
     return () => {
       unsubPlayers();
@@ -130,6 +146,7 @@ export default function App() {
       unsubGallery();
       unsubConvocations();
       unsubNotifications();
+      unsubSettings();
     };
   }, []);
 
@@ -575,6 +592,39 @@ export default function App() {
     setToast({ title, body, type });
   };
 
+  const handleSaveCustomLogo = async (logoData: string) => {
+    try {
+      setCustomClubLogo(logoData);
+      localStorage.setItem('srtc_custom_club_logo', logoData);
+      window.dispatchEvent(new Event('srtc_logo_updated'));
+      await saveDocument('settings', 'logo', { id: 'logo', value: logoData });
+      showToast('Logo del Club Actualizado', 'El logo se guardó correctamente y se sincronizó con el servidor.', 'success');
+      setIsLogoModalOpen(false);
+    } catch (err) {
+      console.error('Error saving custom logo in Firebase setting collection:', err);
+      showToast('Actualizado localmente', 'Guardado en tu dispositivo, pero falló la sincronización con la base de datos.', 'info');
+      setIsLogoModalOpen(false);
+    }
+  };
+
+  const handleResetCustomLogo = async () => {
+    try {
+      setCustomClubLogo(null);
+      localStorage.removeItem('srtc_custom_club_logo');
+      window.dispatchEvent(new Event('srtc_logo_updated'));
+      await deleteDocument('settings', 'logo');
+      showToast('Logo Restablecido', 'Se ha vuelto a configurar el escudo oficial predeterminado.', 'success');
+      setIsLogoModalOpen(false);
+    } catch (err) {
+      console.error('Error resetting custom logo in Firebase:', err);
+      setCustomClubLogo(null);
+      localStorage.removeItem('srtc_custom_club_logo');
+      window.dispatchEvent(new Event('srtc_logo_updated'));
+      showToast('Logo Restablecido', 'Se quitó de forma local en tu dispositivo.', 'info');
+      setIsLogoModalOpen(false);
+    }
+  };
+
   // Clear toast after timeout
   useEffect(() => {
     if (toast) {
@@ -718,46 +768,28 @@ export default function App() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
           
           {/* Logo y Nombre del Club */}
-          <div className="flex items-center gap-4.5 select-none cursor-pointer group" onClick={() => setActiveTab('inicio')}>
-            {/* Highly prominent and glowing official club logo card */}
-            <div className="w-16 h-16 shrink-0 p-1.5 bg-white border-2 border-white/20 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/10 group-hover:scale-105 transition-transform duration-300">
-              <SrtcLogo className="w-13 h-13" />
+          <div className="flex flex-col sm:flex-row items-center gap-4.5 select-none animate-in fade-in duration-300">
+            {/* Highly prominent and glowing official club logo card - enlarged and static */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 p-1.5 bg-white border-2 border-white/20 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/10">
+              {customClubLogo ? (
+                <img 
+                  src={customClubLogo} 
+                  alt="Logo Club personalizado" 
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-contain rounded-xl"
+                />
+              ) : (
+                <SrtcLogo className="w-16 h-16 sm:w-18 sm:h-18" />
+              )}
             </div>
-            <div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <h1 className="text-lg sm:text-2xl md:text-3xl font-sports-condensed font-black text-white tracking-widest uppercase group-hover:text-amber-300 transition-colors duration-300">
-                  SAN RAFAEL TENIS CLUB
-                </h1>
-                <span className="self-start sm:self-auto text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider font-sports-condensed shadow-inner">
-                  HOCKEY CLUB
-                </span>
-              </div>
-              <p className="text-xs text-indigo-100/90 font-bold leading-normal mt-1 flex items-center gap-2">
+            <div className="cursor-pointer text-center sm:text-left flex-1" onClick={() => setActiveTab('inicio')}>
+              <h1 className="text-xl xs:text-2xl sm:text-3.5xl md:text-4.5xl lg:text-5.5xl font-black text-white uppercase tracking-wide sm:tracking-wider md:tracking-widest hover:text-amber-300 transition-all duration-300">
+                SAN RAFAEL TENIS CLUB
+              </h1>
+              <p className="text-xs text-indigo-100/90 font-bold leading-normal mt-1 flex items-center justify-center sm:justify-start gap-2">
                 <span className="w-2 h-2 bg-emerald-450 rounded-full animate-pulse shadow-glow shadow-emerald-400/55"></span>
                 <span className="font-sports-condensed uppercase tracking-wider text-[11px] text-indigo-100">Sitio Oficial de Hockey • Mendoza</span>
               </p>
-            </div>
-          </div>
-
-          {/* Persistent Category Switcher in Header for High Visibility */}
-          <div className="flex flex-col items-center md:items-end gap-1 px-3 py-1.5 bg-black/20 rounded-xl border border-white/10">
-            <span className="text-[9px] uppercase font-black text-indigo-200 tracking-wider font-sports-condensed">
-              Categoría / División Activa
-            </span>
-            <div className="flex flex-wrap items-center gap-0.5 bg-black/10 p-0.5 rounded-lg border border-black/15">
-              {(['7ma', '6ta', '5ta', 'Intermedia', 'Primera'] as Category[]).map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => handleCategoryChange(cat)}
-                  className={`px-2.5 py-1 rounded text-[10px] font-black tracking-wide uppercase transition-all duration-200 cursor-pointer font-sports-condensed ${
-                    selectedCategory === cat
-                      ? 'bg-club-gradient text-white font-extrabold shadow-md border border-white/10 scale-102 shadow-emerald-500/20'
-                      : 'text-indigo-200/80 hover:text-white hover:bg-white/5 border border-transparent'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
             </div>
           </div>
 
@@ -765,97 +797,79 @@ export default function App() {
       </header>
 
       {/* 2.5 Quick Navigation Actions (Sticky/Fixed on scroll) */}
-      <div className="sticky top-0 z-30 bg-club-gradient/95 backdrop-blur-md border-b border-white/10 py-3 px-4 shadow-xl">
+      <div className="sticky top-0 z-30 bg-club-gradient/95 backdrop-blur-md border-b border-white/10 py-1.5 px-1.5 sm:px-4 shadow-xl">
         <div className="max-w-7xl mx-auto container">
-          <div className="flex overflow-x-auto no-scrollbar sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-3 bg-club-gradient-elements p-2 rounded-2xl border border-white/10 shadow-inner snap-x scroll-smooth">
+          <div className="grid grid-cols-6 gap-0 bg-club-gradient-elements p-1 rounded-2xl border border-white/10 shadow-inner">
             <button 
               onClick={() => setActiveTab('inicio')} 
-              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
-                activeTab === 'inicio' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
+                activeTab === 'inicio' 
+                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
+                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
               }`}
             >
-              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
-                <Home className="w-5 h-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Inicio</span>
-                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'inicio' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Principal</span>
-              </div>
+              <Home className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
+              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Inicio</span>
             </button>
 
             <button 
               onClick={() => setActiveTab('fixture')} 
-              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
-                activeTab === 'fixture' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
+                activeTab === 'fixture' 
+                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
+                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
               }`}
             >
-              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
-                <Calendar className="w-5 h-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Fixture</span>
-                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'fixture' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Partidos</span>
-              </div>
+              <Calendar className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
+              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Fixture</span>
             </button>
 
             <button 
               onClick={() => setActiveTab('tabla')} 
-              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
-                activeTab === 'tabla' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
+                activeTab === 'tabla' 
+                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
+                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
               }`}
             >
-              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
-                <Trophy className="w-5 h-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Tabla</span>
-                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'tabla' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Posiciones</span>
-              </div>
+              <Trophy className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
+              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Tabla</span>
             </button>
 
             <button 
               onClick={() => setActiveTab('plantel')} 
-              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
-                activeTab === 'plantel' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
+                activeTab === 'plantel' 
+                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
+                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
               }`}
             >
-              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
-                <Users className="w-5 h-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Plantel</span>
-                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'plantel' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Jugadoras</span>
-              </div>
+              <Users className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
+              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Plantel</span>
             </button>
 
             <button 
               onClick={() => setActiveTab('estadisticas')} 
-              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
-                activeTab === 'estadisticas' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
+                activeTab === 'estadisticas' 
+                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
+                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
               }`}
             >
-              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
-                <BarChart3 className="w-5 h-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Estadísticas</span>
-                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'estadisticas' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Rendimiento</span>
-              </div>
+              <BarChart3 className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
+              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Estadísticas</span>
             </button>
 
             <button 
               onClick={() => setActiveTab('galeria')} 
-              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 text-left cursor-pointer group hover:shadow-md hover:-translate-y-0.5 shrink-0 min-w-[130px] sm:min-w-0 sm:w-full snap-start ${
-                activeTab === 'galeria' ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
+              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
+                activeTab === 'galeria' 
+                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
+                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
               }`}
             >
-              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform shrink-0 border border-white/5 shadow-inner">
-                <ImageIcon className="w-5 h-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-xs sm:text-sm font-black tracking-wide uppercase block truncate font-sports-condensed">Galería</span>
-                <span className={`text-[9px] block truncate font-semibold ${activeTab === 'galeria' ? 'text-indigo-100' : 'text-indigo-200/70'}`}>Fotos</span>
-              </div>
+              <ImageIcon className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
+              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Galería</span>
             </button>
           </div>
         </div>
@@ -885,6 +899,7 @@ export default function App() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

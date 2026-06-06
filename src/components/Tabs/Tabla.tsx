@@ -553,14 +553,16 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                             {row.equipo}
                           </span>
                         </div>
-                        <button
-                          onClick={() => handleOpenEditModal(row.equipo)}
-                          className="bg-white/5 hover:bg-white/10 border border-white/5 text-emerald-400 hover:text-emerald-350 p-2 rounded-lg transition shrink-0 flex items-center gap-1.5 text-xs font-bold font-sans cursor-pointer"
-                          title={userRole === 'admin' ? "Editar Estadísticas y Logo" : "Cargar Logo del Club"}
-                        >
-                          <Camera className="w-3.5 h-3.5" />
-                          <span>{userRole === 'admin' ? 'Editar' : 'Logo'}</span>
-                        </button>
+                        {userRole === 'admin' && (
+                          <button
+                            onClick={() => handleOpenEditModal(row.equipo)}
+                            className="bg-white/5 hover:bg-white/10 border border-white/5 text-emerald-400 hover:text-emerald-350 p-2 rounded-lg transition shrink-0 flex items-center gap-1.5 text-xs font-bold font-sans cursor-pointer"
+                            title="Editar estadísticas"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Editar</span>
+                          </button>
+                        )}
                       </div>
                     </td>
 
@@ -683,126 +685,6 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                   </div>
                 </div>
               )}
-
-              {/* CLUB LOGO CONFIGURATION - AVAILABLE TO ALL */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Upload className="w-4.5 h-4.5 text-emerald-400 shrink-0" />
-                  <h4 className="font-extrabold text-white text-xs uppercase tracking-wider">Logo / Escudo del Club</h4>
-                </div>
-
-                <p className="text-xs text-indigo-150/90 leading-relaxed font-sans">
-                  Sube el escudo oficial de <strong>{editingTeam}</strong> para personalizar su presencia visual en todas las pantallas de la aplicación.
-                </p>
-
-                {/* Input Type selection tabs */}
-                <div className="flex border-b border-white/10 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setLogoInputType('upload')}
-                    className={`pb-2 px-3.5 text-xs font-bold transition-all border-b-2 hover:text-white cursor-pointer ${
-                      logoInputType === 'upload' ? 'border-emerald-500 text-white' : 'border-transparent text-white/50'
-                    }`}
-                  >
-                    Subir Archivo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLogoInputType('url')}
-                    className={`pb-2 px-3.5 text-xs font-bold transition-all border-b-2 hover:text-white cursor-pointer ${
-                      logoInputType === 'url' ? 'border-emerald-500 text-white' : 'border-transparent text-white/50'
-                    }`}
-                  >
-                    Enlace URL
-                  </button>
-                </div>
-
-                {/* Tab Content: Upload File */}
-                {logoInputType === 'upload' && (
-                  <div className="space-y-3">
-                    <div
-                      onDragEnter={handleDrag}
-                      onDragOver={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDrop={handleDrop}
-                      className={`border-2 border-dashed rounded-xl p-6 text-center transition duration-300 cursor-pointer ${
-                        dragActive ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/15 hover:border-white/35 bg-black/25'
-                      }`}
-                      onClick={() => document.getElementById('logo-file-input')?.click()}
-                    >
-                      <input
-                        id="logo-file-input"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleFileChange}
-                      />
-                      <div className="flex flex-col items-center gap-2">
-                        <Upload className="w-8 h-8 text-indigo-300/50 animate-pulse" />
-                        <span className="text-xs text-white/80 font-semibold font-sans">Arrastra tu imagen aquí o haz click para explorar</span>
-                        <span className="text-[10px] text-indigo-200/50 font-mono">JPG, PNG o SVG (Se redimensionará automáticamente)</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Tab Content: IMAGE URL */}
-                {logoInputType === 'url' && (
-                  <div className="space-y-2">
-                    <label className="text-[10px] text-indigo-200 font-bold block text-left">Dirección URL de la Imagen</label>
-                    <input
-                      type="url"
-                      placeholder="https://ejemplo.com/logo-club.png"
-                      value={logoUrl}
-                      onChange={(e) => setLogoUrl(e.target.value)}
-                      className="w-full bg-black/20 border border-white/15 rounded-lg py-2.5 px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-sans"
-                    />
-                  </div>
-                )}
-
-                {/* PREVIEW CONTAINER */}
-                <div className="bg-black/35 p-4 rounded-xl border border-white/10 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    {/* Live Preview Image or Initials */}
-                    <div className="relative shrink-0">
-                      {(logoInputType === 'upload' && logoBase64) || (logoInputType === 'url' && logoUrl.trim()) ? (
-                        <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-emerald-500 shadow-lg flex items-center justify-center bg-[#0f1c3f]">
-                          <img
-                            src={logoInputType === 'upload' ? logoBase64 : logoUrl}
-                            alt="Vista Previa"
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLElement).style.display = 'none';
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-14 h-14 bg-club-gradient-elements border border-white/20 rounded-full flex items-center justify-center font-extrabold text-white text-sm shadow-md">
-                          {editingTeam ? editingTeam.substring(0, 2).toUpperCase() : 'FC'}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-left">
-                      <span className="text-xs font-bold font-sans text-white block">Vista Previa</span>
-                      <span className="text-[10px] text-indigo-200/60 block font-normal font-sans">
-                        Se actualizará en todas las secciones simultáneamente.
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Reset/Remove option */}
-                  {((logoInputType === 'upload' && logoBase64) || (logoInputType === 'url' && logoUrl.trim())) && (
-                    <button
-                      type="button"
-                      onClick={handleDeleteLogo}
-                      className="text-rose-400 hover:text-rose-350 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all duration-300 font-sports-condensed cursor-pointer shrink-0"
-                    >
-                      Remover Logo
-                    </button>
-                  )}
-                </div>
-              </div>
 
             </div>
 

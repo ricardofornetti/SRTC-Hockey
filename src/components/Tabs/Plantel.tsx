@@ -212,7 +212,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
       <div className="flex items-center justify-end">
         <button
           onClick={() => onTabChange('inicio')}
-          className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
         >
           <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
           Volver
@@ -228,7 +228,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
             placeholder="Buscar por nombre, apellido o nº..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-black/25 text-xs text-white pl-9 pr-4 py-2 rounded-lg border border-white/10 focus:outline-none focus:border-emerald-500 transition font-sans"
+            className="w-full bg-black/25 text-xs text-white placeholder-white/60 pl-9 pr-4 py-2 rounded-lg border border-white/10 focus:outline-none focus:border-emerald-500 transition font-sans"
           />
         </div>
 
@@ -241,7 +241,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
               className={`px-3.5 py-1 text-xs font-black rounded-lg border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
                 positionFilter === pos
                   ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md scale-105'
-                  : 'bg-white/5 border-white/15 text-indigo-200 hover:text-white hover:bg-white/10'
+                  : 'bg-white/5 border-white/15 text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
               {pos === 'Todos' ? 'Todas' : pos + 's'}
@@ -262,11 +262,11 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
 
       {/* Profile Form Modal Overlay */}
       {(isCreating || editingPlayer) && (
-        <div id="player-edit-modal" className="fixed inset-0 z-50 bg-neutral-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto w-full h-full">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] my-auto">
-            <div className="bg-neutral-950 px-6 py-4 border-b border-neutral-800 flex items-center justify-between">
+        <div id="player-edit-modal" className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto w-full h-full">
+          <div className="bg-[#121c38] border border-white/10 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] my-auto">
+            <div className="bg-[#0c1228] px-6 py-4 border-b border-white/10 flex items-center justify-between">
               <h3 className="font-extrabold text-white text-sm flex items-center gap-2 font-sports-condensed uppercase tracking-wider">
-                <Users className="w-4 h-4 text-indigo-400" />
+                <Users className="w-4 h-4 text-emerald-400" />
                 {isCreating ? 'Agregar Nueva Jugadora' : `Ficha de ${editingPlayer?.nombre} ${editingPlayer?.apellido}`}
               </h3>
               <button
@@ -274,7 +274,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                   setEditingPlayer(null);
                   setIsCreating(false);
                 }}
-                className="text-neutral-400 hover:text-white bg-neutral-850 px-3 py-1 text-xs rounded transition font-black font-sports-condensed uppercase tracking-wide"
+                className="text-white hover:text-emerald-350 bg-white/10 hover:bg-white/15 px-3 py-1 text-xs rounded transition font-black font-sports-condensed uppercase tracking-wide cursor-pointer"
               >
                 Cerrar
               </button>
@@ -284,24 +284,24 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
             <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-4 text-left">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans">
                 <div>
-                  <label className="block text-[10px] uppercase font-black text-neutral-400 tracking-wider mb-1.5 font-sports-condensed">Nombre</label>
+                  <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider mb-1.5 font-sports-condensed">Nombre</label>
                   <input
                     type="text"
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
                     placeholder="Ej. Guillermina"
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-lg p-2.5 text-xs text-white focus:outline-none"
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase font-black text-neutral-400 tracking-wider mb-1.5 font-sports-condensed">Apellido</label>
+                  <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider mb-1.5 font-sports-condensed">Apellido</label>
                   <input
                     type="text"
                     value={apellido}
                     onChange={(e) => setApellido(e.target.value)}
                     placeholder="Ej. Alvarez Luppo"
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-lg p-2.5 text-xs text-white focus:outline-none"
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors"
                     required
                   />
                 </div>
@@ -309,41 +309,41 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans">
                 <div>
-                  <label className="block text-[10px] uppercase font-black text-neutral-400 tracking-wider mb-1.5 font-sports-condensed">Nº de Camiseta (0 para S/N)</label>
+                  <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider mb-1.5 font-sports-condensed">Nº de Camiseta (0 para S/N)</label>
                   <input
                     type="number"
                     min="0"
                     max="99"
                     value={numeroCamiseta}
                     onChange={(e) => setNumeroCamiseta(Number(e.target.value))}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-lg p-2.5 text-xs text-white focus:outline-none"
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase font-black text-neutral-400 tracking-wider mb-1.5 font-sports-condensed">Posición</label>
+                  <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider mb-1.5 font-sports-condensed">Posición</label>
                   <select
                     value={posicion}
                     onChange={(e) => setPosicion(e.target.value as any)}
-                    className="w-full bg-neutral-950 border border-neutral-850 rounded-lg p-2.5 text-xs text-white focus:outline-none"
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors"
                   >
-                    <option value="Arquera" className="bg-neutral-950">Arquera</option>
-                    <option value="Defensora" className="bg-neutral-950">Defensora</option>
-                    <option value="Volante" className="bg-neutral-950">Volante (Mediocampista)</option>
-                    <option value="Delantera" className="bg-neutral-950">Delantera</option>
+                    <option value="Arquera" className="bg-[#121c38] text-white">Arquera</option>
+                    <option value="Defensora" className="bg-[#121c38] text-white">Defensora</option>
+                    <option value="Volante" className="bg-[#121c38] text-white">Volante (Mediocampista)</option>
+                    <option value="Delantera" className="bg-[#121c38] text-white">Delantera</option>
                   </select>
                 </div>
               </div>
 
               {/* Dynamic Image Uploader */}
-              <div className="bg-neutral-950 p-3 rounded-lg border border-neutral-850 space-y-3 font-sans">
-                <label className="block text-[10px] uppercase font-black text-neutral-400 tracking-wider font-sports-condensed">Foto de Jugadora</label>
+              <div className="bg-black/30 p-3 rounded-lg border border-white/10 space-y-3 font-sans">
+                <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider font-sports-condensed">Foto de Jugadora</label>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   {fotoUrl && (
                     <img
                       src={fotoUrl}
                       alt="Vista previa"
-                      className="w-16 h-16 rounded-xl object-cover border-2 border-indigo-500 shadow shadow-indigo-500/20 shrink-0 self-center"
+                      className="w-16 h-16 rounded-xl object-cover border-2 border-emerald-500 shadow shadow-emerald-500/20 shrink-0 self-center"
                     />
                   )}
                   <div className="flex-1 space-y-2">
@@ -357,62 +357,62 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                       />
                       <label
                         htmlFor="player-image-file"
-                        className="flex items-center justify-center gap-2 w-full bg-neutral-850 hover:bg-neutral-800 border border-neutral-700 hover:border-indigo-400 text-neutral-200 text-xs font-bold py-2 px-3 rounded-lg cursor-pointer transition"
+                        className="flex items-center justify-center gap-2 w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-500 text-white text-xs font-bold py-2 px-3 rounded-lg cursor-pointer transition"
                       >
-                        <Upload className="w-4 h-4 text-indigo-450 text-indigo-400" />
+                        <Upload className="w-4 h-4 text-emerald-400" />
                         Seleccionar de mi dispositivo
                       </label>
                     </div>
-                    <p className="text-[10px] text-neutral-500 text-center">o pegue dirección URL:</p>
+                    <p className="text-[10px] text-white/60 text-center">o pegue dirección URL:</p>
                     <input
                       type="url"
                       value={fotoUrl}
                       onChange={(e) => setFotoUrl(e.target.value)}
                       placeholder="https://images.unsplash.com/..."
-                      className="w-full bg-neutral-900 border border-neutral-805 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-400 font-mono"
+                      className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-lg p-2 text-xs text-white focus:outline-none font-mono transition-colors"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Stats Adjust Panel - admins/coaches can alter raw figures */}
-              <div className="border-t border-neutral-850 pt-3.5 space-y-3 font-sans">
-                <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest font-sports-condensed">Historial de Rendimiento</h4>
+              <div className="border-t border-white/10 pt-3.5 space-y-3 font-sans">
+                <h4 className="text-xs font-black text-emerald-400 uppercase tracking-widest font-sports-condensed">Historial de Rendimiento</h4>
                 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[9px] uppercase font-bold text-neutral-450 mb-1 font-sports-condensed tracking-wider">PJ</label>
+                    <label className="block text-[9px] uppercase font-bold text-white/80 mb-1 font-sports-condensed tracking-wider">PJ</label>
                     <input
                       type="number"
                       min="0"
                       value={partidosJugados}
                       onChange={(e) => setPartidosJugados(Number(e.target.value))}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded p-2 text-xs text-white text-center"
+                      className="w-full bg-black/30 border border-white/10 rounded p-2 text-xs text-white text-center focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[9px] uppercase font-bold text-neutral-450 mb-1 font-sports-condensed tracking-wider">Goles</label>
+                    <label className="block text-[9px] uppercase font-bold text-white/80 mb-1 font-sports-condensed tracking-wider">Goles</label>
                     <input
                       type="number"
                       min="0"
                       value={goles}
                       onChange={(e) => setGoles(Number(e.target.value))}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded p-2 text-xs text-white text-center font-bold text-emerald-400"
+                      className="w-full bg-black/30 border border-white/10 rounded p-2 text-xs text-center font-bold text-emerald-400 focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[9px] uppercase font-bold text-neutral-450 mb-1 font-sports-condensed tracking-wider">Asistencias</label>
+                    <label className="block text-[9px] uppercase font-bold text-white/80 mb-1 font-sports-condensed tracking-wider">Asistencias</label>
                     <input
                       type="number"
                       min="0"
                       value={asistencias}
                       onChange={(e) => setAsistencias(Number(e.target.value))}
-                      className="w-full bg-neutral-950 border border-neutral-850 rounded p-2 text-xs text-white text-center font-bold text-indigo-450"
+                      className="w-full bg-black/30 border border-white/10 rounded p-2 text-xs text-center font-bold text-white focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 bg-indigo-550/5 bg-indigo-600/5 p-3 rounded-xl border border-indigo-500/10">
+                <div className="grid grid-cols-3 gap-3 bg-white/5 p-3 rounded-xl border border-white/10">
                   <div>
                     <label className="block text-[9px] uppercase font-black text-emerald-500 mb-1 font-sports-condensed tracking-wide">T. Verde</label>
                     <input
@@ -420,7 +420,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                       min="0"
                       value={tarjetaVerde}
                       onChange={(e) => setTarjetaVerde(Number(e.target.value))}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded p-2 text-xs text-white text-center"
+                      className="w-full bg-black/30 border border-white/10 rounded p-2 text-xs text-white text-center focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                   <div>
@@ -430,7 +430,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                       min="0"
                       value={tarjetaAmarilla}
                       onChange={(e) => setTarjetaAmarilla(Number(e.target.value))}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded p-2 text-xs text-white text-center"
+                      className="w-full bg-black/30 border border-white/10 rounded p-2 text-xs text-white text-center focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                   <div>
@@ -440,27 +440,27 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                       min="0"
                       value={tarjetaRoja}
                       onChange={(e) => setTarjetaRoja(Number(e.target.value))}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded p-2 text-xs text-white text-center"
+                      className="w-full bg-black/30 border border-white/10 rounded p-2 text-xs text-white text-center focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Box actions */}
-              <div className="border-t border-neutral-850 pt-4 flex items-center justify-end gap-2.5 font-sans">
+              <div className="border-t border-white/10 pt-4 flex items-center justify-end gap-2.5 font-sans">
                 <button
                   type="button"
                   onClick={() => {
                     setEditingPlayer(null);
                     setIsCreating(false);
                   }}
-                  className="px-4 py-2 bg-neutral-800 hover:bg-neutral-750 text-neutral-300 text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg transition cursor-pointer"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg transition cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg shadow-lg flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg shadow-lg flex items-center gap-1.5 cursor-pointer"
                 >
                   <Save className="w-4 h-4" /> Guardar Ficha
                 </button>
@@ -573,7 +573,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                 <span className="w-3 h-7 rounded-sm bg-emerald-500 shadow-glow shadow-emerald-450/40"></span>
                 <h3 className="text-xl font-black font-sports-condensed text-white uppercase tracking-widest flex items-center gap-2">
                   {positionLabels[pos].toUpperCase()}
-                  <span className="text-[11px] bg-black/35 border border-white/10 text-emerald-300 font-black px-2.5 py-0.5 rounded-full font-sans">
+                  <span className="text-[11px] bg-black/35 border border-white/10 text-white font-black px-2.5 py-0.5 rounded-full font-sans">
                     {playersInPosition.length}
                   </span>
                 </h3>
@@ -607,7 +607,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                             {player.apellido.toUpperCase()}, {player.nombre}
                           </h3>
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[9px] font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/25 uppercase tracking-wide">
+                            <span className="text-[9px] font-bold text-white bg-white/10 px-2 py-0.5 rounded border border-white/10 uppercase tracking-wide">
                               {player.posicion}
                             </span>
                           </div>
@@ -617,16 +617,16 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                       {/* Scoreboard block (games, goals, cards) */}
                       <div className="grid grid-cols-3 gap-2 bg-black/25 p-2.5 rounded-xl border border-white/10 mt-4 text-center">
                         <div>
-                          <span className="block text-[8px] uppercase tracking-wider text-indigo-400 font-black font-sports-condensed">PJ</span>
-                          <strong className="text-sm font-mono font-black text-indigo-100">{player.partidosJugados}</strong>
+                          <span className="block text-[8px] uppercase tracking-wider text-white/70 font-black font-sports-condensed">PJ</span>
+                          <strong className="text-sm font-mono font-black text-white">{player.partidosJugados}</strong>
                         </div>
                         <div>
-                          <span className="block text-[8px] uppercase tracking-wider text-emerald-400 font-black font-sports-condensed">Goles</span>
-                          <strong className="text-sm font-mono font-black text-emerald-450">{player.goles}</strong>
+                          <span className="block text-[8px] uppercase tracking-wider text-white/70 font-black font-sports-condensed">Goles</span>
+                          <strong className="text-sm font-mono font-black text-white">{player.goles}</strong>
                         </div>
                         <div>
-                          <span className="block text-[8px] uppercase tracking-wider text-indigo-300 font-black font-sports-condensed">Asist</span>
-                          <strong className="text-sm font-mono font-black text-indigo-200">{player.asistencias}</strong>
+                          <span className="block text-[8px] uppercase tracking-wider text-white/70 font-black font-sports-condensed">Asist</span>
+                          <strong className="text-sm font-mono font-black text-white">{player.asistencias}</strong>
                         </div>
                       </div>
 
@@ -636,13 +636,13 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                           {/* Cards counter icons */}
                           <div className="flex items-center gap-1" title="Tarjetas recibidas">
                             <div className="w-3 h-4 bg-emerald-500 rounded-sm" title="Tarjeta Verde" />
-                            <span className="text-[10px] font-mono text-indigo-200/55 font-bold mr-2">{player.tarjetaVerde}</span>
+                            <span className="text-[10px] font-mono text-white/90 font-bold mr-2">{player.tarjetaVerde}</span>
 
                             <div className="w-3 h-4 bg-amber-500 rounded-sm" title="Tarjeta Amarilla" />
-                            <span className="text-[10px] font-mono text-indigo-200/55 font-bold mr-2">{player.tarjetaAmarilla}</span>
+                            <span className="text-[10px] font-mono text-white/90 font-bold mr-2">{player.tarjetaAmarilla}</span>
 
                             <div className="w-3 h-4 bg-rose-600 rounded-sm" title="Tarjeta Roja" />
-                            <span className="text-[10px] font-mono text-indigo-200/55 font-bold">{player.tarjetaRoja}</span>
+                            <span className="text-[10px] font-mono text-white/90 font-bold">{player.tarjetaRoja}</span>
                           </div>
 
                           {player.tarjetaRoja > 0 && (
@@ -685,7 +685,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
         {baseFilteredPlayers.length === 0 && (
           <div className="text-center py-12 bg-club-gradient-elements border border-white/10 rounded-2xl">
             <Users className="w-10 h-10 text-indigo-200/40 mx-auto mb-2" />
-            <p className="text-indigo-200 font-medium text-xs">No se encontraron jugadoras que coincidan con la búsqueda.</p>
+            <p className="text-white font-medium text-xs">No se encontraron jugadoras que coincidan con la búsqueda.</p>
           </div>
         )}
 
@@ -702,7 +702,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               <div className="bg-club-gradient-elements border border-white/10 rounded-2xl p-5 shadow-xl relative flex flex-col justify-between hover:border-emerald-500/30 hover:-translate-y-0.5 transition duration-350 overflow-hidden group">
-                <div className="absolute top-0 right-0 bg-emerald-500/15 text-emerald-300 font-extrabold text-[8px] px-2.5 py-1 rounded-bl-xl uppercase tracking-wider font-sports-condensed border-l border-b border-white/5">
+                <div className="absolute top-0 right-0 bg-emerald-500/15 text-white font-extrabold text-[8px] px-2.5 py-1 rounded-bl-xl uppercase tracking-wider font-sports-condensed border-l border-b border-white/5">
                   Staff Oficial
                 </div>
                 
@@ -723,15 +723,15 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                     <h4 className="font-extrabold font-sports-condensed text-white group-hover:text-emerald-350 transition-colors tracking-wide text-xl uppercase">
                       {dtName}
                     </h4>
-                    <p className="text-[10px] font-bold text-emerald-300 uppercase tracking-widest font-sans">
+                    <p className="text-[10px] font-bold text-white uppercase tracking-widest font-sans">
                       Director Técnico (DT)
                     </p>
-                    <p className="text-[10px] text-indigo-150 font-sans">División {selectedCategory}</p>
+                    <p className="text-[10px] text-white/90 font-sans">División {selectedCategory}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center justify-between border-t border-white/5 mt-4 pt-3.5">
-                  <span className="text-[10px] text-indigo-200/50 font-mono">Coordinador Principal</span>
+                  <span className="text-[10px] text-white/80 font-mono">Coordinador Principal</span>
                   
                   {/* Actions context menu for DT */}
                   {(userRole === 'admin' || userRole === 'coach') && (

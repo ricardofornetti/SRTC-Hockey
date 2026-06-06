@@ -35,6 +35,13 @@ export default function ClubLogo({ teamName, className = 'w-12 h-12' }: ClubLogo
     const loadLogo = () => {
       try {
         const normalized = normalizeTeamName(teamName);
+        if (normalized === 'SAN RAFAEL TENIS CLUB - A') {
+          const customLogo = localStorage.getItem('srtc_custom_club_logo');
+          if (customLogo) {
+            setLogo(customLogo);
+            return;
+          }
+        }
         const savedLogosStr = localStorage.getItem('srtc_team_logos_db');
         if (savedLogosStr) {
           const savedLogos = JSON.parse(savedLogosStr);
@@ -57,8 +64,10 @@ export default function ClubLogo({ teamName, className = 'w-12 h-12' }: ClubLogo
     };
 
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('srtc_logo_updated', handleStorageChange);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('srtc_logo_updated', handleStorageChange);
     };
   }, [teamName]);
 
@@ -68,7 +77,7 @@ export default function ClubLogo({ teamName, className = 'w-12 h-12' }: ClubLogo
         src={logo}
         alt={`Logo de ${teamName}`}
         referrerPolicy="no-referrer"
-        className={`${className} object-cover rounded-full border border-white/20 shadow-md shrink-0`}
+        className={`${className} object-contain p-1 bg-white rounded-full border border-white/20 shadow-md shrink-0`}
       />
     );
   }
