@@ -8,6 +8,7 @@ import { Trophy, HelpCircle, Share2, Camera, Save, X, Upload, Edit3, ShieldAlert
 import { Match, Standing, Category } from '../../types';
 import { INITIAL_MATCH_LIST } from '../../data';
 import ClubLogo from '../ClubLogo';
+import { saveDocument } from '../../firebase';
 
 interface TablaProps {
   matches: Match[];
@@ -392,7 +393,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
   };
 
   // Save changes
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingTeam) return;
 
     // 1. Save dynamic custom team logo to localStorage
@@ -405,7 +406,8 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
       savedLogos[editingTeam] = logoUrl.trim();
     }
     
-    localStorage.setItem('srtc_team_logos_db', JSON.stringify(savedLogos));
+    const nextLogosStr = JSON.stringify(savedLogos);
+    localStorage.setItem('srtc_team_logos_db', nextLogosStr);
 
     // 2. Save statistic baseline values
     const updatedBaselines = { ...baselines };
@@ -428,7 +430,8 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
     updatedBaselines[editingTeam].gc = editGC;
 
     setBaselines(updatedBaselines);
-    localStorage.setItem('srtc_standings_baseline_db_v5', JSON.stringify(updatedBaselines));
+    const nextBaselinesStr = JSON.stringify(updatedBaselines);
+    localStorage.setItem('srtc_standings_baseline_db_v5', nextBaselinesStr);
 
     // Force refresh ClubLogo by creating dummy state or triggering storage event
     window.dispatchEvent(new Event('storage'));
@@ -437,19 +440,34 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
     setEditingTeam(null);
     setLogoBase64('');
     setLogoUrl('');
+
+    // Sync to Firestore settings collection
+    try {
+      await saveDocument('settings', 'team_logos', { id: 'team_logos', value: nextLogosStr });
+      await saveDocument('settings', 'standings_baselines', { id: 'standings_baselines', value: nextBaselinesStr });
+    } catch (err) {
+      console.error('Error syncing team logo and baselines to Firestore settings:', err);
+    }
   };
 
   // Delete logo fallback
-  const handleDeleteLogo = () => {
+  const handleDeleteLogo = async () => {
     if (!editingTeam) return;
     const savedLogosStr = localStorage.getItem('srtc_team_logos_db') || '{}';
     const savedLogos = JSON.parse(savedLogosStr);
     delete savedLogos[editingTeam];
-    localStorage.setItem('srtc_team_logos_db', JSON.stringify(savedLogos));
+    const nextLogosStr = JSON.stringify(savedLogos);
+    localStorage.setItem('srtc_team_logos_db', nextLogosStr);
     
     setLogoBase64('');
     setLogoUrl('');
     window.dispatchEvent(new Event('storage'));
+
+    try {
+      await saveDocument('settings', 'team_logos', { id: 'team_logos', value: nextLogosStr });
+    } catch (err) {
+      console.error('Error syncing deleted team logo registry with Firestore:', err);
+    }
   };
 
   const handleShareStandings = () => {

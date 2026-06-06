@@ -130,13 +130,36 @@ export default function App() {
       if (data && data.length > 0) setNotifications(data);
     });
     
-    const unsubSettings = subscribeToCollection<{ id: string; value: string }>('settings', (data) => {
+    const unsubSettings = subscribeToCollection<{ id: string; value?: string; name?: string; fotoUrl?: string }>('settings', (data) => {
       const logoSetting = data?.find(item => item.id === 'logo');
       if (logoSetting && logoSetting.value) {
         setCustomClubLogo(logoSetting.value);
         localStorage.setItem('srtc_custom_club_logo', logoSetting.value);
         window.dispatchEvent(new Event('srtc_logo_updated'));
       }
+
+      const teamLogosSetting = data?.find(item => item.id === 'team_logos');
+      if (teamLogosSetting && teamLogosSetting.value) {
+        localStorage.setItem('srtc_team_logos_db', teamLogosSetting.value);
+        window.dispatchEvent(new Event('srtc_logo_updated'));
+        window.dispatchEvent(new Event('storage'));
+      }
+
+      const baselinesSetting = data?.find(item => item.id === 'standings_baselines');
+      if (baselinesSetting && baselinesSetting.value) {
+        localStorage.setItem('srtc_standings_baseline_db_v5', baselinesSetting.value);
+        window.dispatchEvent(new Event('storage'));
+      }
+
+      // Sync DT configurations for all categories
+      data?.forEach(item => {
+        if (item.id.startsWith('dt_config_')) {
+          const category = item.id.replace('dt_config_', '');
+          if (item.name) localStorage.setItem(`srtc_dt_name_${category}`, item.name);
+          if (item.fotoUrl) localStorage.setItem(`srtc_dt_foto_${category}`, item.fotoUrl);
+          window.dispatchEvent(new Event('srtc_dt_updated'));
+        }
+      });
     });
 
     return () => {

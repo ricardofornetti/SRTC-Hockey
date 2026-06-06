@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Search, Plus, Edit2, Trash2, ShieldAlert, Save, Upload, ChevronLeft } from 'lucide-react';
 import { Player, UserRole, Category } from '../../types';
+import { saveDocument } from '../../firebase';
 
 interface PlantelProps {
   players: Player[];
@@ -33,6 +34,20 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
   const [isEditingDt, setIsEditingDt] = useState(false);
   const [dtFormName, setDtFormName] = useState('');
   const [dtFormFotoUrl, setDtFormFotoUrl] = useState('');
+
+  // Listen for dynamic updates (like database synchronization of DTs)
+  useEffect(() => {
+    const loadDtInfo = () => {
+      setDtName(localStorage.getItem(`srtc_dt_name_${selectedCategory}`) || 'Sebastian');
+      setDtFotoUrl(localStorage.getItem(`srtc_dt_foto_${selectedCategory}`) || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150');
+    };
+    loadDtInfo();
+
+    window.addEventListener('srtc_dt_updated', loadDtInfo);
+    return () => {
+      window.removeEventListener('srtc_dt_updated', loadDtInfo);
+    };
+  }, [selectedCategory]);
 
   // Form Fields
   const [nombre, setNombre] = useState('');
@@ -176,7 +191,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
     setIsEditingDt(true);
   };
 
-  const handleSaveDt = (e: React.FormEvent) => {
+  const handleSaveDt = async (e: React.FormEvent) => {
     e.preventDefault();
     const finalName = dtFormName.trim() || 'Sebastian';
     const finalFoto = dtFormFotoUrl.trim() || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150';
@@ -185,6 +200,17 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
     localStorage.setItem(`srtc_dt_name_${selectedCategory}`, finalName);
     localStorage.setItem(`srtc_dt_foto_${selectedCategory}`, finalFoto);
     setIsEditingDt(false);
+
+    // Sync DT configuration to Firestore
+    try {
+      await saveDocument('settings', `dt_config_${selectedCategory}`, {
+        id: `dt_config_${selectedCategory}`,
+        name: finalName,
+        fotoUrl: finalFoto
+      });
+    } catch (err) {
+      console.error('Error syncing DT info to Firestore:', err);
+    }
   };
 
   const positionsOrdered: ('Arquera' | 'Defensora' | 'Volante' | 'Delantera')[] = [
