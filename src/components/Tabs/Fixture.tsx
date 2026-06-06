@@ -410,7 +410,8 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
     <div id="fixture-tab" className="space-y-4">
       {/* Search and Filters Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-club-gradient-elements p-3 rounded-xl border border-white/10 shadow-lg">
-        <div className="flex items-center gap-1.5 flex-wrap">
+        {/* Desktop-only Filters */}
+        <div className="hidden sm:flex items-center gap-1.5 font-sports-condensed">
           <button
             onClick={() => setFilter('todos')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
@@ -437,7 +438,8 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
           </button>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+        {/* Desktop-only Actions */}
+        <div className="hidden sm:flex items-center gap-2 justify-end">
           {userRole === 'admin' && (
             <button
               id="create-match-button"
@@ -455,6 +457,51 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
             <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
             Volver
           </button>
+        </div>
+
+        {/* Mobile unified horizontal scrollbar */}
+        <div className="flex sm:hidden items-center gap-1.5 overflow-x-auto w-full no-scrollbar py-1 font-sports-condensed">
+          <button
+            onClick={() => onTabChange('inicio')}
+            className="flex items-center gap-1 px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer shrink-0"
+          >
+            <ChevronLeft className="w-3 h-3 text-emerald-400" />
+            Volver
+          </button>
+
+          <button
+            onClick={() => setFilter('todos')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
+              filter === 'todos' ? 'bg-emerald-500 text-neutral-950 border border-emerald-400 font-extrabold' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white border border-white/10'
+            }`}
+          >
+            Todos
+          </button>
+          <button
+            onClick={() => setFilter('proximos')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
+              filter === 'proximos' ? 'bg-emerald-500 text-neutral-950 border border-emerald-400 font-extrabold' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white border border-white/10'
+            }`}
+          >
+            Próximos
+          </button>
+          <button
+            onClick={() => setFilter('jugados')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
+              filter === 'jugados' ? 'bg-emerald-500 text-neutral-950 border border-emerald-400 font-extrabold' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white border border-white/10'
+            }`}
+          >
+            Jugados
+          </button>
+
+          {userRole === 'admin' && (
+            <button
+              onClick={handleStartCreate}
+              className="flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-2.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider cursor-pointer shrink-0 transition shadow-md shadow-emerald-500/10"
+            >
+              <Plus className="w-3 h-3" /> Agregar
+            </button>
+          )}
         </div>
       </div>
 

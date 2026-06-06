@@ -247,8 +247,8 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
           />
         </div>
 
-        {/* Position pills */}
-        <div className="flex items-center gap-1 overflow-x-auto w-full md:w-auto no-scrollbar py-1 font-sports-condensed">
+        {/* Desktop-only Position pills and Action Buttons */}
+        <div className="hidden md:flex items-center gap-1 overflow-x-auto w-auto no-scrollbar py-1 font-sports-condensed">
           {(['Todos', 'Arquera', 'Defensora', 'Volante', 'Delantera'] as const).map((pos) => (
             <button
               key={pos}
@@ -264,8 +264,8 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
           ))}
         </div>
 
-        {/* Action Button & Volver */}
-        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+        {/* Desktop-only Action Button & Volver */}
+        <div className="hidden md:flex items-center gap-2 w-auto justify-end">
           {(userRole === 'admin' || userRole === 'coach') && (
             <button
               onClick={handleStartCreate}
@@ -282,6 +282,40 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
             <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
             Volver
           </button>
+        </div>
+
+        {/* Mobile unified horizontal line containing Volver, Filters, and Actions */}
+        <div className="flex md:hidden items-center gap-1.5 overflow-x-auto w-full no-scrollbar py-1 font-sports-condensed">
+          <button
+            onClick={() => onTabChange('inicio')}
+            className="flex items-center gap-1 px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer shrink-0"
+          >
+            <ChevronLeft className="w-3 h-3 text-emerald-400" />
+            Volver
+          </button>
+
+          {(['Todos', 'Arquera', 'Defensora', 'Volante', 'Delantera'] as const).map((pos) => (
+            <button
+              key={pos}
+              onClick={() => setPositionFilter(pos)}
+              className={`px-3 py-1.5 text-xs font-black rounded-lg border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
+                positionFilter === pos
+                  ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md'
+                  : 'bg-white/5 border-white/15 text-white/80'
+              }`}
+            >
+              {pos === 'Todos' ? 'Todas' : pos + 's'}
+            </button>
+          ))}
+
+          {(userRole === 'admin' || userRole === 'coach') && (
+            <button
+              onClick={handleStartCreate}
+              className="flex items-center justify-center gap-1 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-2.5 py-1.5 rounded-lg text-xs font-black font-sports-condensed uppercase tracking-wider cursor-pointer shrink-0 transition shadow-md shadow-emerald-500/10"
+            >
+              <Plus className="w-3 h-3" /> Agregar
+            </button>
+          )}
         </div>
       </div>
 
