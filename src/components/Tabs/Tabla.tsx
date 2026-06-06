@@ -462,36 +462,25 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
   };
 
   return (
-    <div id="standings-tab" className="space-y-6">
-      {/* Go Back button */}
-      <div className="flex items-center justify-end">
+    <div id="standings-tab" className="space-y-4">
+      {/* Control row matching the exact layout style of Fixture */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-club-gradient-elements p-3 rounded-xl border border-white/10 shadow-lg animate-in fade-in slide-in-from-top-1 duration-200">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <button 
+            onClick={handleShareStandings}
+            className="text-xs text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 transition cursor-pointer font-bold flex items-center gap-1.5 shadow-sm"
+          >
+            <Share2 className="w-3.5 h-3.5 text-emerald-300" />
+            Compartir Tabla
+          </button>
+        </div>
+
         <button
           onClick={() => onTabChange('inicio')}
-          className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
         >
           <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
           Volver
-        </button>
-      </div>
-
-      {/* Visual Header Panel */}
-      <div className="bg-club-gradient-elements p-5 rounded-2xl border border-white/10 shadow-lg flex items-center justify-between gap-4 flex-wrap">
-        <div className="space-y-1 text-left">
-          <h2 className="font-extrabold text-white text-base flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-emerald-400" />
-            POSICIONES
-          </h2>
-          <p className="text-xs text-white">
-            Asociación Sanrafaelina de Hockey - Torneo Apertura. Categoría {selectedCategory}.
-          </p>
-        </div>
-
-        <button 
-          onClick={handleShareStandings}
-          className="text-xs text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg border border-white/10 transition cursor-pointer font-bold flex items-center gap-1.5 shadow-sm"
-        >
-          <Share2 className="w-3.5 h-3.5 text-emerald-300" />
-          Compartir Tabla
         </button>
       </div>
 

@@ -407,20 +407,9 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
   };
 
   return (
-    <div id="fixture-tab" className="space-y-6">
-      {/* Go Back button */}
-      <div className="flex items-center justify-end">
-        <button
-          onClick={() => onTabChange('inicio')}
-          className="flex items-center gap-1.5 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
-        >
-          <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
-          Volver
-        </button>
-      </div>
-
+    <div id="fixture-tab" className="space-y-4">
       {/* Search and Filters Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-club-gradient-elements p-4 rounded-xl border border-white/10 shadow-lg">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-club-gradient-elements p-3 rounded-xl border border-white/10 shadow-lg">
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setFilter('todos')}
@@ -448,16 +437,25 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
           </button>
         </div>
 
-        {/* Admin or Coach Create Match button */}
-        {(userRole === 'admin') && (
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          {userRole === 'admin' && (
+            <button
+              id="create-match-button"
+              onClick={handleStartCreate}
+              className="flex items-center justify-center gap-1.5 bg-emerald-650 hover:bg-emerald-550 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-150 shadow-md cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> Agregar Partido
+            </button>
+          )}
+
           <button
-            id="create-match-button"
-            onClick={handleStartCreate}
-            className="xl:w-auto w-full flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition duration-150 shadow-md cursor-pointer"
+            onClick={() => onTabChange('inicio')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
           >
-            <Plus className="w-4 h-4" /> Agregar Partido
+            <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
+            Volver
           </button>
-        )}
+        </div>
       </div>
 
       {/* Editor Modal Overlay */}

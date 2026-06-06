@@ -18,7 +18,8 @@ import {
   Volume2, 
   Share2, 
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  ChevronLeft
 } from 'lucide-react';
 import { 
   UserRole, 
@@ -763,122 +764,157 @@ export default function App() {
         currentUserEmail="fornettiricardo@gmail.com" 
       />
 
-      {/* 2. Header de la Aplicación */}
-      <header id="main-header" className="bg-club-gradient-elements border-b border-white/10 px-5 py-5 md:py-6 shadow-xl relative z-40">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
-          
-          {/* Logo y Nombre del Club */}
-          <div className="flex flex-col sm:flex-row items-center gap-4.5 select-none animate-in fade-in duration-300">
-            {/* Highly prominent and glowing official club logo card - enlarged and static */}
-            <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 p-1.5 bg-white border-2 border-white/20 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/10">
-              {customClubLogo ? (
-                <img 
-                  src={customClubLogo} 
-                  alt="Logo Club personalizado" 
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-contain rounded-xl"
-                />
-              ) : (
-                <SrtcLogo className="w-16 h-16 sm:w-18 sm:h-18" />
-              )}
+      {activeTab === 'fixture' || activeTab === 'tabla' ? (
+        /* Standalone Page View for Fixture & Tabla tabs */
+        <div className="animate-in fade-in duration-300 flex flex-col flex-1">
+          <main id="app-viewport" className="flex-1 max-w-7xl w-full mx-auto px-4 pt-4 pb-8">
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
+              <div>
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+                  {activeTab === 'fixture' ? (
+                    <>
+                      <Calendar className="w-8 h-8 text-emerald-450" />
+                      CALENDARIO
+                    </>
+                  ) : (
+                    <>
+                      <Trophy className="w-8 h-8 text-emerald-450" />
+                      POSICIONES
+                    </>
+                  )}
+                </h2>
+                <p className="text-xs sm:text-sm text-indigo-200 mt-1 uppercase tracking-wider font-semibold">
+                  {activeTab === 'fixture' 
+                    ? 'Torneo Apertura "Damas B"' 
+                    : 'Torneo Apertura Damas B 2026. 7ma Categoria'}
+                </p>
+              </div>
             </div>
-            <div className="cursor-pointer text-center sm:text-left flex-1" onClick={() => setActiveTab('inicio')}>
-              <h1 className="text-xl xs:text-2xl sm:text-3.5xl md:text-4.5xl lg:text-5.5xl font-black text-white uppercase tracking-wide sm:tracking-wider md:tracking-widest hover:text-amber-300 transition-all duration-300">
-                SAN RAFAEL TENIS CLUB
-              </h1>
-              <p className="text-xs text-indigo-100/90 font-bold leading-normal mt-1 flex items-center justify-center sm:justify-start gap-2">
-                <span className="w-2 h-2 bg-emerald-450 rounded-full animate-pulse shadow-glow shadow-emerald-400/55"></span>
-                <span className="font-sports-condensed uppercase tracking-wider text-[11px] text-indigo-100">Sitio Oficial de Hockey • Mendoza</span>
-              </p>
+
+            {renderTabContent()}
+          </main>
+        </div>
+      ) : (
+        /* Regular Standard Hub Layout with Tab bar navigation */
+        <>
+          {/* 2. Header de la Aplicación */}
+          <header id="main-header" className="bg-club-gradient-elements border-b border-white/10 px-5 py-5 md:py-6 shadow-xl relative z-40">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
+              
+              {/* Logo y Nombre del Club */}
+              <div className="flex flex-col sm:flex-row items-center gap-4.5 select-none animate-in fade-in duration-300">
+                {/* Highly prominent and glowing official club logo card - enlarged and static */}
+                <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 p-1.5 bg-white border-2 border-white/20 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/10">
+                  {customClubLogo ? (
+                    <img 
+                      src={customClubLogo} 
+                      alt="Logo Club personalizado" 
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-contain rounded-xl"
+                    />
+                  ) : (
+                    <SrtcLogo className="w-16 h-16 sm:w-18 sm:h-18" />
+                  )}
+                </div>
+                <div className="cursor-pointer text-center sm:text-left flex-1" onClick={() => setActiveTab('inicio')}>
+                  <h1 className="text-xl xs:text-2xl sm:text-3.5xl md:text-4.5xl lg:text-5.5xl font-black text-white uppercase tracking-[0.06em] xs:tracking-[0.1em] sm:tracking-[0.16em] md:tracking-[0.25em] lg:tracking-[0.32em] hover:text-amber-300 transition-all duration-300">
+                    SAN RAFAEL TENIS CLUB
+                  </h1>
+                  <p className="text-xs text-indigo-100/90 font-bold leading-normal mt-1 flex items-center justify-center sm:justify-start gap-2">
+                    <span className="w-2 h-2 bg-emerald-450 rounded-full animate-pulse shadow-glow shadow-emerald-400/55"></span>
+                    <span className="font-sports-condensed uppercase tracking-wider text-[11px] text-indigo-100">Sitio Oficial de Hockey • Mendoza</span>
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </header>
+
+          {/* 2.5 Quick Navigation Actions (Sticky/Fixed on scroll) */}
+          <div className="sticky top-0 z-30 bg-club-gradient/95 backdrop-blur-md border-b border-white/10 py-1.5 px-1.5 sm:px-4 shadow-xl">
+            <div className="max-w-7xl mx-auto container">
+              <div className="grid grid-cols-6 gap-0 bg-club-gradient-elements rounded-xl border border-white/10 overflow-hidden shadow-inner">
+                <button 
+                  onClick={() => setActiveTab('inicio')} 
+                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
+                    activeTab === 'inicio' 
+                      ? 'bg-club-gradient text-white font-black shadow-inner' 
+                      : 'hover:bg-white/5 text-indigo-200'
+                  }`}
+                >
+                  <Home className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'inicio' ? 'text-white' : 'text-indigo-350'}`} />
+                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Inicio</span>
+                </button>
+
+                <button 
+                  onClick={() => setActiveTab('fixture')} 
+                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
+                    activeTab === 'fixture' 
+                      ? 'bg-club-gradient text-white font-black shadow-inner' 
+                      : 'hover:bg-white/5 text-indigo-200'
+                  }`}
+                >
+                  <Calendar className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'fixture' ? 'text-white' : 'text-indigo-350'}`} />
+                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Fixture</span>
+                </button>
+
+                <button 
+                  onClick={() => setActiveTab('tabla')} 
+                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
+                    activeTab === 'tabla' 
+                      ? 'bg-club-gradient text-white font-black shadow-inner' 
+                      : 'hover:bg-white/5 text-indigo-200'
+                  }`}
+                >
+                  <Trophy className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'tabla' ? 'text-white' : 'text-indigo-350'}`} />
+                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Tabla</span>
+                </button>
+
+                <button 
+                  onClick={() => setActiveTab('plantel')} 
+                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
+                    activeTab === 'plantel' 
+                      ? 'bg-club-gradient text-white font-black shadow-inner' 
+                      : 'hover:bg-white/5 text-indigo-200'
+                  }`}
+                >
+                  <Users className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'plantel' ? 'text-white' : 'text-indigo-350'}`} />
+                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Plantel</span>
+                </button>
+
+                <button 
+                  onClick={() => setActiveTab('estadisticas')} 
+                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
+                    activeTab === 'estadisticas' 
+                      ? 'bg-club-gradient text-white font-black shadow-inner' 
+                      : 'hover:bg-white/5 text-indigo-200'
+                  }`}
+                >
+                  <BarChart3 className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'estadisticas' ? 'text-white' : 'text-indigo-350'}`} />
+                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Estadísticas</span>
+                </button>
+
+                <button 
+                  onClick={() => setActiveTab('galeria')} 
+                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
+                    activeTab === 'galeria' 
+                      ? 'bg-club-gradient text-white font-black shadow-inner' 
+                      : 'hover:bg-white/5 text-indigo-200'
+                  }`}
+                >
+                  <ImageIcon className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'galeria' ? 'text-white' : 'text-indigo-350'}`} />
+                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Galería</span>
+                </button>
+              </div>
             </div>
           </div>
 
-        </div>
-      </header>
-
-      {/* 2.5 Quick Navigation Actions (Sticky/Fixed on scroll) */}
-      <div className="sticky top-0 z-30 bg-club-gradient/95 backdrop-blur-md border-b border-white/10 py-1.5 px-1.5 sm:px-4 shadow-xl">
-        <div className="max-w-7xl mx-auto container">
-          <div className="grid grid-cols-6 gap-0 bg-club-gradient-elements p-1 rounded-2xl border border-white/10 shadow-inner">
-            <button 
-              onClick={() => setActiveTab('inicio')} 
-              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
-                activeTab === 'inicio' 
-                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
-                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
-              }`}
-            >
-              <Home className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
-              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Inicio</span>
-            </button>
-
-            <button 
-              onClick={() => setActiveTab('fixture')} 
-              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
-                activeTab === 'fixture' 
-                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
-                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
-              }`}
-            >
-              <Calendar className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
-              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Fixture</span>
-            </button>
-
-            <button 
-              onClick={() => setActiveTab('tabla')} 
-              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
-                activeTab === 'tabla' 
-                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
-                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
-              }`}
-            >
-              <Trophy className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
-              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Tabla</span>
-            </button>
-
-            <button 
-              onClick={() => setActiveTab('plantel')} 
-              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
-                activeTab === 'plantel' 
-                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
-                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
-              }`}
-            >
-              <Users className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
-              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Plantel</span>
-            </button>
-
-            <button 
-              onClick={() => setActiveTab('estadisticas')} 
-              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
-                activeTab === 'estadisticas' 
-                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
-                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
-              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Estadísticas</span>
-            </button>
-
-            <button 
-              onClick={() => setActiveTab('galeria')} 
-              className={`flex flex-col items-center justify-center gap-1.5 p-1 sm:p-2 rounded-xl border transition-all duration-300 text-center cursor-pointer group hover:shadow-md shrink-0 w-full h-15 xs:h-18 sm:h-24 md:h-26 ${
-                activeTab === 'galeria' 
-                  ? 'bg-club-gradient border-white/20 text-white font-extrabold shadow-emerald-500/10' 
-                  : 'bg-white/5 hover:bg-white/10 border-white/5 text-indigo-200'
-              }`}
-            >
-              <ImageIcon className="w-4 h-4 xs:w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110" />
-              <span className="text-[8px] xs:text-[9.5px] sm:text-[11px] md:text-xs font-black tracking-wide uppercase block truncate max-w-full px-0.5">Galería</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Main Tab View Area */}
-      <main id="app-viewport" className="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
-        {renderTabContent()}
-      </main>
+          {/* 3. Main Tab View Area */}
+          <main id="app-viewport" className="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+            {renderTabContent()}
+          </main>
+        </>
+      )}
 
       {/* 6. Dynamic Toast Banner Panel */}
       {toast && (
