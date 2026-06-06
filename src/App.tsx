@@ -838,7 +838,7 @@ export default function App() {
                   )}
                 </div>
                 <div className="cursor-pointer text-center sm:text-left flex-1" onClick={() => setActiveTab('inicio')}>
-                  <h1 className="text-xl xs:text-2xl sm:text-3.5xl md:text-4.5xl lg:text-5.5xl font-black text-white uppercase tracking-[0.06em] xs:tracking-[0.1em] sm:tracking-[0.16em] md:tracking-[0.25em] lg:tracking-[0.32em] hover:text-amber-300 transition-all duration-300">
+                  <h1 className="text-2xl xs:text-3.5xl sm:text-4.5xl md:text-5.5xl lg:text-6.5xl xl:text-7.5xl font-black text-white uppercase tracking-[0.03em] xs:tracking-[0.06em] sm:tracking-[0.12em] md:tracking-[0.18em] lg:tracking-[0.24em] xl:tracking-[0.28em] leading-none hover:text-amber-300 transition-all duration-300 select-none">
                     SAN RAFAEL TENIS CLUB
                   </h1>
                   <p className="text-xs text-indigo-100/90 font-bold leading-normal mt-1 flex items-center justify-center sm:justify-start gap-2">
@@ -852,9 +852,9 @@ export default function App() {
           </header>
 
           {/* 2.5 Quick Navigation Actions (Sticky/Fixed on scroll) */}
-          <div className="sticky top-0 z-30 bg-club-gradient/95 backdrop-blur-md border-b border-white/10 py-1.5 px-1.5 sm:px-4 shadow-xl">
-            <div className="max-w-7xl mx-auto container">
-              <div className="grid grid-cols-6 gap-0 bg-club-gradient-elements rounded-xl border border-white/10 overflow-hidden shadow-inner">
+          <div className="sticky top-0 z-30 bg-club-gradient/95 backdrop-blur-md border-b border-white/10 shadow-xl w-full">
+            <div className="max-w-7xl mx-auto w-full">
+              <div className="grid grid-cols-6 gap-0 bg-club-gradient-elements overflow-hidden shadow-inner w-full">
                 <button 
                   onClick={() => setActiveTab('inicio')} 
                   className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
