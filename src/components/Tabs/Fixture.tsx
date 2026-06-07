@@ -934,7 +934,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                         key={match.id}
                         className={`bg-club-gradient-elements border ${
                           isLive ? 'border-emerald-500 shadow-emerald-500/15 scale-[1.01]' : 'border-white/10'
-                        } rounded-2xl p-5 shadow-xl relative flex flex-col justify-between transition duration-350 hover:border-emerald-500/30 w-full hover:-translate-y-0.5`}
+                        } rounded-2xl p-5 shadow-xl relative flex flex-col transition duration-350 hover:border-emerald-500/30 w-full hover:-translate-y-0.5`}
                       >
                         {/* Upper row: Date & status */}
                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2 flex-wrap gap-2 text-left">
@@ -960,7 +960,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                             <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
                               <ClubLogo teamName={localTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
                             </div>
-                            <span className="text-xs sm:text-sm font-black text-white mt-3 block leading-tight tracking-tight w-full break-words">
+                            <span className="text-[10px] min-[400px]:text-xs sm:text-sm font-black text-white mt-3 block leading-none tracking-tight w-full truncate whitespace-nowrap overflow-hidden text-ellipsis px-1">
                               {localTeam.toUpperCase()}
                             </span>
                             <span className="text-[10px] text-white/50 uppercase mt-1 font-bold tracking-wider font-sans">Local</span>
@@ -994,7 +994,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                             <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
                               <ClubLogo teamName={visitorTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
                             </div>
-                            <span className="text-xs sm:text-sm font-black text-white mt-3 block leading-tight tracking-tight w-full break-words">
+                            <span className="text-[10px] min-[400px]:text-xs sm:text-sm font-black text-white mt-3 block leading-none tracking-tight w-full truncate whitespace-nowrap overflow-hidden text-ellipsis px-1">
                               {visitorTeam.toUpperCase()}
                             </span>
                             <span className="text-[10px] text-white/50 uppercase mt-1 font-bold tracking-wider font-sans">Visitante</span>
@@ -1145,7 +1145,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                         key={match.id}
                         className={`bg-club-gradient-elements border ${
                           isLive ? 'border-emerald-500 shadow-emerald-500/15 scale-[1.01]' : 'border-white/10'
-                        } rounded-2xl p-5 shadow-xl relative flex flex-col justify-between transition duration-350 hover:border-emerald-500/30 w-full hover:-translate-y-0.5`}
+                        } rounded-2xl p-5 shadow-xl relative flex flex-col transition duration-350 hover:border-emerald-500/30 w-full hover:-translate-y-0.5`}
                       >
                         {/* Upper row: Date & status */}
                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2 flex-wrap gap-2 text-left">
@@ -1172,7 +1172,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                             <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
                               <ClubLogo teamName={localTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
                             </div>
-                            <span className="text-xs sm:text-sm font-black text-white mt-3 block leading-tight tracking-tight w-full break-words">
+                            <span className="text-[10px] min-[400px]:text-xs sm:text-sm font-black text-white mt-3 block leading-none tracking-tight w-full truncate whitespace-nowrap overflow-hidden text-ellipsis px-1">
                               {localTeam.toUpperCase()}
                             </span>
                             <span className="text-[10px] text-white uppercase mt-1 font-bold tracking-wider">Local</span>
@@ -1208,7 +1208,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                             <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
                               <ClubLogo teamName={visitorTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
                             </div>
-                            <span className="text-xs sm:text-sm font-black text-white mt-3 block leading-tight tracking-tight w-full break-words">
+                            <span className="text-[10px] min-[400px]:text-xs sm:text-sm font-black text-white mt-3 block leading-none tracking-tight w-full truncate whitespace-nowrap overflow-hidden text-ellipsis px-1">
                               {visitorTeam.toUpperCase()}
                             </span>
                             <span className="text-[10px] text-white uppercase mt-1 font-bold tracking-wider">Visitante</span>
@@ -1253,7 +1253,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                         )}
 
                         {/* Foot indicators */}
-                        <div className="mt-4 pt-3 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs text-indigo-200">
+                        <div className="mt-auto pt-3 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs text-indigo-200">
                           <div className="flex items-center gap-1.5 justify-start text-left">
                             <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
                             <span>Cancha: <strong className="text-white">{match.cancha}</strong></span>
