@@ -189,6 +189,20 @@ export async function seedInitialDataIfCollectionIsEmpty(): Promise<void> {
       for (const m of INITIAL_MATCH_LIST) {
         await setDoc(doc(db, 'matches', m.id), m);
       }
+    } else {
+      // Backport playoff matches if they are not in Firestore
+      const existingIds = new Set(matchesSnap.docs.map(doc => doc.id));
+      const playoffMatches = INITIAL_MATCH_LIST.filter(m => m.fase === 'cuartos' || m.fase === 'semifinal' || m.fase === 'final');
+      let backportedCount = 0;
+      for (const m of playoffMatches) {
+        if (!existingIds.has(m.id)) {
+          await setDoc(doc(db, 'matches', m.id), m);
+          backportedCount++;
+        }
+      }
+      if (backportedCount > 0) {
+        console.log(`Backported ${backportedCount} playoff matches to Firestore.`);
+      }
     }
 
     // 3. Standings

@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { Calendar, MapPin, Trophy, Users, BarChart3, Image, ChevronRight, Clock, Share2, Award, Home } from 'lucide-react';
-import { Player, Match, Standing, GalleryItem, Category } from '../../types';
+import { Calendar, MapPin, Trophy, Users, BarChart3, Image, ChevronRight, Clock, Share2, Award, Home, Upload, RotateCcw } from 'lucide-react';
+import { Player, Match, Standing, GalleryItem, Category, UserRole } from '../../types';
 import ClubLogo from '../ClubLogo';
 import SrtcLogo from '../SrtcLogo';
 import { formatFechaDdmmyyyy } from './Fixture';
@@ -18,9 +18,25 @@ interface InicioProps {
   selectedCategory: Category;
   onTabChange: (tabId: string) => void;
   onShare: (title: string, text: string) => void;
+  userRole?: UserRole;
+  customClubLogo?: string | null;
+  onSaveLogo?: (logoData: string) => Promise<void>;
+  onResetLogo?: () => Promise<void>;
 }
 
-export default function Inicio({ players, matches, standings, gallery, selectedCategory, onTabChange, onShare }: InicioProps) {
+export default function Inicio({ 
+  players, 
+  matches, 
+  standings, 
+  gallery, 
+  selectedCategory, 
+  onTabChange, 
+  onShare,
+  userRole,
+  customClubLogo,
+  onSaveLogo,
+  onResetLogo
+}: InicioProps) {
   // Filter matches involving SRTC
   const srtcMatches = matches.filter(m => {
     const localTeam = m.localNombre || (m.esLocal ? 'San Rafael Tenis Club' : m.rival);
@@ -91,6 +107,66 @@ export default function Inicio({ players, matches, standings, gallery, selectedC
   return (
     <div id="inicio-tab" className="space-y-6">
 
+      {/* Club Logo Administration Banner - Only for Admins/Coaches */}
+      {(userRole === 'admin' || userRole === 'coach') && (
+        <div className="bg-club-gradient-elements border border-emerald-500/20 rounded-xl p-4.5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 w-full sm:w-auto">
+            <div className="w-12 h-12 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center p-1 relative overflow-hidden group shrink-0">
+              {customClubLogo ? (
+                <img 
+                  src={customClubLogo} 
+                  alt="Logo Actual" 
+                  className="w-full h-full object-contain rounded-lg"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <SrtcLogo className="w-8 h-8" />
+              )}
+            </div>
+            <div className="text-left">
+              <h3 className="text-xs font-black text-white uppercase tracking-wider font-sports-condensed">Administrar Escudo del Club</h3>
+              <p className="text-[10px] text-indigo-200">Personaliza el escudo de la institución para todas las divisiones de la aplicación.</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2 font-sports-condensed w-full sm:w-auto justify-end">
+            <label className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider cursor-pointer transition shadow-md shrink-0">
+              <Upload className="w-3.5 h-3.5" />
+              <span>Subir Escudo</span>
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    if (typeof reader.result === 'string' && onSaveLogo) {
+                      onSaveLogo(reader.result);
+                    }
+                  };
+                  reader.readAsDataURL(file);
+                }} 
+              />
+            </label>
+            
+            {customClubLogo && (
+              <button 
+                onClick={() => {
+                  if (onResetLogo && window.confirm('¿Seguro que deseas restablecer el escudo oficial predeterminado?')) {
+                    onResetLogo();
+                  }
+                }}
+                className="flex items-center gap-1.5 bg-white/5 hover:bg-rose-500/20 hover:text-rose-200 border border-white/10 text-indigo-200 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer shrink-0"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Restablecer</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Row de dos tarjetas: Próximo Partido & Último Resultado */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

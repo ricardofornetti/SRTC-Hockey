@@ -96,6 +96,7 @@ const POPULAR_CLUBS = [
 export default function Fixture({ matches, players, userRole, selectedCategory, onUpdateMatches, onShare, onTabChange }: FixtureProps) {
   const [filter, setFilter] = useState<'todos' | 'proximos' | 'jugados'>('todos');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [faseFilter, setFaseFilter] = useState<'regular' | 'cuartos' | 'semifinal' | 'final'>('regular');
   
   // State for Editing
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
@@ -118,6 +119,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
   const [estado, setEstado] = useState<MatchState>('Programado');
   const [mvpId, setMvpId] = useState('');
   const [fechaNumeroInput, setFechaNumeroInput] = useState<number>(1);
+  const [fase, setFase] = useState<'regular' | 'cuartos' | 'semifinal' | 'final'>('regular');
   
   // Live lists of scorers and card bookings while editing
   const [selectedScorers, setSelectedScorers] = useState<{ jugadorId: string; cantidad: number }[]>([]);
@@ -127,11 +129,20 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
   const filteredMatches = matches
     .filter(m => m.categoria === selectedCategory)
     .filter(m => {
+      // Phase filtering: fallback to 'regular' if not specified
+      const matchFase = m.fase || 'regular';
+      return matchFase === faseFilter;
+    })
+    .filter(m => {
       if (filter === 'proximos') return m.estado === 'Programado' || m.estado === 'En juego';
       if (filter === 'jugados') return m.estado === 'Finalizado' || m.estado === 'Suspendido';
       return true;
     })
     .filter(m => {
+      // For playoff brackets, show all matchups so users can follow the tournament tree.
+      // For regular season, apply the custom request filter if it is public.
+      if (faseFilter !== 'regular') return true;
+      
       // public users only see matches starring San Rafael Tenis Club
       if (userRole === 'public') {
         const localTeam = m.localNombre || (m.esLocal ? 'San Rafael Tenis Club' : m.rival);
@@ -199,6 +210,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
     setEstado(match.estado);
     setMvpId(match.mvpId || '');
     setFechaNumeroInput(match.fechaNumero || getMatchFechaNumber(match));
+    setFase(match.fase || 'regular');
     
     // Scorers map back
     setSelectedScorers(match.goleadorasIds || []);
@@ -233,6 +245,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
     setMvpId('');
     setSelectedScorers([]);
     setSelectedCards([]);
+    setFase(faseFilter);
     
     // Find highest current fecha and default to next
     let maxFecha = 1;
@@ -306,7 +319,8 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
         mvpId: estado === 'Finalizado' && mvpId ? mvpId : undefined,
         goleadorasIds: processedScorers,
         tarjetas: processedCards,
-        fechaNumero: Number(fechaNumeroInput)
+        fechaNumero: Number(fechaNumeroInput),
+        fase: fase
       };
       updatedList = [...matches, newMatch];
     } else if (editingMatch) {
@@ -327,7 +341,8 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
             mvpId: estado === 'Finalizado' && mvpId ? mvpId : undefined,
             goleadorasIds: processedScorers,
             tarjetas: processedCards,
-            fechaNumero: Number(fechaNumeroInput)
+            fechaNumero: Number(fechaNumeroInput),
+            fase: fase
           };
         }
         return m;
@@ -408,6 +423,55 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
   return (
     <div id="fixture-tab" className="space-y-4">
+      {/* Tournament Phase Navigation Bar */}
+      <div className="bg-club-gradient-elements p-2 rounded-2xl border border-white/10 shadow-lg flex items-center justify-between w-full overflow-hidden">
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full no-scrollbar py-0.5 font-sports-condensed">
+          <button
+            onClick={() => setFaseFilter('regular')}
+            className={`px-4 py-2 text-xs font-black rounded-xl border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
+              faseFilter === 'regular'
+                ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md scale-102 font-extrabold'
+                : 'bg-white/5 border-white/10 text-indigo-200 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            Fase Regular
+          </button>
+          
+          <button
+            onClick={() => setFaseFilter('cuartos')}
+            className={`px-4 py-2 text-xs font-black rounded-xl border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
+              faseFilter === 'cuartos'
+                ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md scale-102 font-extrabold'
+                : 'bg-white/5 border-white/10 text-indigo-200 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            Cuartos de Final
+          </button>
+
+          <button
+            onClick={() => setFaseFilter('semifinal')}
+            className={`px-4 py-2 text-xs font-black rounded-xl border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
+              faseFilter === 'semifinal'
+                ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md scale-102 font-extrabold'
+                : 'bg-white/5 border-white/10 text-indigo-200 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            Semifinal
+          </button>
+
+          <button
+            onClick={() => setFaseFilter('final')}
+            className={`px-4 py-2 text-xs font-black rounded-xl border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
+              faseFilter === 'final'
+                ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md scale-102 font-extrabold'
+                : 'bg-white/5 border-white/10 text-indigo-200 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            Final
+          </button>
+        </div>
+      </div>
+
       {/* Search and Filters Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-club-gradient-elements p-3 rounded-xl border border-white/10 shadow-lg">
         {/* Desktop-only Filters */}
@@ -647,6 +711,20 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                 </div>
 
                 <div>
+                  <label className="block text-[10px] uppercase font-bold text-emerald-400 mb-1.5">Fase del Torneo</label>
+                  <select
+                    value={fase}
+                    onChange={(e) => setFase(e.target.value as 'regular' | 'cuartos' | 'semifinal' | 'final')}
+                    className="w-full bg-black/30 border border-white/15 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer font-semibold"
+                  >
+                    <option value="regular" className="bg-[#0f1c3f] text-white">Fase Regular</option>
+                    <option value="cuartos" className="bg-[#0f1c3f] text-white">Cuartos de Final</option>
+                    <option value="semifinal" className="bg-[#0f1c3f] text-white">Semifinal</option>
+                    <option value="final" className="bg-[#0f1c3f] text-white">Final</option>
+                  </select>
+                </div>
+
+                <div>
                   <label className="block text-[10px] uppercase font-bold text-white/85 mb-1.5">Estado Partido</label>
                   <select
                      value={estado}
@@ -801,6 +879,209 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
       {/* Main Fixtures Cards Stack */}
       <div id="fixtures-stack" className="space-y-8 font-sans">
         {(() => {
+          // If a playoff phase is selected, we render as a beautiful unified tournament tree branch
+          if (faseFilter !== 'regular') {
+            if (filteredMatches.length === 0) {
+              return (
+                <div className="text-center py-10 bg-[#0c142c] border border-white/5 rounded-2xl w-full">
+                  <Trophy className="w-10 h-10 text-indigo-200/20 mx-auto mb-2" />
+                  <p className="text-indigo-200/60 font-medium text-xs">No se encontraron partidos para esta categoría con los filtros aplicados.</p>
+                </div>
+              );
+            }
+
+            const headerTitles = {
+              cuartos: 'Cuartos de Final (27-Jun)',
+              semifinal: 'Semifinales (04-Jul)',
+              final: 'La Gran Final (05-Jul)'
+            };
+
+            const headerTitle = headerTitles[faseFilter] || 'Playoffs';
+
+            return (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 border-l-4 border-emerald-500 pl-3 py-1 bg-club-gradient-elements/60 rounded-r-lg pr-4 w-fit shadow-md border border-white/5">
+                  <h3 className="font-extrabold text-sm tracking-wider text-emerald-300 uppercase">
+                    {headerTitle}
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+                  {filteredMatches.map((match) => {
+                    const isPlayed = match.estado === 'Finalizado';
+                    const isLive = match.estado === 'En juego';
+                    const localTeam = match.localNombre || (match.esLocal ? 'San Rafael Tenis Club' : match.rival);
+                    const visitorTeam = match.visitanteNombre || (!match.esLocal ? 'San Rafael Tenis Club' : match.rival);
+                    const isLocalSrtc = localTeam.toLowerCase().includes('san rafael') || localTeam.toLowerCase().includes('srtc');
+                    const isVisitorSrtc = visitorTeam.toLowerCase().includes('san rafael') || visitorTeam.toLowerCase().includes('srtc');
+
+                    let localGoles = 0;
+                    let visitorGoles = 0;
+
+                    if (isLocalSrtc) {
+                      localGoles = match.golesPropios;
+                      visitorGoles = match.golesRival;
+                    } else if (isVisitorSrtc) {
+                      localGoles = match.golesRival;
+                      visitorGoles = match.golesPropios;
+                    } else {
+                      localGoles = match.golesPropios;
+                      visitorGoles = match.golesRival;
+                    }
+
+                    return (
+                      <div
+                        key={match.id}
+                        className={`bg-club-gradient-elements border ${
+                          isLive ? 'border-emerald-500 shadow-emerald-500/15 scale-[1.01]' : 'border-white/10'
+                        } rounded-2xl p-5 shadow-xl relative flex flex-col justify-between transition duration-350 hover:border-emerald-500/30 w-full hover:-translate-y-0.5`}
+                      >
+                        {/* Upper row: Date & status */}
+                        <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2 flex-wrap gap-2 text-left">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-3.5 h-3.5 text-white/70" />
+                            <span className="text-xs font-semibold text-white/90">{formatFechaDdmmyyyy(match.fecha)}</span>
+                            <span className="text-white/40">•</span>
+                            <Clock className="w-3.5 h-3.5 text-white/70" />
+                            <span className="text-xs font-semibold text-white/90">{match.hora} Hs</span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {getStatusBadge(match.estado)}
+                            <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/25 uppercase font-sans">
+                              {match.categoria}ª Div
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Scoreboard Board */}
+                        <div className="flex items-center justify-between py-2 gap-2">
+                          <div className="flex flex-col items-center w-5/12 text-center">
+                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
+                              <ClubLogo teamName={localTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
+                            </div>
+                            <span className="text-xs sm:text-sm font-black text-white mt-3 block leading-tight tracking-tight w-full break-words">
+                              {localTeam.toUpperCase()}
+                            </span>
+                            <span className="text-[10px] text-white/50 uppercase mt-1 font-bold tracking-wider font-sans">Local</span>
+                          </div>
+
+                          <div className="flex flex-col items-center justify-center px-4 py-2.5 bg-black/25 border border-white/10 rounded-xl min-w-[90px] sm:min-w-[120px] shadow-2xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/10 pointer-events-none" />
+                            {isPlayed ? (
+                              <div className="flex items-center justify-center gap-2 sm:gap-3.5 text-3xl sm:text-5xl font-extrabold font-mono tracking-tighter leading-none z-10">
+                                <span className={isLocalSrtc ? "text-emerald-400 filter drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" : "text-white"}>{localGoles}</span>
+                                <span className="text-indigo-200/30 font-normal text-xl sm:text-2xl">-</span>
+                                <span className={isVisitorSrtc ? "text-emerald-400 filter drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" : "text-white"}>{visitorGoles}</span>
+                              </div>
+                            ) : isLive ? (
+                              <div className="flex flex-col items-center gap-1 z-10">
+                                <div className="flex items-center gap-2 text-2xl sm:text-4xl font-black text-amber-500 animate-pulse font-mono leading-none">
+                                  <span>{localGoles}</span>
+                                  <span className="text-indigo-200/30 text-sm">-</span>
+                                  <span>{visitorGoles}</span>
+                                </div>
+                                <span className="text-[8px] font-black text-amber-500 animate-pulse uppercase tracking-widest leading-none">VIVO</span>
+                              </div>
+                            ) : (
+                              <div className="text-indigo-200/50 font-mono font-black text-sm sm:text-base tracking-widest z-10">
+                                VS
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex flex-col items-center w-5/12 text-center">
+                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
+                              <ClubLogo teamName={visitorTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
+                            </div>
+                            <span className="text-xs sm:text-sm font-black text-white mt-3 block leading-tight tracking-tight w-full break-words">
+                              {visitorTeam.toUpperCase()}
+                            </span>
+                            <span className="text-[10px] text-white/50 uppercase mt-1 font-bold tracking-wider font-sans">Visitante</span>
+                          </div>
+                        </div>
+
+                        {/* Beautiful list of scorers listed vertically (uno debajo del otro) */}
+                        {isPlayed && match.goleadorasIds && match.goleadorasIds.length > 0 && (
+                          <div className="mt-4 bg-black/20 rounded-xl p-3 border border-white/10 text-left">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2 flex items-center gap-1.5 border-b border-white/5 pb-1.5 font-sans">
+                              {/* Hockey ball SVG */}
+                              <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-white shrink-0 inline-block filter drop-shadow-[0_1px_2px_rgba(255,255,255,0.25)]">
+                                <circle cx="12" cy="12" r="9.5" fill="#FFFFFF" stroke="#b9d3ed" strokeWidth="1" />
+                                <circle cx="9" cy="9" r="0.9" fill="#94a3b8" />
+                                <circle cx="15" cy="9" r="0.9" fill="#94a3b8" />
+                                <circle cx="12" cy="12" r="0.9" fill="#94a3b8" />
+                                <circle cx="9" cy="15" r="0.9" fill="#94a3b8" />
+                                <circle cx="15" cy="15" r="0.9" fill="#94a3b8" />
+                                <circle cx="12" cy="7.5" r="0.8" fill="#94a3b8" />
+                                <circle cx="12" cy="16.5" r="0.8" fill="#94a3b8" />
+                              </svg>
+                              <span className="text-indigo-100 font-semibold uppercase font-display select-none text-[10px]">Goles del Club (SRTC)</span>
+                            </div>
+                            <div className="flex flex-col gap-2 pl-0.5">
+                              {match.goleadorasIds.map((val) => {
+                                const p = players.find(x => x.id === val.jugadorId);
+                                if (!p) return null;
+                                return (
+                                  <div key={val.jugadorId} className="flex items-center justify-between text-xs font-semibold py-1 border-b border-white/5 last:border-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                      <span className="text-white select-all font-sans text-xs">{p.nombre} {p.apellido}</span>
+                                    </div>
+                                    <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono px-2 py-0.5 rounded font-black shrink-0 tracking-wider">
+                                      {val.cantidad === 1 ? '1 GOL' : `${val.cantidad} GOLES`}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Foot indicators */}
+                        <div className="mt-4 pt-3 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs text-indigo-200">
+                          <div className="flex items-center gap-1.5 justify-start text-left">
+                            <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <span>Cancha: <strong className="text-white">{match.cancha}</strong></span>
+                          </div>
+
+                          {/* Operational actions */}
+                          <div className="flex items-center justify-end gap-2 shrink-0 pt-2 sm:pt-0">
+                            <button
+                               onClick={() => handleShareResultDirect(match)}
+                               className="px-2.5 py-1.5 rounded bg-white/10 hover:bg-white/20 text-white font-extrabold transition text-[11px] font-bold cursor-pointer font-sans"
+                            >
+                              Compartir
+                            </button>
+                            {(userRole === 'admin' || userRole === 'coach') && (
+                              <>
+                                <button
+                                  onClick={() => handleStartEdit(match)}
+                                  className="px-2.5 py-1.5 rounded bg-emerald-600/35 text-white hover:bg-emerald-500 hover:text-white transition text-[11px] font-bold flex items-center gap-1 cursor-pointer font-sans"
+                                >
+                                  <Edit3 className="w-3 h-3 text-white" /> Cargar
+                                </button>
+                                {userRole === 'admin' && (
+                                  <button
+                                    onClick={() => handleDelete(match.id)}
+                                    className="px-2.5 py-1.5 rounded bg-rose-600/15 text-rose-400 hover:bg-rose-600 hover:text-white transition text-[11px] font-bold cursor-pointer font-sans"
+                                    title="Eliminar Partido"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          }
+
           // Group matches by tournament date number
           const grouped: { [key: number]: Match[] } = {};
           filteredMatches.forEach((m) => {

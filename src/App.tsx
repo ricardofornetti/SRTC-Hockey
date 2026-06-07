@@ -672,6 +672,10 @@ export default function App() {
             selectedCategory={selectedCategory} 
             onTabChange={setActiveTab} 
             onShare={handleShare} 
+            userRole={userRole}
+            customClubLogo={customClubLogo}
+            onSaveLogo={handleSaveCustomLogo}
+            onResetLogo={handleResetCustomLogo}
           />
         );
       case 'noticias':

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Users, Search, Plus, Edit2, Trash2, ShieldAlert, Save, Upload, ChevronLeft } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, ShieldAlert, Save, Upload, ChevronLeft } from 'lucide-react';
 import { Player, UserRole, Category } from '../../types';
 import { saveDocument } from '../../firebase';
 
@@ -235,86 +235,46 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
   return (
     <div id="roster-tab" className="space-y-4">
       {/* Control Toolbar */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-club-gradient-elements p-4 rounded-2xl border border-white/10 shadow-lg">
-        <div className="relative w-full md:w-72">
-          <Search className="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Buscar por nombre, apellido o nº..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-black/25 text-xs text-white placeholder-white/60 pl-9 pr-4 py-2 rounded-lg border border-white/10 focus:outline-none focus:border-emerald-500 transition font-sans"
-          />
-        </div>
-
-        {/* Desktop-only Position pills and Action Buttons */}
-        <div className="hidden md:flex items-center gap-1 overflow-x-auto w-auto no-scrollbar py-1 font-sports-condensed">
-          {(['Todos', 'Arquera', 'Defensora', 'Volante', 'Delantera'] as const).map((pos) => (
-            <button
-              key={pos}
-              onClick={() => setPositionFilter(pos)}
-              className={`px-3.5 py-1 text-xs font-black rounded-lg border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
-                positionFilter === pos
-                  ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md scale-105'
-                  : 'bg-white/5 border-white/15 text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              {pos === 'Todos' ? 'Todas' : pos + 's'}
-            </button>
-          ))}
-        </div>
-
-        {/* Desktop-only Action Button & Volver */}
-        <div className="hidden md:flex items-center gap-2 w-auto justify-end">
-          {(userRole === 'admin' || userRole === 'coach') && (
-            <button
-              onClick={handleStartCreate}
-              className="flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-3.5 py-1.5 rounded-lg text-xs font-black font-sports-condensed uppercase tracking-wider cursor-pointer transition shadow-md shadow-emerald-500/10"
-            >
-              <Plus className="w-3.5 h-3.5" /> Agregar Jugadora
-            </button>
-          )}
-
+      <div className="bg-club-gradient-elements p-3.5 rounded-2xl border border-white/10 shadow-lg flex items-center w-full">
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full no-scrollbar py-0.5 font-sports-condensed">
+          {/* Volver */}
           <button
             onClick={() => onTabChange('inicio')}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer shrink-0"
           >
             <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
             Volver
           </button>
-        </div>
 
-        {/* Mobile unified horizontal line containing Volver, Filters, and Actions */}
-        <div className="flex md:hidden items-center gap-1.5 overflow-x-auto w-full no-scrollbar py-1 font-sports-condensed">
-          <button
-            onClick={() => onTabChange('inicio')}
-            className="flex items-center gap-1 px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer shrink-0"
-          >
-            <ChevronLeft className="w-3 h-3 text-emerald-400" />
-            Volver
-          </button>
+          {/* Separador vertical */}
+          <span className="h-6 w-px bg-white/10 shrink-0 mx-1"></span>
 
+          {/* Position tabs */}
           {(['Todos', 'Arquera', 'Defensora', 'Volante', 'Delantera'] as const).map((pos) => (
             <button
               key={pos}
               onClick={() => setPositionFilter(pos)}
-              className={`px-3 py-1.5 text-xs font-black rounded-lg border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
+              className={`px-3.5 py-1.5 text-xs font-black rounded-lg border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
                 positionFilter === pos
                   ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md'
-                  : 'bg-white/5 border-white/15 text-white/80'
+                  : 'bg-white/5 border-white/15 text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
-              {pos === 'Todos' ? 'Todas' : pos + 's'}
+              {pos === 'Todos' ? 'Todas' : pos === 'Arquera' ? 'Arqueras' : pos === 'Defensora' ? 'Defensoras' : pos === 'Volante' ? 'Volantes' : 'Delanteras'}
             </button>
           ))}
 
+          {/* Separador visual si hay admin buttons */}
           {(userRole === 'admin' || userRole === 'coach') && (
-            <button
-              onClick={handleStartCreate}
-              className="flex items-center justify-center gap-1 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-2.5 py-1.5 rounded-lg text-xs font-black font-sports-condensed uppercase tracking-wider cursor-pointer shrink-0 transition shadow-md shadow-emerald-500/10"
-            >
-              <Plus className="w-3 h-3" /> Agregar
-            </button>
+            <>
+              <span className="h-6 w-px bg-white/10 shrink-0 mx-1"></span>
+              <button
+                onClick={handleStartCreate}
+                className="flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-3.5 py-1.5 rounded-lg text-xs font-black font-sports-condensed uppercase tracking-wider cursor-pointer shrink-0 transition shadow-md shadow-emerald-500/10"
+              >
+                <Plus className="w-3.5 h-3.5" /> Agregar Jugadora
+              </button>
+            </>
           )}
         </div>
       </div>

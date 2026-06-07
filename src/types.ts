@@ -46,6 +46,7 @@ export interface Match {
   asistidorasIds?: { jugadorId: string; cantidad: number }[];
   tarjetas?: { jugadorId: string; verde?: number; amarilla?: number; roja?: number }[];
   fechaNumero?: number;
+  fase?: 'regular' | 'cuartos' | 'semifinal' | 'final';
 }
 
 export interface Standing {
