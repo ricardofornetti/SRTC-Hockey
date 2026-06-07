@@ -208,12 +208,13 @@ export default function App() {
     // 1. Recalculate and update Players
     const updatedPlayers = players.map(p => {
       const basePlayer = INITIAL_PLAYERS.find(bp => bp.id === p.id);
-      const baseGoles = basePlayer ? basePlayer.goles : 0;
-      const baseAsistencias = basePlayer ? basePlayer.asistencias : 0;
-      const basePartidosJugados = basePlayer ? basePlayer.partidosJugados : 0;
-      const baseVerde = basePlayer ? basePlayer.tarjetaVerde : 0;
-      const baseAmarilla = basePlayer ? basePlayer.tarjetaAmarilla : 0;
-      const baseRoja = basePlayer ? basePlayer.tarjetaRoja : 0;
+      
+      const baseGoles = typeof p.baseGoles === 'number' ? p.baseGoles : (basePlayer ? basePlayer.goles : p.goles);
+      const baseAsistencias = typeof p.baseAsistencias === 'number' ? p.baseAsistencias : (basePlayer ? basePlayer.asistencias : p.asistencias);
+      const basePartidosJugados = typeof p.basePartidosJugados === 'number' ? p.basePartidosJugados : (basePlayer ? basePlayer.partidosJugados : p.partidosJugados);
+      const baseVerde = typeof p.baseTarjetaVerde === 'number' ? p.baseTarjetaVerde : (basePlayer ? basePlayer.tarjetaVerde : p.tarjetaVerde);
+      const baseAmarilla = typeof p.baseTarjetaAmarilla === 'number' ? p.baseTarjetaAmarilla : (basePlayer ? basePlayer.tarjetaAmarilla : p.tarjetaAmarilla);
+      const baseRoja = typeof p.baseTarjetaRoja === 'number' ? p.baseTarjetaRoja : (basePlayer ? basePlayer.tarjetaRoja : p.tarjetaRoja);
 
       let additionalGoles = 0;
       let additionalAsistencias = 0;
@@ -247,10 +248,11 @@ export default function App() {
           const conv = convocations.find(c => c.id === m.id);
           const isConvocada = conv && conv.estadosJugadoras && conv.estadosJugadoras[p.id] === 'Convocada';
           const hasScored = m.goleadorasIds && m.goleadorasIds.some(gs => gs.jugadorId === p.id && gs.cantidad > 0);
+          const hasAssisted = m.asistidorasIds && m.asistidorasIds.some(as => as.jugadorId === p.id && as.cantidad > 0);
           const hasCards = m.tarjetas && m.tarjetas.some(tc => tc.jugadorId === p.id && ((tc.verde || 0) > 0 || (tc.amarilla || 0) > 0 || (tc.roja || 0) > 0));
           const isMvp = m.mvpId === p.id;
 
-          if (isConvocada || hasScored || hasCards || isMvp) {
+          if (isConvocada || hasScored || hasAssisted || hasCards || isMvp) {
             additionalPartidos += 1;
           }
         }
@@ -268,6 +270,7 @@ export default function App() {
     });
 
     try {
+      setPlayers(updatedPlayers);
       await syncCollection('players', players, updatedPlayers);
       console.log('Player statistics recalculated and synchronized with Firestore.');
     } catch (err) {

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Edit2, Trash2, ShieldAlert, Save, Upload, ChevronLeft } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, ShieldAlert, Save, Upload, ChevronLeft, Camera, CameraOff } from 'lucide-react';
 import { Player, UserRole, Category } from '../../types';
 import { saveDocument } from '../../firebase';
 
@@ -63,7 +63,110 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
   const [tarjetaAmarilla, setTarjetaAmarilla] = useState(0);
   const [tarjetaRoja, setTarjetaRoja] = useState(0);
 
-  // Read local file as Base64 helper
+  // Live Camera states and helpers
+  const [isUsingCamera, setIsUsingCamera] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraFacingMode, setCameraFacingMode] = useState<'user' | 'environment'>('user');
+  const [cameraError, setCameraError] = useState<string | null>(null);
+
+  const startCamera = async (mode: 'user' | 'environment' = cameraFacingMode) => {
+    setCameraError(null);
+    setIsUsingCamera(true);
+    
+    // Stop any existing stream first
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+    }
+
+    try {
+      const constraints = {
+        video: {
+          facingMode: mode,
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        }
+      };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setCameraStream(stream);
+      
+      // Auto assign the stream to the video element shortly after render
+      setTimeout(() => {
+        const videoElement = document.getElementById('player-camera-preview') as HTMLVideoElement;
+        if (videoElement) {
+          videoElement.srcObject = stream;
+        }
+      }, 200);
+    } catch (err: any) {
+      console.error("Camera access error:", err);
+      setCameraError("No se pudo acceder a la cámara. Revisa los permisos.");
+      setIsUsingCamera(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setIsUsingCamera(false);
+  };
+
+  const toggleCameraFacingMode = () => {
+    const nextMode = cameraFacingMode === 'user' ? 'environment' : 'user';
+    setCameraFacingMode(nextMode);
+    if (isUsingCamera) {
+      startCamera(nextMode);
+    }
+  };
+
+  const capturePhoto = () => {
+    const videoElement = document.getElementById('player-camera-preview') as HTMLVideoElement;
+    if (!videoElement) return;
+
+    try {
+      const canvas = document.createElement('canvas');
+      const width = videoElement.videoWidth || 640;
+      const height = videoElement.videoHeight || 480;
+      
+      // We want a beautiful compressed thumb
+      const MAX_DIM = 200;
+      let targetWidth = width;
+      let targetHeight = height;
+      
+      if (width > height) {
+        if (width > MAX_DIM) {
+          targetHeight = Math.round(height * (MAX_DIM / width));
+          targetWidth = MAX_DIM;
+        }
+      } else {
+        if (height > MAX_DIM) {
+          targetWidth = Math.round(width * (MAX_DIM / height));
+          targetHeight = MAX_DIM;
+        }
+      }
+
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        if (cameraFacingMode === 'user') {
+          ctx.translate(targetWidth, 0);
+          ctx.scale(-1, 1);
+        }
+        ctx.drawImage(videoElement, 0, 0, targetWidth, targetHeight);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+        setFotoUrl(dataUrl);
+        stopCamera();
+      }
+    } catch (err) {
+      console.error("Error capturing camera frame:", err);
+    }
+  };
+
+  // Read local file as Base64 helper with canvas compression to keep files tiny (< 20KB) for Firestore
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -71,7 +174,39 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result === 'string') {
-        callback(reader.result);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Max dimension of 200px is perfect for roster thumbnails
+          const MAX_DIM = 200;
+          if (width > height) {
+            if (width > MAX_DIM) {
+              height *= MAX_DIM / width;
+              width = MAX_DIM;
+            }
+          } else {
+            if (height > MAX_DIM) {
+              width *= MAX_DIM / height;
+              height = MAX_DIM;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // Compress as JPEG with 0.75 quality (highly optimized size)
+            const compressedUrl = canvas.toDataURL('image/jpeg', 0.75);
+            callback(compressedUrl);
+          } else {
+            callback(reader.result as string);
+          }
+        };
+        img.src = reader.result;
       }
     };
     reader.readAsDataURL(file);
@@ -145,7 +280,13 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
         tarjetaAmarilla: Number(tarjetaAmarilla),
         tarjetaRoja: Number(tarjetaRoja),
         categoria: selectedCategory,
-        destacada: false
+        destacada: false,
+        baseGoles: Number(goles),
+        baseAsistencias: Number(asistencias),
+        basePartidosJugados: Number(partidosJugados),
+        baseTarjetaVerde: Number(tarjetaVerde),
+        baseTarjetaAmarilla: Number(tarjetaAmarilla),
+        baseTarjetaRoja: Number(tarjetaRoja)
       };
       updatedList = [...players, newPlayer];
     } else if (editingPlayer) {
@@ -164,7 +305,13 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
             asistencias: Number(asistencias),
             tarjetaVerde: Number(tarjetaVerde),
             tarjetaAmarilla: Number(tarjetaAmarilla),
-            tarjetaRoja: Number(tarjetaRoja)
+            tarjetaRoja: Number(tarjetaRoja),
+            baseGoles: Number(goles),
+            baseAsistencias: Number(asistencias),
+            basePartidosJugados: Number(partidosJugados),
+            baseTarjetaVerde: Number(tarjetaVerde),
+            baseTarjetaAmarilla: Number(tarjetaAmarilla),
+            baseTarjetaRoja: Number(tarjetaRoja)
           };
         }
         return p;
@@ -357,41 +504,102 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
               {/* Dynamic Image Uploader */}
               <div className="bg-black/30 p-3 rounded-lg border border-white/10 space-y-3 font-sans">
                 <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider font-sports-condensed">Foto de Jugadora</label>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  {fotoUrl && (
-                    <img
-                      src={fotoUrl}
-                      alt="Vista previa"
-                      className="w-16 h-16 rounded-xl object-cover border-2 border-emerald-500 shadow shadow-emerald-500/20 shrink-0 self-center"
-                    />
-                  )}
-                  <div className="flex-1 space-y-2">
-                    <div className="relative">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        id="player-image-file"
-                        onChange={(e) => handleImageUpload(e, setFotoUrl)}
-                        className="hidden"
+                
+                {isUsingCamera ? (
+                  <div className="space-y-3">
+                    <div className="relative aspect-video rounded-lg overflow-hidden bg-black/80 border border-white/15 flex items-center justify-center">
+                      <video
+                        id="player-camera-preview"
+                        autoPlay
+                        playsInline
+                        muted
+                        className={`w-full h-full object-cover ${cameraFacingMode === 'user' ? '-scale-x-100' : ''}`}
                       />
-                      <label
-                        htmlFor="player-image-file"
-                        className="flex items-center justify-center gap-2 w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-500 text-white text-xs font-bold py-2 px-3 rounded-lg cursor-pointer transition"
-                      >
-                        <Upload className="w-4 h-4 text-emerald-400" />
-                        Seleccionar de mi dispositivo
-                      </label>
+                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur text-[9px] text-white/90 px-2 py-0.5 rounded uppercase font-black tracking-widest font-sports-condensed">
+                        {cameraFacingMode === 'user' ? 'Frontal' : 'Trasera'}
+                      </div>
                     </div>
-                    <p className="text-[10px] text-white/60 text-center">o pegue dirección URL:</p>
-                    <input
-                      type="url"
-                      value={fotoUrl}
-                      onChange={(e) => setFotoUrl(e.target.value)}
-                      placeholder="https://images.unsplash.com/..."
-                      className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-lg p-2 text-xs text-white focus:outline-none font-mono transition-colors"
-                    />
+                    {cameraError && (
+                      <p className="text-[10px] text-rose-400 font-medium text-center">{cameraError}</p>
+                    )}
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={capturePhoto}
+                        className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 text-[11px] font-black font-sports-condensed uppercase tracking-wider rounded transition flex items-center justify-center gap-1.5 cursor-pointer animate-pulse"
+                      >
+                        <Camera className="w-3.5 h-3.5" /> Capturar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={toggleCameraFacingMode}
+                        className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white text-[11px] font-black font-sports-condensed uppercase tracking-wider rounded transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        Girar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={stopCamera}
+                        className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-black font-sports-condensed uppercase tracking-wider rounded transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        Cerrar
+                      </button>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    {fotoUrl && (
+                      <img
+                        src={fotoUrl}
+                        alt="Vista previa"
+                        className="w-16 h-16 rounded-xl object-cover border-2 border-emerald-500 shadow shadow-emerald-500/20 shrink-0 self-center"
+                      />
+                    )}
+                    <div className="flex-1 space-y-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            id="player-image-file"
+                            onChange={(e) => handleImageUpload(e, setFotoUrl)}
+                            className="hidden"
+                          />
+                          <label
+                            htmlFor="player-image-file"
+                            className="flex items-center justify-center gap-2 w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-500 text-white text-[11px] font-bold py-2 px-2.5 rounded-lg cursor-pointer transition text-center"
+                          >
+                            <Upload className="w-4 h-4 text-emerald-400 shrink-0" />
+                            Subir de Galería
+                          </label>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => startCamera()}
+                          className="flex items-center justify-center gap-2 w-full bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/20 hover:border-emerald-400 text-emerald-405 text-[11px] font-bold py-2 px-2.5 rounded-lg cursor-pointer transition text-center"
+                        >
+                          <Camera className="w-4 h-4 text-emerald-400 shrink-0" />
+                          Tomar con Cámara
+                        </button>
+                      </div>
+                      
+                      <div className="relative flex py-1 items-center">
+                        <div className="flex-grow border-t border-white/5"></div>
+                        <span className="flex-shrink mx-2 text-[9px] text-white/30 uppercase tracking-widest font-mono">o pegar URL</span>
+                        <div className="flex-grow border-t border-white/5"></div>
+                      </div>
+
+                      <input
+                        type="url"
+                        value={fotoUrl}
+                        onChange={(e) => setFotoUrl(e.target.value)}
+                        placeholder="https://images.unsplash.com/..."
+                        className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-lg p-2 text-xs text-white focus:outline-none font-mono transition-colors"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Stats Adjust Panel - admins/coaches can alter raw figures */}
@@ -472,6 +680,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                   onClick={() => {
                     setEditingPlayer(null);
                     setIsCreating(false);
+                    stopCamera();
                   }}
                   className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg transition cursor-pointer"
                 >
@@ -479,6 +688,9 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                 </button>
                 <button
                   type="submit"
+                  onClick={() => {
+                    stopCamera();
+                  }}
                   className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg shadow-lg flex items-center gap-1.5 cursor-pointer"
                 >
                   <Save className="w-4 h-4" /> Guardar Ficha

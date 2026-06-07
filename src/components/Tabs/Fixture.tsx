@@ -123,6 +123,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
   
   // Live lists of scorers and card bookings while editing
   const [selectedScorers, setSelectedScorers] = useState<{ jugadorId: string; cantidad: number }[]>([]);
+  const [selectedAssisters, setSelectedAssisters] = useState<{ jugadorId: string; cantidad: number }[]>([]);
   const [selectedCards, setSelectedCards] = useState<{ jugadorId: string; verde: boolean; amarilla: boolean; roja: boolean }[]>([]);
 
   // Filter & Sort matches
@@ -215,6 +216,9 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
     // Scorers map back
     setSelectedScorers(match.goleadorasIds || []);
     
+    // Assists map back
+    setSelectedAssisters(match.asistidorasIds || []);
+    
     // Cards map back
     const cardsInitial = (match.tarjetas || []).map(t => ({
       jugadorId: t.jugadorId,
@@ -244,6 +248,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
     setEstado('Programado');
     setMvpId('');
     setSelectedScorers([]);
+    setSelectedAssisters([]);
     setSelectedCards([]);
     setFase(faseFilter);
     
@@ -293,6 +298,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
     let updatedList: Match[];
 
     const processedScorers = selectedScorers.filter(s => s.cantidad > 0);
+    const processedAssisters = selectedAssisters.filter(a => a.cantidad > 0);
     const processedCards = selectedCards
       .filter(c => c.verde || c.amarilla || c.roja)
       .map(c => ({
@@ -318,6 +324,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
         estado: estado,
         mvpId: estado === 'Finalizado' && mvpId ? mvpId : undefined,
         goleadorasIds: processedScorers,
+        asistidorasIds: processedAssisters,
         tarjetas: processedCards,
         fechaNumero: Number(fechaNumeroInput),
         fase: fase
@@ -340,6 +347,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
             estado: estado,
             mvpId: estado === 'Finalizado' && mvpId ? mvpId : undefined,
             goleadorasIds: processedScorers,
+            asistidorasIds: processedAssisters,
             tarjetas: processedCards,
             fechaNumero: Number(fechaNumeroInput),
             fase: fase
@@ -376,6 +384,28 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
   const handleSubScorerGoal = (playerId: string) => {
     setSelectedScorers(prev => {
+      return prev.map(s => {
+        if (s.jugadorId === playerId) {
+          return { ...s, cantidad: Math.max(0, s.cantidad - 1) };
+        }
+        return s;
+      }).filter(s => s.cantidad > 0);
+    });
+  };
+
+  // Assisters list helpers
+  const handleAddAssisterGoal = (playerId: string) => {
+    setSelectedAssisters(prev => {
+      const exists = prev.find(s => s.jugadorId === playerId);
+      if (exists) {
+        return prev.map(s => s.jugadorId === playerId ? { ...s, cantidad: s.cantidad + 1 } : s);
+      }
+      return [...prev, { jugadorId: playerId, cantidad: 1 }];
+    });
+  };
+
+  const handleSubAssisterGoal = (playerId: string) => {
+    setSelectedAssisters(prev => {
       return prev.map(s => {
         if (s.jugadorId === playerId) {
           return { ...s, cantidad: Math.max(0, s.cantidad - 1) };
@@ -771,10 +801,10 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                     <Award className="w-4 h-4 text-emerald-400 animate-bounce" /> Desempeño y Goles de Jugadoras (SRTC)
                   </h4>
 
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Quick Scorers tally list */}
                     <div>
-                      <label className="block text-[10px] uppercase font-bold text-white/80 mb-1.5 font-display tracking-wide">Goleadoras</label>
+                      <label className="block text-[10px] uppercase font-bold text-white/85 mb-1.5 font-display tracking-wide">Goleadoras</label>
                       <div className="bg-black/40 border border-white/10 rounded-lg p-3 max-h-40 overflow-y-auto space-y-1.5 divide-y divide-white/5">
                         {players.map(p => {
                           const scorer = selectedScorers.find(s => s.jugadorId === p.id);
@@ -794,6 +824,39 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                                 <button
                                   type="button"
                                   onClick={() => handleAddScorerGoal(p.id)}
+                                  className="w-5 h-5 bg-white/10 hover:bg-white/20 text-white rounded font-mono font-black text-center cursor-pointer transition flex items-center justify-center text-xs"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Quick Assisters tally list */}
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-white/85 mb-1.5 font-display tracking-wide">Asistidoras</label>
+                      <div className="bg-black/40 border border-white/10 rounded-lg p-3 max-h-40 overflow-y-auto space-y-1.5 divide-y divide-white/5">
+                        {players.map(p => {
+                          const assister = selectedAssisters.find(a => a.jugadorId === p.id);
+                          const quantity = assister?.cantidad || 0;
+                          return (
+                            <div key={p.id} className="flex items-center justify-between text-xs py-1.5">
+                              <span className="text-white font-medium">#{p.numeroCamiseta} {p.nombre} {p.apellido}</span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleSubAssisterGoal(p.id)}
+                                  className="w-5 h-5 bg-white/10 hover:bg-white/20 text-white rounded font-mono font-black text-center cursor-pointer transition flex items-center justify-center text-xs"
+                                >
+                                  -
+                                </button>
+                                <span className={`w-4 text-center font-bold font-mono ${quantity > 0 ? 'text-emerald-400 font-extrabold' : 'text-white/40'}`}>{quantity}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleAddAssisterGoal(p.id)}
                                   className="w-5 h-5 bg-white/10 hover:bg-white/20 text-white rounded font-mono font-black text-center cursor-pointer transition flex items-center justify-center text-xs"
                                 >
                                   +

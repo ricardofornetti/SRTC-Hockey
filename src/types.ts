@@ -25,6 +25,12 @@ export interface Player {
   tarjetaRoja: number;
   categoria: Category;
   destacada?: boolean; // Premium: Destacada del plantel
+  baseGoles?: number;
+  baseAsistencias?: number;
+  basePartidosJugados?: number;
+  baseTarjetaVerde?: number;
+  baseTarjetaAmarilla?: number;
+  baseTarjetaRoja?: number;
 }
 
 export interface Match {
