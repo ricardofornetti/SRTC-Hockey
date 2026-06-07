@@ -35,17 +35,35 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
   const [dtFormName, setDtFormName] = useState('');
   const [dtFormFotoUrl, setDtFormFotoUrl] = useState('');
 
-  // Listen for dynamic updates (like database synchronization of DTs)
+  // Ayudante de Campo (AC) Editable Information States (Persisted in localStorage per Category)
+  const [acName, setAcName] = useState(() => {
+    return localStorage.getItem(`srtc_ac_name_${selectedCategory}`) || 'Mauricio Reynoso';
+  });
+  const [acFotoUrl, setAcFotoUrl] = useState(() => {
+    return localStorage.getItem(`srtc_ac_foto_${selectedCategory}`) || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150';
+  });
+  const [isEditingAc, setIsEditingAc] = useState(false);
+  const [acFormName, setAcFormName] = useState('');
+  const [acFormFotoUrl, setAcFormFotoUrl] = useState('');
+
+  // Listen for dynamic updates (like database synchronization of DTs and ACs)
   useEffect(() => {
     const loadDtInfo = () => {
       setDtName(localStorage.getItem(`srtc_dt_name_${selectedCategory}`) || 'Sebastian');
       setDtFotoUrl(localStorage.getItem(`srtc_dt_foto_${selectedCategory}`) || 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150');
     };
+    const loadAcInfo = () => {
+      setAcName(localStorage.getItem(`srtc_ac_name_${selectedCategory}`) || 'Mauricio Reynoso');
+      setAcFotoUrl(localStorage.getItem(`srtc_ac_foto_${selectedCategory}`) || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150');
+    };
     loadDtInfo();
+    loadAcInfo();
 
     window.addEventListener('srtc_dt_updated', loadDtInfo);
+    window.addEventListener('srtc_ac_updated', loadAcInfo);
     return () => {
       window.removeEventListener('srtc_dt_updated', loadDtInfo);
+      window.removeEventListener('srtc_ac_updated', loadAcInfo);
     };
   }, [selectedCategory]);
 
@@ -357,6 +375,34 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
       });
     } catch (err) {
       console.error('Error syncing DT info to Firestore:', err);
+    }
+  };
+
+  const handleStartEditAc = () => {
+    setAcFormName(acName);
+    setAcFormFotoUrl(acFotoUrl);
+    setIsEditingAc(true);
+  };
+
+  const handleSaveAc = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const finalName = acFormName.trim() || 'Mauricio Reynoso';
+    const finalFoto = acFormFotoUrl.trim() || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150';
+    setAcName(finalName);
+    setAcFotoUrl(finalFoto);
+    localStorage.setItem(`srtc_ac_name_${selectedCategory}`, finalName);
+    localStorage.setItem(`srtc_ac_foto_${selectedCategory}`, finalFoto);
+    setIsEditingAc(false);
+
+    // Sync AC configuration to Firestore
+    try {
+      await saveDocument('settings', `ac_config_${selectedCategory}`, {
+        id: `ac_config_${selectedCategory}`,
+        name: finalName,
+        fotoUrl: finalFoto
+      });
+    } catch (err) {
+      console.error('Error syncing AC info to Firestore:', err);
     }
   };
 
@@ -792,6 +838,98 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
           </div>
         </div>
       )}
+
+      {/* AC Edit Modal Overlay */}
+      {isEditingAc && (
+        <div id="ac-edit-modal" className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto w-full h-full">
+          <div className="bg-[#121c38] border border-white/10 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] my-auto">
+            <div className="bg-[#0c1228] px-6 py-4 border-b border-white/10 flex items-center justify-between">
+              <h3 className="font-extrabold text-white text-sm flex items-center gap-2 font-sports-condensed uppercase tracking-wider">
+                <Users className="w-4 h-4 text-emerald-400" />
+                Ficha de Ayudante de Campo
+              </h3>
+              <button
+                onClick={() => setIsEditingAc(false)}
+                className="text-white hover:text-emerald-350 bg-white/10 hover:bg-white/15 px-3 py-1 text-xs rounded transition font-black font-sports-condensed uppercase tracking-wide cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveAc} className="p-6 overflow-y-auto space-y-4 text-left">
+              <div className="grid grid-cols-1 gap-4 font-sans">
+                <div>
+                  <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider mb-1.5 font-sports-condensed">Nombre del Ayudante de Campo</label>
+                  <input
+                    type="text"
+                    value={acFormName}
+                    onChange={(e) => setAcFormName(e.target.value)}
+                    placeholder="Ej. Mauricio Reynoso"
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors font-sans"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* AC Photo Upload */}
+              <div className="bg-black/30 p-3 rounded-lg border border-white/10 space-y-3 font-sans">
+                <label className="block text-[10px] uppercase font-black text-white/90 tracking-wider font-sports-condensed">Foto de Perfil del Ayudante</label>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  {acFormFotoUrl && (
+                    <img
+                      src={acFormFotoUrl}
+                      alt="Vista previa AC"
+                      className="w-16 h-16 rounded-xl object-cover border-2 border-emerald-500 shadow shadow-emerald-500/20 shrink-0 self-center"
+                    />
+                  )}
+                  <div className="flex-1 space-y-2">
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id="ac-image-file"
+                        onChange={(e) => handleImageUpload(e, setAcFormFotoUrl)}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="ac-image-file"
+                        className="flex items-center justify-center gap-2 w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-500 text-white text-xs font-bold py-2 px-3 rounded-lg cursor-pointer transition"
+                      >
+                        <Upload className="w-4 h-4 text-emerald-400" />
+                        Seleccionar de mi dispositivo
+                      </label>
+                    </div>
+                    <p className="text-[10px] text-white/60 text-center">o pegue dirección URL:</p>
+                    <input
+                      type="url"
+                      value={acFormFotoUrl}
+                      onChange={(e) => setAcFormFotoUrl(e.target.value)}
+                      placeholder="https://images.unsplash.com/..."
+                      className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-lg p-2 text-xs text-white focus:outline-none font-mono transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-white/10 pt-4 flex items-center justify-end gap-2.5 font-sans">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingAc(false)}
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg transition cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 text-xs font-black font-sports-condensed uppercase tracking-wider rounded-lg shadow-lg flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" /> Guardar Ficha
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Roster Positions Sections */}
       <div className="space-y-12">
         {activePositions.map((pos) => {
@@ -922,8 +1060,13 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
           </div>
         )}
 
-        {/* Cuerpo Técnico / DT section header & card (rendered at the end) */}
-        {(!search.trim() || dtName.toLowerCase().includes(search.toLowerCase()) || 'dt'.includes(search.toLowerCase()) || 'coach'.includes(search.toLowerCase())) && positionFilter === 'Todos' && (
+        {/* Cuerpo Técnico / DT & AC section header & card (rendered at the end) */}
+        {(!search.trim() || 
+          dtName.toLowerCase().includes(search.toLowerCase()) || 
+          acName.toLowerCase().includes(search.toLowerCase()) || 
+          'dt'.includes(search.toLowerCase()) || 
+          'ayudante'.includes(search.toLowerCase()) || 
+          'coach'.includes(search.toLowerCase())) && positionFilter === 'Todos' && (
           <div className="space-y-5 pt-4">
             {/* Staff Section Divider */}
             <div className="flex items-center gap-3 border-b border-white/10 pb-3 text-left">
@@ -934,49 +1077,99 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              <div className="bg-club-gradient-elements border border-white/10 rounded-2xl p-5 shadow-xl relative flex flex-col justify-between hover:border-emerald-500/30 hover:-translate-y-0.5 transition duration-350 overflow-hidden group">
-                <div className="absolute top-0 right-0 bg-emerald-500/15 text-white font-extrabold text-[8px] px-2.5 py-1 rounded-bl-xl uppercase tracking-wider font-sports-condensed border-l border-b border-white/5">
-                  Staff Oficial
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="relative shrink-0">
-                    <img
-                      src={dtFotoUrl}
-                      alt={dtName}
-                      referrerPolicy="no-referrer"
-                      className="w-18 h-18 rounded-2xl object-cover border-2 border-white/10 group-hover:border-emerald-500/40 transition"
-                    />
-                    <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-neutral-950 font-extrabold rounded-md text-[8px] px-1.5 py-0.5 shadow-md font-sports-condensed">
-                      DT
+              {/* DT Card */}
+              {(!search.trim() || dtName.toLowerCase().includes(search.toLowerCase()) || 'dt'.includes(search.toLowerCase()) || 'coach'.includes(search.toLowerCase())) && (
+                <div className="bg-club-gradient-elements border border-white/10 rounded-2xl p-5 shadow-xl relative flex flex-col justify-between hover:border-emerald-500/30 hover:-translate-y-0.5 transition duration-350 overflow-hidden group">
+                  <div className="absolute top-0 right-0 bg-emerald-500/15 text-white font-extrabold text-[8px] px-2.5 py-1 rounded-bl-xl uppercase tracking-wider font-sports-condensed border-l border-b border-white/5">
+                    Staff Oficial
+                  </div>
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="relative shrink-0">
+                      <img
+                        src={dtFotoUrl}
+                        alt={dtName}
+                        referrerPolicy="no-referrer"
+                        className="w-18 h-18 rounded-2xl object-cover border-2 border-white/10 group-hover:border-emerald-500/40 transition"
+                      />
+                      <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-neutral-950 font-extrabold rounded-md text-[8px] px-1.5 py-0.5 shadow-md font-sports-condensed">
+                        DT
+                      </div>
+                    </div>
+                    
+                    <div className="text-left space-y-1">
+                      <h4 className="font-extrabold font-sports-condensed text-white group-hover:text-emerald-350 transition-colors tracking-wide text-xl uppercase">
+                        {dtName}
+                      </h4>
+                      <p className="text-[10px] font-bold text-white uppercase tracking-widest font-sans">
+                        Director Técnico (DT)
+                      </p>
+                      <p className="text-[10px] text-white/90 font-sans">División {selectedCategory}</p>
                     </div>
                   </div>
                   
-                  <div className="text-left space-y-1">
-                    <h4 className="font-extrabold font-sports-condensed text-white group-hover:text-emerald-350 transition-colors tracking-wide text-xl uppercase">
-                      {dtName}
-                    </h4>
-                    <p className="text-[10px] font-bold text-white uppercase tracking-widest font-sans">
-                      Director Técnico (DT)
-                    </p>
-                    <p className="text-[10px] text-white/90 font-sans">División {selectedCategory}</p>
+                  <div className="flex items-center justify-between border-t border-white/5 mt-4 pt-3.5">
+                    <span className="text-[10px] text-white/80 font-mono">Coordinador Principal</span>
+                    
+                    {/* Actions context menu for DT */}
+                    {(userRole === 'admin' || userRole === 'coach') && (
+                      <button
+                        onClick={handleStartEditDt}
+                        className="p-1 px-2.5 rounded bg-white/10 hover:bg-white/20 text-white transition text-[10px] font-bold flex items-center gap-1 cursor-pointer font-sans"
+                      >
+                        <Edit2 className="w-3 h-3 text-indigo-200" /> Editar Foto/Nombre
+                      </button>
+                    )}
                   </div>
                 </div>
-                
-                <div className="flex items-center justify-between border-t border-white/5 mt-4 pt-3.5">
-                  <span className="text-[10px] text-white/80 font-mono">Coordinador Principal</span>
+              )}
+
+              {/* Ayudante de Campo (AC) Card */}
+              {(!search.trim() || acName.toLowerCase().includes(search.toLowerCase()) || 'ayudante'.includes(search.toLowerCase()) || 'staff'.includes(search.toLowerCase())) && (
+                <div className="bg-club-gradient-elements border border-white/10 rounded-2xl p-5 shadow-xl relative flex flex-col justify-between hover:border-emerald-500/30 hover:-translate-y-0.5 transition duration-350 overflow-hidden group">
+                  <div className="absolute top-0 right-0 bg-emerald-500/15 text-white font-extrabold text-[8px] px-2.5 py-1 rounded-bl-xl uppercase tracking-wider font-sports-condensed border-l border-b border-white/5">
+                    Staff Oficial
+                  </div>
                   
-                  {/* Actions context menu for DT */}
-                  {(userRole === 'admin' || userRole === 'coach') && (
-                    <button
-                      onClick={handleStartEditDt}
-                      className="p-1 px-2.5 rounded bg-white/10 hover:bg-white/20 text-white transition text-[10px] font-bold flex items-center gap-1 cursor-pointer font-sans"
-                    >
-                      <Edit2 className="w-3 h-3 text-indigo-200" /> Editar Foto/Nombre
-                    </button>
-                  )}
+                  <div className="flex items-start gap-4">
+                    <div className="relative shrink-0">
+                      <img
+                        src={acFotoUrl}
+                        alt={acName}
+                        referrerPolicy="no-referrer"
+                        className="w-18 h-18 rounded-2xl object-cover border-2 border-white/10 group-hover:border-emerald-500/40 transition"
+                      />
+                      <div className="absolute -bottom-1 -right-1 bg-teal-500 text-[#0c1228] font-extrabold rounded-md text-[8px] px-1.5 py-0.5 shadow-md font-sports-condensed">
+                        AC
+                      </div>
+                    </div>
+                    
+                    <div className="text-left space-y-1">
+                      <h4 className="font-extrabold font-sports-condensed text-white group-hover:text-emerald-350 transition-colors tracking-wide text-xl uppercase">
+                        {acName}
+                      </h4>
+                      <p className="text-[10px] font-bold text-white uppercase tracking-widest font-sans">
+                        Ayudante de Campo
+                      </p>
+                      <p className="text-[10px] text-white/90 font-sans">División {selectedCategory}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between border-t border-white/5 mt-4 pt-3.5">
+                    <span className="text-[10px] text-white/80 font-mono">Asistente Técnico</span>
+                    
+                    {/* Actions context menu for AC */}
+                    {(userRole === 'admin' || userRole === 'coach') && (
+                      <button
+                        onClick={handleStartEditAc}
+                        className="p-1 px-2.5 rounded bg-white/10 hover:bg-white/20 text-white transition text-[10px] font-bold flex items-center gap-1 cursor-pointer font-sans"
+                      >
+                        <Edit2 className="w-3 h-3 text-indigo-200" /> Editar Foto/Nombre
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}

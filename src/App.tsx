@@ -151,13 +151,18 @@ export default function App() {
         window.dispatchEvent(new Event('storage'));
       }
 
-      // Sync DT configurations for all categories
+      // Sync DT and AC configurations for all categories
       data?.forEach(item => {
         if (item.id.startsWith('dt_config_')) {
           const category = item.id.replace('dt_config_', '');
           if (item.name) localStorage.setItem(`srtc_dt_name_${category}`, item.name);
           if (item.fotoUrl) localStorage.setItem(`srtc_dt_foto_${category}`, item.fotoUrl);
           window.dispatchEvent(new Event('srtc_dt_updated'));
+        } else if (item.id.startsWith('ac_config_')) {
+          const category = item.id.replace('ac_config_', '');
+          if (item.name) localStorage.setItem(`srtc_ac_name_${category}`, item.name);
+          if (item.fotoUrl) localStorage.setItem(`srtc_ac_foto_${category}`, item.fotoUrl);
+          window.dispatchEvent(new Event('srtc_ac_updated'));
         }
       });
     });
