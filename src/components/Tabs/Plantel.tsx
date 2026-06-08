@@ -144,8 +144,14 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
 
     try {
       const canvas = document.createElement('canvas');
-      const width = videoElement.videoWidth || 640;
-      const height = videoElement.videoHeight || 480;
+      let width = videoElement.videoWidth;
+      let height = videoElement.videoHeight;
+      
+      // Safety guard for mobile browsers where dimensions are not loaded yet or return 0
+      if (!width || !height || width <= 0 || height <= 0) {
+        width = 640;
+        height = 480;
+      }
       
       // We want a beautiful compressed thumb
       const MAX_DIM = 200;
@@ -556,6 +562,11 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                     <div className="relative aspect-video rounded-lg overflow-hidden bg-black/80 border border-white/15 flex items-center justify-center">
                       <video
                         id="player-camera-preview"
+                        ref={(el) => {
+                          if (el && cameraStream && el.srcObject !== cameraStream) {
+                            el.srcObject = cameraStream;
+                          }
+                        }}
                         autoPlay
                         playsInline
                         muted
@@ -623,9 +634,9 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                         <button
                           type="button"
                           onClick={() => startCamera()}
-                          className="flex items-center justify-center gap-2 w-full bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/20 hover:border-emerald-400 text-emerald-405 text-[11px] font-bold py-2 px-2.5 rounded-lg cursor-pointer transition text-center"
+                          className="flex items-center justify-center gap-2 w-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-500 text-white text-[11px] font-bold py-2 px-2.5 rounded-lg cursor-pointer transition text-center"
                         >
-                          <Camera className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <Camera className="w-4 h-4 text-white shrink-0" />
                           Tomar con Cámara
                         </button>
                       </div>
