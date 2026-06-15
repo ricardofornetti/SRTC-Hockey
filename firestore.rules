@@ -2,53 +2,34 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // =========================================================================
-    // CONTROL DE ACCESO
-    // =========================================================================
-    // Esta app es pública para LECTURA (cualquier persona puede ver el
-    // fixture, plantel, tabla, noticias, etc. sin registrarse).
-    //
-    // Para ESCRITURA (crear, modificar, borrar) se exige que el pedido venga
-    // de un usuario autenticado con Firebase Authentication (email + password)
-    // cuyo email esté en la lista de administradores autorizados (STAFF_EMAILS).
-    //
-    // IMPORTANTE: esta lista debe coincidir EXACTAMENTE con `ADMIN_EMAILS` en
-    // `src/firebase.ts`. Si agregás o quitás un administrador:
-    //   1. Crear/eliminar el usuario en Firebase Console > Authentication > Users.
-    //   2. Actualizar la lista dentro de isStaff() en este archivo.
-    //   3. Actualizar ADMIN_EMAILS en src/firebase.ts.
-    //   4. Publicar (deploy) estas reglas nuevamente.
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isStaff() {
-      return isSignedIn() && request.auth.token.email in [
-        'fornettiricardo@gmail.com'
-        // Agregar aquí más emails de staff/administradores autorizados,
-        // separados por coma, por ejemplo:
-        // , 'otro.admin@dominio.com'
-      ];
-    }
-
     // Helper functions for validation and ID poisoning protection
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    // Límite de tamaño para campos de imagen individuales en base64 (Data URL).
-    // El cliente comprime las imágenes antes de subirlas (ver
-    // src/utils/imageUtils.ts), por lo que un valor legítimo nunca debería
-    // acercarse a este límite. Esto evita que se llenen documentos con
-    // blobs de imagen gigantes.
+    // Authentication & Authorization checks
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // isStaff helper identifies authed users in the verified admin email list.
+    // NOTE: This list of emails must mirror ADMIN_EMAILS in src/firebase.ts.
+    // To add or remove staff members manually:
+    // 1. Create or delete the user in Firebase Console -> Authentication -> Users.
+    // 2. Add or remove their email here in this rules file AND in src/firebase.ts (ADMIN_EMAILS).
+    // 3. Publish these Firestore security rules.
+    function isStaff() {
+      return isSignedIn() && request.auth.token.email in [
+        'fornettiricardo@gmail.com'
+        // Add more authorized staff emails here (separated by commas)
+      ];
+    }
+
+    // Image size validators
     function isValidImageField(value) {
       return value is string && value.size() <= 300000;
     }
 
-    // Algunos documentos de `settings` (ej. "team_logos", "standings_baselines")
-    // almacenan un JSON con varios logos/datos pequeños combinados, no una
-    // sola imagen. Se les permite más espacio, pero siempre acotado muy por
-    // debajo del límite de ~1MB por documento de Firestore.
     function isValidSettingsValue(value) {
       return value is string && value.size() <= 900000;
     }
@@ -105,7 +86,7 @@ service cloud.firestore {
       return data.keys().hasAll(['id', 'titulo', 'imagenUrl', 'fecha', 'torneo'])
         && data.id is string
         && data.titulo is string && data.titulo.size() <= 200
-        && isValidImageField(data.imagenUrl)
+        && isValidImageField(data.imagenUrl) // Obligatory in gallery
         && data.fecha is string
         && data.torneo is string;
     }
@@ -128,6 +109,7 @@ service cloud.firestore {
         && data.tipo in ['noticia', 'resultado', 'horario', 'convocatoria'];
     }
 
+    // settings holds logos, custom rules, background and baseline data
     function isValidSettings(data) {
       return data.id is string && data.id.size() <= 128
         && (!('value' in data) || isValidSettingsValue(data.value))
@@ -140,8 +122,7 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Explicit structural paths for each collection matching the blueprint.
-    // Lectura: pública. Escritura/borrado: solo staff autenticado.
+    // Explicit structural paths for each collection matching the blueprint
     match /players/{playerId} {
       allow read: if true;
       allow create, update: if isStaff() && isValidId(playerId) && isValidPlayer(request.resource.data);

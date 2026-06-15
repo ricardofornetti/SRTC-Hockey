@@ -4,7 +4,6 @@
  */
 
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
 import { Calendar, MapPin, Clock, Edit3, Plus, Trophy, Save, Trash2, Award, CheckCircle2, AlertTriangle, Play, ChevronLeft } from 'lucide-react';
 import { Match, Player, UserRole, MatchState, Category } from '../../types';
 import SrtcLogo from '../SrtcLogo';
@@ -971,7 +970,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
-                  {filteredMatches.map((match, idx) => {
+                  {filteredMatches.map((match) => {
                     const isPlayed = match.estado === 'Finalizado';
                     const isLive = match.estado === 'En juego';
                     const localTeam = match.localNombre || (match.esLocal ? 'San Rafael Tenis Club' : match.rival);
@@ -994,15 +993,11 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                     }
 
                     return (
-                      <motion.div
+                      <div
                         key={match.id}
-                        initial={{ opacity: 0, y: 14 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.25, delay: Math.min(idx * 0.04, 0.4), ease: 'easeOut' }}
-                        whileHover={{ y: -3 }}
                         className={`bg-club-gradient-elements border ${
                           isLive ? 'border-emerald-500 shadow-emerald-500/15 scale-[1.01]' : 'border-white/10'
-                        } rounded-2xl p-5 shadow-xl relative flex flex-col transition-colors duration-300 hover:border-emerald-500/30 w-full`}
+                        } rounded-2xl p-5 shadow-xl relative flex flex-col transition duration-350 hover:border-emerald-500/30 w-full hover:-translate-y-0.5`}
                       >
                         {/* Upper row: Date & status */}
                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2 flex-wrap gap-2 text-left">
@@ -1142,7 +1137,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                             )}
                           </div>
                         </div>
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </div>
@@ -1185,7 +1180,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
-                  {matchesInFecha.map((match, idx) => {
+                  {matchesInFecha.map((match) => {
                     const isPlayed = match.estado === 'Finalizado';
                     const isLive = match.estado === 'En juego';
                     const localTeam = match.localNombre || (match.esLocal ? 'San Rafael Tenis Club' : match.rival);
@@ -1209,15 +1204,11 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                     }
                     
                     return (
-                      <motion.div
+                      <div
                         key={match.id}
-                        initial={{ opacity: 0, y: 14 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.25, delay: Math.min(idx * 0.04, 0.4), ease: 'easeOut' }}
-                        whileHover={{ y: -3 }}
                         className={`bg-club-gradient-elements border ${
                           isLive ? 'border-emerald-500 shadow-emerald-500/15 scale-[1.01]' : 'border-white/10'
-                        } rounded-2xl p-5 shadow-xl relative flex flex-col transition-colors duration-300 hover:border-emerald-500/30 w-full`}
+                        } rounded-2xl p-5 shadow-xl relative flex flex-col transition duration-350 hover:border-emerald-500/30 w-full hover:-translate-y-0.5`}
                       >
                         {/* Upper row: Date & status */}
                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2 flex-wrap gap-2 text-left">
@@ -1360,7 +1351,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                             )}
                           </div>
                         </div>
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </div>

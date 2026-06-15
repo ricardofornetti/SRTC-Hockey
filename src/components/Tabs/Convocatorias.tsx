@@ -4,7 +4,6 @@
  */
 
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
 import { Award, User, Clock, Calendar, HelpCircle, Save, CheckCircle, ShieldAlert, Plus, Zap, HeartPulse } from 'lucide-react';
 import { Convocation, Match, Player, UserRole, Category } from '../../types';
 import { formatFechaDdmmyyyy } from './Fixture';
@@ -137,11 +136,11 @@ export default function Convocatorias({ convocations, matches, players, userRole
         <div className="bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 p-3 rounded-xl flex items-center gap-2">
           <Zap className="w-4.5 h-4.5 text-rose-400 shrink-0" />
           <p>
-            <strong>Modo administrador activo:</strong> Podés cambiar las convocatorias de cualquier jugadora haciendo clic en las opciones correspondientes de su respectiva ficha abajo.
+            <strong>Consola de Administración Activa:</strong> Podés cambiar las convocatorias de cualquier jugadora haciendo clic en las opciones correspondientes de su respectiva ficha abajo.
           </p>
         </div>
       )}
-
+    
       {/* Core Lists Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* GROUP 1: CONVOCADAS (Selected Roster) */}
@@ -154,14 +153,8 @@ export default function Convocatorias({ convocations, matches, players, userRole
 
           <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
             {convocadasList.length > 0 ? (
-              convocadasList.map((player, idx) => (
-                <motion.div
-                  key={player.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, delay: Math.min(idx * 0.03, 0.3) }}
-                  className="bg-neutral-900 border border-neutral-800 p-3.5 rounded-xl text-xs space-y-3"
-                >
+              convocadasList.map((player) => (
+                <div key={player.id} className="bg-neutral-900 border border-neutral-800 p-3.5 rounded-xl text-xs space-y-3">
                   <div className="flex items-center gap-3">
                     <img 
                       src={player.fotoUrl} 
@@ -196,7 +189,7 @@ export default function Convocatorias({ convocations, matches, players, userRole
                       </button>
                     </div>
                   )}
-                </motion.div>
+                </div>
               ))
             ) : (
               <p className="text-xs text-neutral-500 text-center py-6">No hay jugadoras convocadas en este momento.</p>
@@ -214,14 +207,8 @@ export default function Convocatorias({ convocations, matches, players, userRole
 
           <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
             {ausentesList.length > 0 ? (
-              ausentesList.map((player, idx) => (
-                <motion.div
-                  key={player.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, delay: Math.min(idx * 0.03, 0.3) }}
-                  className="bg-neutral-900 border border-neutral-800 p-3.5 rounded-xl text-xs space-y-3"
-                >
+              ausentesList.map((player) => (
+                <div key={player.id} className="bg-neutral-900 border border-neutral-800 p-3.5 rounded-xl text-xs space-y-3">
                   <div className="flex items-center gap-3">
                     <img 
                       src={player.fotoUrl} 
@@ -256,7 +243,7 @@ export default function Convocatorias({ convocations, matches, players, userRole
                       </button>
                     </div>
                   )}
-                </motion.div>
+                </div>
               ))
             ) : (
               <p className="text-xs text-neutral-500 text-center py-6">No hay jugadoras reportadas como ausentes.</p>
@@ -274,14 +261,8 @@ export default function Convocatorias({ convocations, matches, players, userRole
 
           <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
             {lesionadasList.length > 0 ? (
-              lesionadasList.map((player, idx) => (
-                <motion.div
-                  key={player.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, delay: Math.min(idx * 0.03, 0.3) }}
-                  className="bg-neutral-900 border border-neutral-800 p-3.5 rounded-xl text-xs space-y-3"
-                >
+              lesionadasList.map((player) => (
+                <div key={player.id} className="bg-neutral-900 border border-neutral-800 p-3.5 rounded-xl text-xs space-y-3">
                   <div className="flex items-center gap-3">
                     <img 
                       src={player.fotoUrl} 
@@ -312,7 +293,7 @@ export default function Convocatorias({ convocations, matches, players, userRole
                       </button>
                     </div>
                   )}
-                </motion.div>
+                </div>
               ))
             ) : (
               <p className="text-xs text-neutral-500 text-center py-6">¡Excepcional! No hay jugadoras registradas en el parte médico.</p>

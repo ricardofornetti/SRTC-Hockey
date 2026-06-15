@@ -9,7 +9,6 @@ import { Match, Standing, Category } from '../../types';
 import { INITIAL_MATCH_LIST } from '../../data';
 import ClubLogo from '../ClubLogo';
 import { saveDocument } from '../../firebase';
-import { processImageFile, ImageValidationError, IMAGE_PRESETS } from '../../utils/imageUtils';
 
 interface TablaProps {
   matches: Match[];
@@ -96,7 +95,6 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
   const [logoUrl, setLogoUrl] = useState('');
   const [logoBase64, setLogoBase64] = useState('');
   const [dragActive, setDragActive] = useState(false);
-  const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
 
   // Stats edit form fields
   const [editPG, setEditPG] = useState(0);
@@ -329,7 +327,6 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
     setEditPP(baseRecord.pp);
     setEditGF(baseRecord.gf);
     setEditGC(baseRecord.gc);
-    setLogoUploadError(null);
 
     // Look for any existing custom URL
     try {
@@ -384,12 +381,15 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
   };
 
   const processFile = (file: File) => {
-    setLogoUploadError(null);
-    processImageFile(file, IMAGE_PRESETS.logo)
-      .then((compressed) => setLogoBase64(compressed))
-      .catch((err) => {
-        setLogoUploadError(err instanceof ImageValidationError ? err.message : 'No se pudo procesar la imagen. Probá con otro archivo.');
-      });
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor carga un archivo de tipo imagen.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLogoBase64(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   // Save changes

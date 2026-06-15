@@ -4,7 +4,6 @@
  */
 
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
 import { Newspaper, ChevronRight, Plus, Trash2, Calendar, User, Save, Link, Share2, Send } from 'lucide-react';
 import { NewsItem, UserRole } from '../../types';
 
@@ -256,15 +255,11 @@ export default function Noticias({ news, userRole, onUpdateNews, onShare }: Noti
       ) : (
         /* Regular timeline scroll stack of news */
         <div id="news-stack" className="space-y-4">
-          {news.map((item, idx) => (
-            <motion.div
+          {news.map((item) => (
+            <div
               key={item.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: Math.min(idx * 0.05, 0.4), ease: 'easeOut' }}
-              whileHover={{ y: -2 }}
               onClick={() => setActiveArticle(item)}
-              className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden hover:border-neutral-700 transition-colors flex flex-col sm:flex-row shadow-lg cursor-pointer group"
+              className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden hover:border-neutral-700 transition flex flex-col sm:flex-row shadow-lg cursor-pointer group"
             >
               {/* Thumbnail block image */}
               <div className="relative w-full sm:w-52 h-44 sm:h-auto shrink-0 overflow-hidden">
@@ -322,7 +317,7 @@ export default function Noticias({ news, userRole, onUpdateNews, onShare }: Noti
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       )}

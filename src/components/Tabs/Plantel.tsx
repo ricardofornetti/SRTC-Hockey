@@ -4,11 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
 import { Users, Plus, Edit2, Trash2, ShieldAlert, Save, Upload, ChevronLeft, Camera, CameraOff } from 'lucide-react';
 import { Player, UserRole, Category } from '../../types';
 import { saveDocument } from '../../firebase';
-import { processImageFile, ImageValidationError, IMAGE_PRESETS } from '../../utils/imageUtils';
 
 interface PlantelProps {
   players: Player[];
@@ -25,7 +23,6 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
   // Edit/Create Player States
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
 
   // DT Editable Information States (Persisted in localStorage per Category)
   const [dtName, setDtName] = useState(() => {
@@ -193,19 +190,50 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
     }
   };
 
-  // Procesa la imagen seleccionada (valida tipo/tamaño y la comprime a un
-  // thumbnail liviano de máx. 200px) antes de pasarla al callback del campo
-  // correspondiente (foto de jugadora, DT o AC).
+  // Read local file as Base64 helper with canvas compression to keep files tiny (< 20KB) for Firestore
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setImageUploadError(null);
-    processImageFile(file, IMAGE_PRESETS.avatar)
-      .then(callback)
-      .catch((err) => {
-        setImageUploadError(err instanceof ImageValidationError ? err.message : 'No se pudo procesar la imagen. Probá con otro archivo.');
-      });
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Max dimension of 200px is perfect for roster thumbnails
+          const MAX_DIM = 200;
+          if (width > height) {
+            if (width > MAX_DIM) {
+              height *= MAX_DIM / width;
+              width = MAX_DIM;
+            }
+          } else {
+            if (height > MAX_DIM) {
+              width *= MAX_DIM / height;
+              height = MAX_DIM;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // Compress as JPEG with 0.75 quality (highly optimized size)
+            const compressedUrl = canvas.toDataURL('image/jpeg', 0.75);
+            callback(compressedUrl);
+          } else {
+            callback(reader.result as string);
+          }
+        };
+        img.src = reader.result;
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   // Filter and search
@@ -222,7 +250,6 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
   const handleStartEdit = (player: Player) => {
     setEditingPlayer(player);
     setIsCreating(false);
-    setImageUploadError(null);
     setNombre(player.nombre);
     setApellido(player.apellido);
     setNumeroCamiseta(player.numeroCamiseta || 0);
@@ -240,7 +267,6 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
   const handleStartCreate = () => {
     setEditingPlayer(null);
     setIsCreating(true);
-    setImageUploadError(null);
     setNombre('');
     setApellido('');
     setNumeroCamiseta(players.length > 0 ? Math.max(...players.map(p => p.numeroCamiseta || 0)) + 1 : 1);
@@ -333,7 +359,6 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
   const handleStartEditDt = () => {
     setDtFormName(dtName);
     setDtFormFotoUrl(dtFotoUrl);
-    setImageUploadError(null);
     setIsEditingDt(true);
   };
 
@@ -362,7 +387,6 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
   const handleStartEditAc = () => {
     setAcFormName(acName);
     setAcFormFotoUrl(acFotoUrl);
-    setImageUploadError(null);
     setIsEditingAc(true);
   };
 
@@ -630,9 +654,6 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                         placeholder="https://images.unsplash.com/..."
                         className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-lg p-2 text-xs text-white focus:outline-none font-mono transition-colors"
                       />
-                      {imageUploadError && (
-                        <p className="text-[10px] text-rose-400 font-bold">{imageUploadError}</p>
-                      )}
                     </div>
                   </div>
                 )}
@@ -805,9 +826,6 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                       placeholder="https://images.unsplash.com/..."
                       className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-lg p-2 text-xs text-white focus:outline-none font-mono transition-colors"
                     />
-                    {imageUploadError && (
-                      <p className="text-[10px] text-rose-400 font-bold text-center">{imageUploadError}</p>
-                    )}
                   </div>
                 </div>
               </div>
@@ -900,9 +918,6 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                       placeholder="https://images.unsplash.com/..."
                       className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-lg p-2 text-xs text-white focus:outline-none font-mono transition-colors"
                     />
-                    {imageUploadError && (
-                      <p className="text-[10px] text-rose-400 font-bold text-center">{imageUploadError}</p>
-                    )}
                   </div>
                 </div>
               </div>
@@ -948,15 +963,11 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
 
               {/* Roster Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {playersInPosition.map((player, idx) => {
+                {playersInPosition.map((player) => {
                   return (
-                    <motion.div
+                    <div
                       key={player.id}
-                      initial={{ opacity: 0, y: 14 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.25, delay: Math.min(idx * 0.04, 0.4), ease: 'easeOut' }}
-                      whileHover={{ y: -3 }}
-                      className="bg-club-gradient-elements border border-white/10 rounded-2xl p-5 shadow-xl relative flex flex-col justify-between hover:border-emerald-500/30 transition-colors duration-300 overflow-hidden group"
+                      className="bg-club-gradient-elements border border-white/10 rounded-2xl p-5 shadow-xl relative flex flex-col justify-between hover:border-emerald-500/30 hover:-translate-y-0.5 transition duration-355 overflow-hidden group"
                     >
                       <div className="flex items-start gap-4">
                         {/* Photo Profile with shirt badge */}
@@ -1044,7 +1055,7 @@ export default function Plantel({ players, userRole, selectedCategory, onUpdateP
                           )}
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>

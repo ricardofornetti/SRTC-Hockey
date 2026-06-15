@@ -4,7 +4,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, 
   Newspaper, 
@@ -48,11 +47,11 @@ import {
   syncCollection,
   saveDocument,
   deleteDocument,
-  onAuthStateChanged,
-  isAdminUser,
-  signInAdmin,
-  signOutAdmin
+  auth,
+  ADMIN_EMAILS
 } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { motion, AnimatePresence } from 'motion/react';
 
 import RoleSelector from './components/RoleSelector';
 import ClubLogo from './components/ClubLogo';
@@ -80,13 +79,8 @@ export default function App() {
   const [notifications, setNotifications] = useState<NotificationLog[]>(INITIAL_NOTIFICATIONS);
 
   // App settings
-  // El rol del usuario ya NO se elige manualmente ni se guarda en localStorage.
-  // Se deriva exclusivamente del estado de sesión de Firebase Authentication
-  // (ver useEffect de onAuthStateChanged más abajo). Por defecto, sin sesión
-  // iniciada, el rol es 'public' (solo lectura).
   const [userRole, setUserRole] = useState<UserRole>('public');
-  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
   
   const [selectedCategory, setSelectedCategory] = useState<Category>('7ma');
   const [activeTab, setActiveTab] = useState<string>('inicio');
@@ -99,13 +93,30 @@ export default function App() {
   });
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
 
-  // Bind real-time Firestore synchronization on load.
-  // NOTA: la siembra de datos iniciales (seedInitialDataIfCollectionIsEmpty)
-  // requiere permisos de escritura y solo se ejecuta cuando hay una sesión
-  // de administrador activa (ver useEffect de autenticación más abajo),
-  // ya que las reglas de Firestore ya no permiten escrituras públicas.
+  // Listen to Auth State dynamically and evaluate admin permissions on the fly
   useEffect(() => {
-    // Attach real-time subscriptions with a fallback to local changes
+    const unsubAuth = onAuthStateChanged(auth, async (user) => {
+      if (user && user.email && ADMIN_EMAILS.includes(user.email)) {
+        setUserRole('admin');
+        setCurrentUserEmail(user.email);
+        
+        // Seed Firestore if empty ONLY when active admin is authorized
+        try {
+          await seedInitialDataIfCollectionIsEmpty();
+        } catch (err) {
+          console.warn('Initial seeding lookup bypassed.', err);
+        }
+      } else {
+        setUserRole('public');
+        setCurrentUserEmail('');
+      }
+    });
+
+    return () => unsubAuth();
+  }, []);
+
+  // Bind real-time Firestore synchronization on load
+  useEffect(() => {
     const unsubPlayers = subscribeToCollection<Player>('players', (data) => {
       if (data && data.length > 0) setPlayers(data);
     });
@@ -181,42 +192,10 @@ export default function App() {
     };
   }, []);
 
-  // Suscripción al estado de autenticación de Firebase.
-  // El rol 'admin' solo se otorga si hay una sesión válida cuyo email
-  // figura en ADMIN_EMAILS (src/firebase.ts). La validación que realmente
-  // importa para la seguridad de los datos ocurre en firestore.rules;
-  // esto solo controla qué controles de edición se muestran en la interfaz.
-  useEffect(() => {
-    const unsubAuth = onAuthStateChanged((user) => {
-      if (user && isAdminUser(user)) {
-        setUserRole('admin');
-        setCurrentUserEmail(user.email);
-        // La siembra de datos iniciales requiere permisos de escritura,
-        // por lo que solo se intenta cuando hay sesión de administrador.
-        seedInitialDataIfCollectionIsEmpty().catch((err) => {
-          if (import.meta.env.DEV) console.warn('No se pudo sembrar datos iniciales:', err);
-        });
-      } else {
-        setUserRole('public');
-        setCurrentUserEmail(null);
-      }
-      setAuthLoading(false);
-    });
-    return () => unsubAuth();
-  }, []);
-
-  const handleSignIn = async (email: string, password: string) => {
-    const user = await signInAdmin(email, password);
-    if (!isAdminUser(user)) {
-      await signOutAdmin();
-      throw new Error('Esta cuenta no tiene permisos de administrador.');
-    }
-    showToast('Sesión iniciada', 'Acceso de administrador habilitado.', 'success');
-  };
-
-  const handleSignOut = async () => {
-    await signOutAdmin();
-    showToast('Sesión cerrada', 'Volviste al modo de solo lectura.', 'info');
+  // Sync state changes
+  const handleRoleChange = (role: UserRole) => {
+    setUserRole(role);
+    showToast('Rol de Acceso Actualizado', `Ahora tienes permisos de: ${role === 'admin' ? 'Administrador' : 'Usuario Público'}`, 'info');
   };
 
   const handleCategoryChange = (category: Category) => {
@@ -825,18 +804,16 @@ export default function App() {
 
   return (
     <div id="app-root-container" className="min-h-screen bg-club-gradient text-neutral-100 flex flex-col font-sans pb-10">
-      {/* 1. Indicador de sesión / Acceso de Staff */}
+      {/* 1. Control de Rol / Simulación de Entorno con Firebase Real Auth */}
       <RoleSelector 
         currentRole={userRole} 
-        currentUserEmail={currentUserEmail}
-        authLoading={authLoading}
-        onSignIn={handleSignIn}
-        onSignOut={handleSignOut}
+        currentUserEmail={currentUserEmail} 
+        showToast={showToast}
       />
 
       {activeTab !== 'inicio' ? (
         /* Standalone Page View for sub-tabs */
-        <div className="animate-in fade-in duration-300 flex flex-col flex-1">
+        <div className="flex flex-col flex-1">
           <main id="app-viewport" className="flex-1 max-w-7xl w-full mx-auto px-4 pt-4 pb-8">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
               <div>
@@ -885,10 +862,11 @@ export default function App() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.22, ease: 'easeOut' }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.22, ease: "easeInOut" }}
+                className="w-full flex-1"
               >
                 {renderTabContent()}
               </motion.div>
@@ -903,7 +881,7 @@ export default function App() {
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
               
               {/* Logo y Nombre del Club */}
-              <div className="flex flex-col sm:flex-row items-center gap-4.5 select-none animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row items-center gap-4.5 select-none md:scale-100">
                 {/* Highly prominent and glowing official club logo card - enlarged and static */}
                 <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 p-1.5 bg-white border-2 border-white/20 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/10">
                   {customClubLogo ? (
@@ -918,11 +896,11 @@ export default function App() {
                   )}
                 </div>
                 <div className="cursor-pointer text-center sm:text-left flex-1" onClick={() => setActiveTab('inicio')}>
-                  <h1 className="text-2xl xs:text-3.5xl sm:text-4.5xl md:text-5.5xl lg:text-6.5xl xl:text-7.5xl font-black text-white uppercase tracking-[0.03em] xs:tracking-[0.06em] sm:tracking-[0.12em] md:tracking-[0.18em] lg:tracking-[0.24em] xl:tracking-[0.28em] leading-none hover:text-amber-300 transition-all duration-300 select-none">
+                  <h1 className="text-2xl xs:text-3.5xl sm:text-4.5xl md:text-5.5xl lg:text-6.5xl xl:text-7.5xl font-black text-white uppercase tracking-[0.03em] xs:tracking-[0.06em] sm:tracking-[0.12em] md:tracking-[0.18em] lg:tracking-[0.24em] xl:tracking-[0.28em] leading-none hover:text-amber-350 transition-all duration-300 select-none">
                     SAN RAFAEL TENIS CLUB
                   </h1>
                   <p className="text-xs text-indigo-100/90 font-bold leading-normal mt-1 flex items-center justify-center sm:justify-start gap-2">
-                    <span className="w-2 h-2 bg-emerald-450 rounded-full animate-pulse shadow-glow shadow-emerald-400/55"></span>
+                    <span className="w-2 h-2 bg-emerald-450 rounded-full animate-pulse"></span>
                     <span className="font-sports-condensed uppercase tracking-wider text-[11px] text-indigo-100">Sitio Oficial de Hockey • Mendoza</span>
                   </p>
                 </div>
@@ -934,7 +912,7 @@ export default function App() {
           {/* 2.5 Quick Navigation Actions (Sticky/Fixed on scroll) */}
           <div className="sticky top-0 z-30 bg-club-gradient/95 backdrop-blur-md border-b border-white/10 shadow-xl w-full">
             <div className="max-w-7xl mx-auto w-full">
-              <div className="grid grid-cols-6 gap-0 bg-club-gradient-elements overflow-hidden shadow-inner w-full">
+              <div className="grid grid-cols-6 gap-0 bg-club-gradient-elements overflow-hidden shadow-inner w-full relative">
                 {tabsConfig.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -942,19 +920,22 @@ export default function App() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`relative flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
-                        isActive ? 'text-white font-black' : 'hover:bg-white/5 text-indigo-200'
-                      }`}
+                      className="flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 relative overflow-hidden"
                     >
                       {isActive && (
                         <motion.div
                           layoutId="nav-active-pill"
-                          className="absolute inset-0 bg-club-gradient shadow-inner"
-                          transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                          className="absolute inset-0 bg-club-gradient z-0"
+                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                         />
                       )}
-                      <Icon className={`relative z-10 w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-indigo-350'}`} />
-                      <span className="relative z-10 text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">{tab.label}</span>
+                      
+                      <div className="z-10 flex flex-col items-center justify-center gap-1.5 w-full">
+                        <Icon className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white font-black' : 'text-indigo-350'}`} />
+                        <span className={`text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5 ${isActive ? 'text-white' : 'text-indigo-200'}`}>
+                          {tab.label}
+                        </span>
+                      </div>
                     </button>
                   );
                 })}
@@ -962,15 +943,16 @@ export default function App() {
             </div>
           </div>
 
-          {/* 3. Main Tab View Area */}
+          {/* 3. Main Tab View Area with Entry Animation */}
           <main id="app-viewport" className="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.22, ease: 'easeOut' }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.22, ease: "easeInOut" }}
+                className="w-full flex-1"
               >
                 {renderTabContent()}
               </motion.div>
@@ -979,16 +961,16 @@ export default function App() {
         </>
       )}
 
-      {/* 6. Dynamic Toast Banner Panel */}
+      {/* 6. Dynamic Toast Banner Panel (Animated with AnimatePresence) */}
       <AnimatePresence>
         {toast && (
-          <motion.div
+          <motion.div 
             id="toast-notification-panel"
-            initial={{ opacity: 0, y: 24, scale: 0.97 }}
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.97 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="fixed bottom-4 md:bottom-8 right-4 left-4 md:left-auto md:w-96 modern-card p-4 rounded-2xl shadow-2xl flex gap-3 items-start z-50"
+            exit={{ opacity: 0, y: 50, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+            className="fixed bottom-4 md:bottom-8 right-4 left-4 md:left-auto md:w-96 bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-2xl flex gap-3 items-start z-50 transform"
           >
             <div className="shrink-0 mt-0.5">
               {toast.type === 'success' ? (
