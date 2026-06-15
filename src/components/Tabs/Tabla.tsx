@@ -300,9 +300,10 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
     };
   });
 
-  // Sort logically: Priority 1: Points, Priority 2: Goal Difference, Priority 3: Goals Scored (gf)
+  // Sort logically: Priority 1: Points (pts), Priority 2: Matches Won (pg), Priority 3: Goal Difference (dg), Priority 4: Goals Scored (gf)
   const sortedStandings = [...standingsList].sort((a, b) => {
     if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.pg !== a.pg) return b.pg - a.pg;
     if (b.dg !== a.dg) return b.dg - a.dg;
     return b.gf - a.gf;
   });

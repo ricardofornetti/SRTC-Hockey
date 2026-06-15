@@ -380,6 +380,17 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
   const [faseFilter, setFaseFilter] = useState<'regular' | 'cuartos' | 'semifinal' | 'final'>('regular');
   const [fechaTorneoFilter, setFechaTorneoFilter] = useState<number | 'todas'>('todas');
   
+  // Dynamic unique fixture round numbers for the active category
+  const uniqueFechas = Array.from(
+    new Set(
+      matches
+        .filter(m => m.categoria === selectedCategory && (m.fase === 'regular' || !m.fase))
+        .map(getMatchFechaNumber)
+    )
+  ).sort((a, b) => a - b);
+
+  const fechasToRender = uniqueFechas.length > 0 ? uniqueFechas : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+  
   // State for Editing
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -907,46 +918,55 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
       {/* Selector de Fecha del Torneo (Fase Regular) */}
       {faseFilter === 'regular' && (
-        <div className="bg-club-gradient-elements p-3 rounded-2xl border border-white/10 shadow-lg space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5 font-sans select-none">
+        <div className="bg-club-gradient-elements p-4 rounded-2xl border border-white/10 shadow-xl space-y-3">
+          <div className="flex items-center justify-between pb-1 border-b border-white/5">
+            <span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 font-sans select-none">
               <Trophy className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
-              Filtrar por Fecha del Torneo
+              Filtrar por Jornada / Fecha
             </span>
             {fechaTorneoFilter !== 'todas' && (
               <button
                 onClick={() => setFechaTorneoFilter('todas')}
-                className="text-[10px] bg-white/5 hover:bg-white/10 text-indigo-200 hover:text-white px-2 py-0.5 rounded border border-white/5 font-sans transition cursor-pointer"
+                className="text-[10px] bg-white/5 hover:bg-white/10 text-indigo-200 hover:text-white px-2.5 py-1 rounded-lg border border-white/10 font-sans font-bold uppercase tracking-wider transition cursor-pointer"
               >
                 Limpiar Filtro
               </button>
             )}
           </div>
           
-          <div className="flex items-center gap-1.5 overflow-x-auto w-full no-scrollbar py-1">
-            <button
-              onClick={() => setFechaTorneoFilter('todas')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-150 shrink-0 cursor-pointer border ${
-                fechaTorneoFilter === 'todas'
-                  ? 'bg-emerald-500 border-emerald-400 text-neutral-950 font-extrabold shadow shadow-emerald-500/20'
-                  : 'bg-white/5 border-white/10 text-indigo-400 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              Todas las Fechas
-            </button>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((num) => (
+          <div className="relative w-full overflow-hidden rounded-xl">
+            {/* Elegant fading borders at scrolling boundaries */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-neutral-950/20 to-transparent pointer-events-none z-10" />
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-neutral-950/20 to-transparent pointer-events-none z-10" />
+            
+            <div className="flex items-center gap-2 overflow-x-auto w-full no-scrollbar py-2 scroll-smooth px-1">
               <button
-                key={num}
-                onClick={() => setFechaTorneoFilter(num)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-150 shrink-0 cursor-pointer border ${
-                  fechaTorneoFilter === num
-                    ? 'bg-emerald-500 border-emerald-400 text-neutral-950 font-extrabold shadow shadow-emerald-500/20'
-                    : 'bg-white/5 border-white/10 text-indigo-400 hover:text-white hover:bg-white/10'
+                onClick={() => setFechaTorneoFilter('todas')}
+                className={`flex flex-col items-center justify-center min-w-[76px] h-13 rounded-xl border transition-all duration-200 shrink-0 cursor-pointer ${
+                  fechaTorneoFilter === 'todas'
+                    ? 'bg-gradient-to-tr from-emerald-500 to-teal-500 border-emerald-400 text-neutral-950 font-black shadow-lg shadow-emerald-500/20'
+                    : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white hover:bg-white/10 hover:border-white/20'
                 }`}
               >
-                Fecha {num}
+                <span className={`text-[9px] font-bold uppercase tracking-widest leading-none ${fechaTorneoFilter === 'todas' ? 'text-neutral-950/80' : 'text-indigo-300/60'}`}>TORNEO</span>
+                <span className="text-xs font-black leading-none mt-1 uppercase tracking-wide">TODAS</span>
               </button>
-            ))}
+              
+              {fechasToRender.map((num) => (
+                <button
+                  key={num}
+                  onClick={() => setFechaTorneoFilter(num)}
+                  className={`flex flex-col items-center justify-center min-w-[64px] h-13 rounded-xl border transition-all duration-200 shrink-0 cursor-pointer ${
+                    fechaTorneoFilter === num
+                      ? 'bg-gradient-to-tr from-emerald-500 to-teal-500 border-emerald-400 text-neutral-950 font-black shadow-lg shadow-emerald-500/20'
+                      : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className={`text-[9px] font-bold uppercase tracking-widest leading-none ${fechaTorneoFilter === num ? 'text-neutral-950/80' : 'text-indigo-300/60'}`}>FECHA</span>
+                  <span className="text-xs font-black leading-none mt-1 tracking-wider">{num}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -1354,7 +1374,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                           isLive 
                             ? 'border-emerald-500 shadow-[0_0_20px_rgba(52,211,153,0.15)] ring-1 ring-emerald-500/20' 
                             : 'border-white/10 hover:border-emerald-500/30'
-                        } rounded-2xl p-5 shadow-xl relative flex flex-col w-full`}
+                        } rounded-2xl p-4 sm:p-5 shadow-xl relative flex flex-col w-full`}
                       >
                         {/* Upper row: Date & status */}
                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2 flex-wrap gap-2 text-left">
@@ -1375,10 +1395,11 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                         </div>
 
                         {/* Scoreboard Board */}
-                        <div className="flex items-center justify-between py-2 gap-2">
-                          <div className="flex flex-col items-center w-5/12 text-center">
-                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
-                              <ClubLogo teamName={localTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
+                        <div className="flex items-center justify-between py-2 gap-2 w-full overflow-hidden">
+                          {/* Left Logo and name */}
+                          <div className="flex flex-col items-center flex-1 min-w-0 text-center">
+                            <div className="w-14 h-14 sm:w-18 sm:h-18 bg-[#0a0f24] border border-white/10 rounded-2xl flex items-center justify-center shadow-lg p-1 transition-transform hover:scale-105 shrink-0 overflow-hidden">
+                              <ClubLogo teamName={localTeam} className="w-11 h-11 sm:w-14 sm:h-14" />
                             </div>
                             <span className="text-[10px] min-[400px]:text-xs sm:text-sm font-black text-white mt-3 block leading-none tracking-tight w-full truncate whitespace-nowrap overflow-hidden text-ellipsis px-1">
                               {localTeam.toUpperCase()}
@@ -1386,33 +1407,35 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                             <span className="text-[10px] text-white/50 uppercase mt-1 font-bold tracking-wider font-sans">Local</span>
                           </div>
 
-                          <div className="flex flex-col items-center justify-center px-4 py-2.5 bg-black/25 border border-white/10 rounded-xl min-w-[90px] sm:min-w-[120px] shadow-2xl relative overflow-hidden group">
+                          {/* Mid stats/scores (Highlighted Scoreboard) */}
+                          <div className="flex flex-col items-center justify-center px-2 sm:px-4 py-2.5 bg-black/25 border border-white/10 rounded-xl min-w-[76px] sm:min-w-[110px] shadow-2xl relative overflow-hidden group shrink-0">
                             <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/10 pointer-events-none" />
                             {isPlayed ? (
-                              <div className="flex items-center justify-center gap-2 sm:gap-3.5 text-3xl sm:text-5xl font-extrabold font-mono tracking-tighter leading-none z-10">
+                              <div className="flex items-center justify-center gap-1.5 sm:gap-3 text-2xl sm:text-4xl font-extrabold font-mono tracking-tighter leading-none z-10">
                                 <span className={isLocalSrtc ? "text-emerald-400 filter drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" : "text-white"}>{localGoles}</span>
-                                <span className="text-indigo-200/30 font-normal text-xl sm:text-2xl">-</span>
+                                <span className="text-indigo-200/30 font-normal text-lg sm:text-xl">-</span>
                                 <span className={isVisitorSrtc ? "text-emerald-400 filter drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" : "text-white"}>{visitorGoles}</span>
                               </div>
                             ) : isLive ? (
                               <div className="flex flex-col items-center gap-1 z-10">
-                                <div className="flex items-center gap-2 text-2xl sm:text-4xl font-black text-amber-500 animate-pulse font-mono leading-none">
+                                <div className="flex items-center gap-1.5 text-xl sm:text-3xl font-black text-amber-500 animate-pulse font-mono leading-none">
                                   <span>{localGoles}</span>
-                                  <span className="text-indigo-200/30 text-sm">-</span>
+                                  <span className="text-indigo-200/30 text-xs">-</span>
                                   <span>{visitorGoles}</span>
                                 </div>
                                 <span className="text-[8px] font-black text-amber-500 animate-pulse uppercase tracking-widest leading-none">VIVO</span>
                               </div>
                             ) : (
-                              <div className="text-indigo-200/50 font-mono font-black text-sm sm:text-base tracking-widest z-10">
+                              <div className="text-indigo-200/50 font-mono font-black text-xs sm:text-sm tracking-widest z-10">
                                 VS
                               </div>
                             )}
                           </div>
 
-                          <div className="flex flex-col items-center w-5/12 text-center">
-                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
-                              <ClubLogo teamName={visitorTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
+                          {/* Right Logo and name */}
+                          <div className="flex flex-col items-center flex-1 min-w-0 text-center">
+                            <div className="w-14 h-14 sm:w-18 sm:h-18 bg-[#0a0f24] border border-white/10 rounded-2xl flex items-center justify-center shadow-lg p-1 transition-transform hover:scale-105 shrink-0 overflow-hidden">
+                              <ClubLogo teamName={visitorTeam} className="w-11 h-11 sm:w-14 sm:h-14" />
                             </div>
                             <span className="text-[10px] min-[400px]:text-xs sm:text-sm font-black text-white mt-3 block leading-none tracking-tight w-full truncate whitespace-nowrap overflow-hidden text-ellipsis px-1">
                               {visitorTeam.toUpperCase()}
@@ -1575,7 +1598,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                           isLive 
                             ? 'border-emerald-500 shadow-[0_0_20px_rgba(52,211,153,0.15)] ring-1 ring-emerald-500/20' 
                             : 'border-white/10 hover:border-emerald-500/30'
-                        } rounded-2xl p-5 shadow-xl relative flex flex-col w-full`}
+                        } rounded-2xl p-4 sm:p-5 shadow-xl relative flex flex-col w-full`}
                       >
                         {/* Upper row: Date & status */}
                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2 flex-wrap gap-2 text-left">
@@ -1596,11 +1619,11 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                         </div>
 
                         {/* Scoreboard Board */}
-                        <div className="flex items-center justify-between py-2 gap-2">
+                        <div className="flex items-center justify-between py-2 gap-2 w-full overflow-hidden">
                           {/* Left Logo and name */}
-                          <div className="flex flex-col items-center w-5/12 text-center">
-                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
-                              <ClubLogo teamName={localTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
+                          <div className="flex flex-col items-center flex-1 min-w-0 text-center">
+                            <div className="w-14 h-14 sm:w-18 sm:h-18 bg-[#0a0f24] border border-white/10 rounded-2xl flex items-center justify-center shadow-lg p-1 transition-transform hover:scale-105 shrink-0 overflow-hidden">
+                              <ClubLogo teamName={localTeam} className="w-11 h-11 sm:w-14 sm:h-14" />
                             </div>
                             <span className="text-[10px] min-[400px]:text-xs sm:text-sm font-black text-white mt-3 block leading-none tracking-tight w-full truncate whitespace-nowrap overflow-hidden text-ellipsis px-1">
                               {localTeam.toUpperCase()}
@@ -1609,34 +1632,34 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                           </div>
 
                           {/* Mid stats/scores (Highlighted Scoreboard) */}
-                          <div className="flex flex-col items-center justify-center px-4 py-2.5 bg-black/25 border border-white/10 rounded-xl min-w-[90px] sm:min-w-[120px] shadow-2xl relative overflow-hidden group">
+                          <div className="flex flex-col items-center justify-center px-2 sm:px-4 py-2.5 bg-black/25 border border-white/10 rounded-xl min-w-[76px] sm:min-w-[110px] shadow-2xl relative overflow-hidden group shrink-0">
                             <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/10 pointer-events-none" />
                             {isPlayed ? (
-                              <div className="flex items-center justify-center gap-2 sm:gap-3.5 text-3xl sm:text-5xl font-extrabold font-mono tracking-tighter leading-none z-10">
+                              <div className="flex items-center justify-center gap-1.5 sm:gap-3 text-2xl sm:text-4xl font-extrabold font-mono tracking-tighter leading-none z-10">
                                 <span className={isLocalSrtc ? "text-emerald-400 filter drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" : "text-white"}>{localGoles}</span>
-                                <span className="text-indigo-200/30 font-normal text-xl sm:text-2xl">-</span>
+                                <span className="text-indigo-200/30 font-normal text-lg sm:text-xl">-</span>
                                 <span className={isVisitorSrtc ? "text-emerald-400 filter drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" : "text-white"}>{visitorGoles}</span>
                               </div>
                             ) : isLive ? (
                               <div className="flex flex-col items-center gap-1 z-10">
-                                <div className="flex items-center gap-2 text-2xl sm:text-4xl font-black text-amber-500 animate-pulse font-mono leading-none">
+                                <div className="flex items-center gap-1.5 text-xl sm:text-3xl font-black text-amber-500 animate-pulse font-mono leading-none">
                                   <span>{localGoles}</span>
-                                  <span className="text-indigo-200/30 text-sm">-</span>
+                                  <span className="text-indigo-200/30 text-xs">-</span>
                                   <span>{visitorGoles}</span>
                                 </div>
                                 <span className="text-[8px] font-black text-amber-500 animate-pulse uppercase tracking-widest leading-none">VIVO</span>
                               </div>
                             ) : (
-                              <div className="text-indigo-200/50 font-mono font-black text-sm sm:text-base tracking-widest z-10">
+                              <div className="text-indigo-200/50 font-mono font-black text-xs sm:text-sm tracking-widest z-10">
                                 VS
                               </div>
                             )}
                           </div>
 
                           {/* Right Logo and name */}
-                          <div className="flex flex-col items-center w-5/12 text-center">
-                            <div className="w-19 h-19 sm:w-22 sm:h-22 bg-[#0f1c3f] border border-white/10 rounded-full flex items-center justify-center shadow-lg pb-0.5 transition-transform hover:scale-105">
-                              <ClubLogo teamName={visitorTeam} className="w-15 h-15 sm:w-18 sm:h-18" />
+                          <div className="flex flex-col items-center flex-1 min-w-0 text-center">
+                            <div className="w-14 h-14 sm:w-18 sm:h-18 bg-[#0a0f24] border border-white/10 rounded-2xl flex items-center justify-center shadow-lg p-1 transition-transform hover:scale-105 shrink-0 overflow-hidden">
+                              <ClubLogo teamName={visitorTeam} className="w-11 h-11 sm:w-14 sm:h-14" />
                             </div>
                             <span className="text-[10px] min-[400px]:text-xs sm:text-sm font-black text-white mt-3 block leading-none tracking-tight w-full truncate whitespace-nowrap overflow-hidden text-ellipsis px-1">
                               {visitorTeam.toUpperCase()}
