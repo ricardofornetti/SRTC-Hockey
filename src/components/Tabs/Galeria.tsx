@@ -4,8 +4,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { Image, Eye, Trash2, Plus, Save, Calendar, Link, X, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
 import { GalleryItem, Match, UserRole } from '../../types';
+import { processImageFile, ImageValidationError, IMAGE_PRESETS } from '../../utils/imageUtils';
 
 interface GaleriaProps {
   gallery: GalleryItem[];
@@ -67,6 +69,8 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
 
   // Drag & drop upload state and logic
   const [dragActive, setDragActive] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -78,18 +82,20 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
     }
   };
 
-  const processFile = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecciona un archivo de imagen válido.');
-      return;
+  const processFile = async (file: File) => {
+    setUploadError(null);
+    setIsProcessingImage(true);
+    try {
+      // Las imágenes se redimensionan y comprimen en el navegador antes de
+      // guardarse, para mantenerlas livianas y dentro del límite permitido
+      // por las reglas de Firestore.
+      const compressed = await processImageFile(file, IMAGE_PRESETS.gallery);
+      setImagenUrl(compressed);
+    } catch (err) {
+      setUploadError(err instanceof ImageValidationError ? err.message : 'No se pudo procesar la imagen. Probá con otro archivo.');
+    } finally {
+      setIsProcessingImage(false);
     }
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setImagenUrl(event.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -113,6 +119,7 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
     setImagenUrl('https://images.unsplash.com/photo-1543326137-f3642b957686?auto=format&fit=crop&q=80&w=600');
     setTorneo('');
     setPartidoRelacionado('');
+    setUploadError(null);
   };
 
   const handleSave = (e: React.FormEvent) => {
@@ -153,7 +160,7 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
       {/* Control row matching the exact layout style of other screens */}
       <div className="flex bg-club-gradient-elements p-3 rounded-xl border border-white/10 shadow-lg justify-end">
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          {(userRole === 'admin' || userRole === 'coach') && (
+          {(userRole === 'admin') && (
             <button
               onClick={handleStartCreate}
               className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-3.5 py-1.5 rounded-lg text-xs font-black font-sports-condensed uppercase tracking-wider transition shadow-md cursor-pointer"
@@ -246,7 +253,12 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
                   className="hidden"
                 />
                 
-                {imagenUrl && imagenUrl.startsWith('data:image/') ? (
+                {isProcessingImage ? (
+                  <div className="flex flex-col items-center gap-2 py-2">
+                    <div className="w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-[10px] text-indigo-200/70 font-bold">Optimizando imagen...</p>
+                  </div>
+                ) : imagenUrl && imagenUrl.startsWith('data:image/') ? (
                   <div className="space-y-2 w-full flex flex-col items-center">
                     <img 
                       src={imagenUrl} 
@@ -268,10 +280,13 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
                   >
                     <Upload className={`w-8 h-8 mb-2 ${dragActive ? 'text-emerald-400 animate-bounce' : 'text-indigo-200/40'}`} />
                     <p className="font-bold text-indigo-100 text-[11px]">Arrastra tu imagen aquí o haz click para explorarla</p>
-                    <p className="text-[9px] text-indigo-200/50 mt-1">Soporta PNG, JPEG, WEBP</p>
+                    <p className="text-[9px] text-indigo-200/50 mt-1">Soporta PNG, JPEG, WEBP (máx. 8MB)</p>
                   </label>
                 )}
               </div>
+              {uploadError && (
+                <p className="text-[10px] text-rose-400 font-bold">{uploadError}</p>
+              )}
             </div>
 
             <div>
@@ -306,15 +321,19 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
 
       {/* Media interactive grid */}
       <div id="gallery-grid" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-        {gallery.map((photo) => {
+        {gallery.map((photo, idx) => {
           // Find match related details
           const matchedMatch = matches.find(m => m.id === photo.partidoRelacionado);
           
           return (
-            <div
+            <motion.div
               key={photo.id}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: Math.min(idx * 0.04, 0.4), ease: 'easeOut' }}
+              whileHover={{ y: -3 }}
               onClick={() => setActivePhoto(photo)}
-              className="bg-club-gradient-elements border border-white/10 rounded-2xl overflow-hidden hover:border-emerald-500/30 hover:-translate-y-0.5 transition duration-300 shadow-xl cursor-pointer group relative"
+              className="bg-club-gradient-elements border border-white/10 rounded-2xl overflow-hidden hover:border-emerald-500/30 transition-colors duration-300 shadow-xl cursor-pointer group relative"
             >
               <div className="relative h-48 w-full overflow-hidden block">
                 <img 
@@ -358,7 +377,7 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

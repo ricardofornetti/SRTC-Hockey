@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { motion } from 'motion/react';
 import { Calendar, MapPin, Trophy, Users, BarChart3, Image, ChevronRight, Clock, Share2, Award, Home, Upload, RotateCcw } from 'lucide-react';
 import { Player, Match, Standing, GalleryItem, Category, UserRole } from '../../types';
 import ClubLogo from '../ClubLogo';
@@ -104,22 +105,55 @@ export default function Inicio({
     onShare(`Resultado SRTC vs ${match.rival}`, text);
   };
 
+  // Cuenta regresiva (en días) hasta el próximo partido programado.
+  const getDaysUntil = (fecha: string): number | null => {
+    if (!fecha) return null;
+    const target = new Date(`${fecha}T00:00:00`);
+    if (isNaN(target.getTime())) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffMs = target.getTime() - today.getTime();
+    return Math.round(diffMs / (1000 * 60 * 60 * 24));
+  };
+
+  const daysUntilNextMatch = nextMatch ? getDaysUntil(nextMatch.fecha) : null;
+  const countdownLabel = (() => {
+    if (daysUntilNextMatch === null) return null;
+    if (daysUntilNextMatch < 0) return null;
+    if (daysUntilNextMatch === 0) return '¡Hoy!';
+    if (daysUntilNextMatch === 1) return 'Mañana';
+    return `Faltan ${daysUntilNextMatch} días`;
+  })();
+
   return (
     <div id="inicio-tab" className="space-y-6">
 
       {/* Row de dos tarjetas: Próximo Partido & Último Resultado */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Next Match Card */}
-        <div id="next-match-card" className="bg-club-gradient-elements border border-white/10 rounded-xl p-5 shadow-lg relative flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          id="next-match-card"
+          className="bg-club-gradient-elements border border-emerald-500/15 accent-glow rounded-xl p-5 shadow-lg relative flex flex-col justify-between"
+        >
           <div>
             <div className="flex items-center justify-between mb-4">
               <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300 border border-emerald-500/20 px-2.5 py-0.5 rounded-md bg-emerald-500/15 flex items-center gap-1 shadow-inner">
                 <Clock className="w-3 h-3 animate-pulse text-emerald-400" /> PRÓXIMO PARTIDO
               </span>
               {nextMatch && (
-                <span className="text-xs font-black text-white">
-                  {formatFechaDdmmyyyy(nextMatch.fecha)}
-                </span>
+                <div className="flex items-center gap-2">
+                  {countdownLabel && (
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 border border-amber-500/20 px-2 py-0.5 rounded-md bg-amber-500/10">
+                      {countdownLabel}
+                    </span>
+                  )}
+                  <span className="text-xs font-black text-white">
+                    {formatFechaDdmmyyyy(nextMatch.fecha)}
+                  </span>
+                </div>
               )}
             </div>
 
@@ -176,10 +210,16 @@ export default function Inicio({
               Ver fixtures completo <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Last Result Card */}
-        <div id="last-result-card" className="bg-club-gradient-elements border border-white/10 rounded-xl p-5 shadow-lg relative flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.05, ease: 'easeOut' }}
+          id="last-result-card"
+          className="bg-club-gradient-elements border border-white/10 rounded-xl p-5 shadow-lg relative flex flex-col justify-between"
+        >
           <div>
             <div className="flex items-center justify-between mb-4">
               <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 border border-amber-500/20 px-2.5 py-0.5 rounded-md bg-amber-500/15">
@@ -272,13 +312,18 @@ export default function Inicio({
               Ver Partidos <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Row: Standings Snapshot & Season MVP Highlight */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Standings Snippet */}
-        <div className="bg-club-gradient-elements border border-white/10 rounded-xl p-5 shadow-lg md:col-span-2">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1, ease: 'easeOut' }}
+          className="bg-club-gradient-elements border border-white/10 rounded-xl p-5 shadow-lg md:col-span-2"
+        >
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-extrabold text-white flex items-center gap-1.5 text-sm font-sports-condensed tracking-wider">
               <Trophy className="w-4 h-4 text-emerald-400" /> POSICIONES
@@ -327,10 +372,15 @@ export default function Inicio({
               Ver Tabla Completa <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Goleadora del equipo Card */}
-        <div className="bg-club-gradient-elements border border-white/10 rounded-xl p-5 shadow-lg flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15, ease: 'easeOut' }}
+          className="bg-club-gradient-elements border border-white/10 rounded-xl p-5 shadow-lg flex flex-col justify-between"
+        >
           <div>
             <h3 className="font-extrabold text-white flex items-center gap-1.5 text-sm mb-3 font-sports-condensed tracking-wider">
               <Award className="w-4 h-4 text-emerald-400" /> {topScorers.length > 1 ? 'GOLEADORAS' : 'GOLEADORA'}
@@ -419,7 +469,7 @@ export default function Inicio({
               Ver Rankings Estadísticos <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Featured Gallery Section */}
@@ -429,10 +479,14 @@ export default function Inicio({
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {gallery.slice(0, 3).map((item) => (
-            <div 
+          {gallery.slice(0, 3).map((item, idx) => (
+            <motion.div 
               key={item.id} 
-              className="bg-club-gradient-elements border border-white/10 rounded-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-lg transition flex flex-col justify-between cursor-pointer"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 + idx * 0.05, ease: 'easeOut' }}
+              whileHover={{ y: -3 }}
+              className="bg-club-gradient-elements border border-white/10 rounded-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-lg transition-colors cursor-pointer flex flex-col justify-between"
               onClick={() => onTabChange('galeria')}
             >
               <div className="relative h-44 overflow-hidden">
@@ -464,7 +518,7 @@ export default function Inicio({
                   </span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

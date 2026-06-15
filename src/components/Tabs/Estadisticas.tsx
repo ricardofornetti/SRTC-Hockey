@@ -1,9 +1,10 @@
 /**
  * @license
- * SPDX-License-Identifier: Apache-2.5
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { AreaChart, BarChart3, Award, Trophy, Users, ShieldAlert, Star, Shield, ThumbsUp, ChevronLeft } from 'lucide-react';
 import { Player, Match, Category } from '../../types';
 
@@ -97,7 +98,12 @@ export default function Estadisticas({ players, matches, selectedCategory, onTab
       {/* Visual Bento Dashboard Header (4 elements grid) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total stats counters */}
-        <div className="bg-club-gradient-elements border border-white/10 rounded-2xl p-4 flex items-center gap-3.5 shadow-xl">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0 }}
+          className="bg-club-gradient-elements border border-white/10 rounded-2xl p-4 flex items-center gap-3.5 shadow-xl"
+        >
           <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-white/5">
             <BarChart3 className="w-5 h-5" />
           </div>
@@ -105,9 +111,14 @@ export default function Estadisticas({ players, matches, selectedCategory, onTab
             <span className="block text-[10px] text-indigo-200/55 font-bold uppercase tracking-wider">Partidos Jugados</span>
             <strong className="text-xl font-black text-white font-mono">{partidosJugados}</strong>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-club-gradient-elements border border-white/10 rounded-2xl p-4 flex items-center gap-3.5 shadow-xl">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0.05 }}
+          className="bg-club-gradient-elements border border-white/10 rounded-2xl p-4 flex items-center gap-3.5 shadow-xl"
+        >
           <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-white/5">
             <Trophy className="w-5 h-5 animate-pulse" />
           </div>
@@ -115,9 +126,14 @@ export default function Estadisticas({ players, matches, selectedCategory, onTab
             <span className="block text-[10px] text-indigo-200/55 font-bold uppercase tracking-wider">Goles Convertidos</span>
             <strong className="text-xl font-black text-white font-mono">{golesConvertidos}</strong>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-club-gradient-elements border border-white/10 rounded-2xl p-4 flex items-center gap-3.5 shadow-xl col-span-1">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0.1 }}
+          className="bg-club-gradient-elements border border-white/10 rounded-2xl p-4 flex items-center gap-3.5 shadow-xl col-span-1"
+        >
           <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-white/5">
             <Award className="w-5 h-5" />
           </div>
@@ -128,9 +144,14 @@ export default function Estadisticas({ players, matches, selectedCategory, onTab
               <span className="text-xs font-black text-emerald-400 font-mono">({winPercentage}%)</span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-club-gradient-elements border border-white/10 rounded-2xl p-4 flex items-center gap-3.5 shadow-xl col-span-1">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0.15 }}
+          className="bg-club-gradient-elements border border-white/10 rounded-2xl p-4 flex items-center gap-3.5 shadow-xl col-span-1"
+        >
           <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-white/5">
             <Users className="w-5 h-5" />
           </div>
@@ -138,7 +159,7 @@ export default function Estadisticas({ players, matches, selectedCategory, onTab
             <span className="block text-[10px] text-indigo-200/55 font-bold uppercase tracking-wider">Jugadoras</span>
             <strong className="text-xl font-black text-white font-mono">{cantidadJugadoras}</strong>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Dynamic Team Top Goalscorers List Box */}
@@ -255,9 +276,11 @@ export default function Estadisticas({ players, matches, selectedCategory, onTab
                         <span className="font-black text-emerald-400 text-sm font-mono">{player.goles}</span>
                       </div>
                       <div className="w-full bg-black/40 h-2.5 rounded-full overflow-hidden block border border-white/5">
-                        <div
-                          className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                          style={{ width: `${widthPct}%` }}
+                        <motion.div
+                          className="bg-emerald-500 h-full rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${widthPct}%` }}
+                          transition={{ duration: 0.6, delay: Math.min(index * 0.04, 0.3), ease: 'easeOut' }}
                         />
                       </div>
                     </div>
@@ -292,9 +315,11 @@ export default function Estadisticas({ players, matches, selectedCategory, onTab
                         <span className="font-black text-emerald-400 text-sm font-mono">{player.asistencias}</span>
                       </div>
                       <div className="w-full bg-black/40 h-2.5 rounded-full overflow-hidden block border border-white/5">
-                        <div
-                          className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                          style={{ width: `${widthPct}%` }}
+                        <motion.div
+                          className="bg-emerald-500 h-full rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${widthPct}%` }}
+                          transition={{ duration: 0.6, delay: Math.min(index * 0.04, 0.3), ease: 'easeOut' }}
                         />
                       </div>
                     </div>
@@ -329,9 +354,11 @@ export default function Estadisticas({ players, matches, selectedCategory, onTab
                         <span className="font-black text-emerald-400 text-sm font-mono">{player.partidosJugados} Part.</span>
                       </div>
                       <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden block border border-white/5">
-                        <div
-                          className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                          style={{ width: `${widthPct}%` }}
+                        <motion.div
+                          className="bg-emerald-500 h-full rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${widthPct}%` }}
+                          transition={{ duration: 0.6, delay: Math.min(index * 0.04, 0.3), ease: 'easeOut' }}
                         />
                       </div>
                     </div>

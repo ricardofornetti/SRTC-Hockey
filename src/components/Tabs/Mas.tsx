@@ -264,7 +264,7 @@ export default function Mas({
             </div>
 
             {/* Coach / Admin broadcaster block */}
-            {(userRole === 'admin' || userRole === 'coach') ? (
+            {(userRole === 'admin') ? (
               <form onSubmit={handleSendNotification} className="bg-neutral-950 p-4 border border-neutral-800 rounded-xl space-y-4.5 text-xs text-left">
                 <span className="text-[10px] font-black text-rose-400 uppercase tracking-widest block">📢 Emitir Notificación Push global</span>
                 
@@ -318,7 +318,7 @@ export default function Mas({
               </form>
             ) : (
               <div className="bg-neutral-950 p-3 rounded-lg border border-neutral-850 text-neutral-400 text-xs">
-                🔒 Para emitir transmisiones de notificaciones ingrese con rol de <strong>Entrenador</strong> o <strong>Administrador</strong> en la sección superior.
+                🔒 Para emitir transmisiones de notificaciones ingresá con acceso de <strong>Administrador</strong> en la sección superior.
               </div>
             )}
 
