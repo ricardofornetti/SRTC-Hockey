@@ -9,17 +9,17 @@ export default function SrtcLogo({ className = 'w-6 h-6', withText = false }: Sr
   // Common Gradients and Filters to make the SVG look premium & shiny
   const svgFiltersAndDefs = (
     <defs>
-      {/* Royal Blue Gradient */}
+      {/* Club Blue Gradient (color institucional #3e7496) */}
       <linearGradient id="srtc-blue-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#1e40af" /> {/* Navy Blue */}
-        <stop offset="50%" stopColor="#2563eb" /> {/* Royal Blue */}
-        <stop offset="100%" stopColor="#1d4ed8" /> {/* Intense Blue */}
+        <stop offset="0%" stopColor="#2d546c" /> {/* Azul oscuro */}
+        <stop offset="50%" stopColor="#3e7496" /> {/* Azul institucional */}
+        <stop offset="100%" stopColor="#5a90b3" /> {/* Azul claro */}
       </linearGradient>
 
-      {/* Official Emerald/Forest Green Gradient */}
+      {/* Club Green Gradient (color institucional #7a9660) */}
       <linearGradient id="srtc-green-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#047857" /> {/* Emerald/Forest Green */}
-        <stop offset="100%" stopColor="#10b981" /> {/* Bright Green */}
+        <stop offset="0%" stopColor="#60764c" /> {/* Verde oscuro */}
+        <stop offset="100%" stopColor="#8ba573" /> {/* Verde institucional claro */}
       </linearGradient>
 
       {/* Pure White/Silver Sheen Gradient */}

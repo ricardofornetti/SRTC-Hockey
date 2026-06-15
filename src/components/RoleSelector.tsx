@@ -4,116 +4,173 @@
  */
 
 import React, { useState } from 'react';
-import { Shield, User, Users, ChevronDown, Check, LogIn, LogOut, Database, Wifi } from 'lucide-react';
+import { Shield, Users, LogIn, LogOut, X, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { UserRole } from '../types';
 
 interface RoleSelectorProps {
   currentRole: UserRole;
-  onChangeRole: (role: UserRole) => void;
-  currentUserEmail: string;
+  currentUserEmail: string | null;
+  authLoading: boolean;
+  onSignIn: (email: string, password: string) => Promise<void>;
+  onSignOut: () => Promise<void>;
 }
 
-export default function RoleSelector({ currentRole, onChangeRole, currentUserEmail }: RoleSelectorProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function RoleSelector({ currentRole, currentUserEmail, authLoading, onSignIn, onSignOut }: RoleSelectorProps) {
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const roles = [
-    {
-      id: 'public' as UserRole,
-      label: 'Usuario Público',
-      icon: Users,
-      color: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-      badgeColor: 'bg-emerald-500 text-white',
-      desc: 'Acceso de solo lectura para familias, jugadoras y simpatizantes.',
-    },
-    {
-      id: 'admin' as UserRole,
-      label: 'Administrador Web',
-      icon: Shield,
-      color: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
-      badgeColor: 'bg-rose-600 text-white',
-      desc: 'Control integral de partidos, jugadoras, noticias, configuración del club y bases de datos.',
+  const isAdmin = currentRole === 'admin';
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      await onSignIn(email, password);
+      setIsLoginOpen(false);
+      setEmail('');
+      setPassword('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo iniciar sesión.');
+    } finally {
+      setSubmitting(false);
     }
-  ];
-
-  const activeRoleConfig = roles.find(r => r.id === currentRole) || roles[0];
+  };
 
   return (
-    <div id="role-selector-container" className="bg-neutral-900/40 backdrop-blur-sm border-b border-neutral-850 text-xs text-neutral-300 select-none z-50 relative shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-1.5 flex justify-end items-center">
-        <div className="relative">
-          <button
-            id="role-dropdown-trigger"
-            onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-850 hover:bg-neutral-800 text-[11px] text-neutral-250 border border-neutral-750 hover:border-neutral-700 transition duration-150 cursor-pointer font-bold shadow-sm"
-          >
-            <activeRoleConfig.icon className="w-3.5 h-3.5 text-neutral-450" />
-            <span>{activeRoleConfig.label}</span>
-            <ChevronDown className={`w-3 h-3 text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-          </button>
-
-          {isOpen && (
-              <>
-                <div 
-                  className="fixed inset-0 z-40" 
-                  onClick={() => setIsOpen(false)} 
-                />
-                <div 
-                  id="role-dropdown-menu" 
-                  className="absolute right-0 mt-2 w-72 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl z-50 p-3 flex flex-col gap-2 scale-100 origin-top-right transition-all animate-in fade-in zoom-in-95 duration-100"
-                >
-                  <div className="border-b border-neutral-800 pb-2 mb-1">
-                    <div className="flex items-center justify-between">
-                      <p className="font-bold text-neutral-200">Control de Acceso</p>
-                      <div className="flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded text-[9px] font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span>FIREBASE ONLINE</span>
-                      </div>
-                    </div>
-                    <p className="text-[10px] text-neutral-400 truncate mt-0.5" title={currentUserEmail}>
-                      Sesión activa: <span className="font-mono text-neutral-300">{currentUserEmail}</span>
-                    </p>
-                  </div>
-
-                  {roles.map((role) => {
-                    const Icon = role.icon;
-                    const isSelected = currentRole === role.id;
-                    return (
-                      <button
-                        key={role.id}
-                        onClick={() => {
-                          onChangeRole(role.id);
-                          setIsOpen(false);
-                        }}
-                        className={`w-full text-left p-2.5 rounded-lg transition duration-200 cursor-pointer flex gap-2 items-start ${
-                          isSelected 
-                            ? 'bg-neutral-800/80 border border-neutral-700' 
-                            : 'hover:bg-neutral-900 border border-transparent'
-                        }`}
-                      >
-                        <div className={`p-1.5 rounded-md mt-0.5 ${isSelected ? 'bg-neutral-700' : 'bg-neutral-800'}`}>
-                          <Icon className="w-3.5 h-3.5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-neutral-100 text-xs">{role.label}</span>
-                            {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400" />}
-                          </div>
-                          <p className="text-[10px] text-neutral-400 mt-1 leading-relaxed">
-                            {role.desc}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-
-                  <div className="bg-neutral-900 p-2 rounded-lg text-[10px] text-neutral-400 text-center">
-                    Los permisos cambian instantáneamente en todas las secciones.
-                  </div>
-                </div>
-              </>
-            )}
+    <div id="role-selector-container" className="bg-neutral-950/60 backdrop-blur-sm border-b border-white/5 text-xs text-neutral-300 select-none z-50 relative">
+      <div className="max-w-7xl mx-auto px-4 py-1.5 flex justify-end items-center gap-2">
+        {isAdmin ? (
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-300 border border-rose-500/20 text-[11px] font-bold">
+              <Shield className="w-3.5 h-3.5" />
+              <span>Administrador</span>
+              {currentUserEmail && (
+                <span className="hidden sm:inline text-rose-200/70 font-mono text-[10px] ml-1 truncate max-w-[160px]" title={currentUserEmail}>
+                  · {currentUserEmail}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => onSignOut()}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-neutral-850 hover:bg-neutral-800 border border-neutral-750 text-[11px] font-bold text-neutral-300 transition cursor-pointer"
+              title="Cerrar sesión"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Salir</span>
+            </button>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[11px] font-bold">
+              <Users className="w-3.5 h-3.5" />
+              <span>Visitante</span>
+            </div>
+            <button
+              onClick={() => setIsLoginOpen(true)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-neutral-850 hover:bg-neutral-800 border border-neutral-750 text-[11px] font-bold text-neutral-300 transition cursor-pointer"
+              title="Acceso de Staff"
+              disabled={authLoading}
+            >
+              {authLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogIn className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">Acceso Staff</span>
+            </button>
+          </>
+        )}
       </div>
+
+      <AnimatePresence>
+        {isLoginOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsLoginOpen(false)}
+            />
+            <motion.div
+              className="fixed inset-0 z-[61] flex items-center justify-center p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ duration: 0.18 }}
+                className="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl p-5 relative"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setIsLoginOpen(false)}
+                  className="absolute top-3 right-3 text-neutral-500 hover:text-white transition cursor-pointer"
+                  aria-label="Cerrar"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                    <Shield className="w-4 h-4" />
+                  </div>
+                  <h3 className="font-extrabold text-white text-sm">Acceso de Staff</h3>
+                </div>
+                <p className="text-[11px] text-neutral-400 mb-4">
+                  Ingresá con el email y contraseña del cuerpo técnico/administración para habilitar la edición.
+                </p>
+
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <div>
+                    <label className="block text-[10px] text-neutral-400 font-bold mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-rose-500/50"
+                      placeholder="tu@email.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-neutral-400 font-bold mb-1">Contraseña</label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      autoComplete="current-password"
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-rose-500/50"
+                      placeholder="••••••••"
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded px-2.5 py-2">
+                      {error}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full bg-rose-600 hover:bg-rose-500 disabled:opacity-60 text-white font-bold text-xs py-2 rounded-lg shadow-md flex items-center justify-center gap-2 cursor-pointer transition"
+                  >
+                    {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogIn className="w-3.5 h-3.5" />}
+                    Iniciar sesión
+                  </button>
+                </form>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
