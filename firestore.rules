@@ -2,9 +2,55 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // =========================================================================
+    // CONTROL DE ACCESO
+    // =========================================================================
+    // Esta app es pública para LECTURA (cualquier persona puede ver el
+    // fixture, plantel, tabla, noticias, etc. sin registrarse).
+    //
+    // Para ESCRITURA (crear, modificar, borrar) se exige que el pedido venga
+    // de un usuario autenticado con Firebase Authentication (email + password)
+    // cuyo email esté en la lista de administradores autorizados (STAFF_EMAILS).
+    //
+    // IMPORTANTE: esta lista debe coincidir EXACTAMENTE con `ADMIN_EMAILS` en
+    // `src/firebase.ts`. Si agregás o quitás un administrador:
+    //   1. Crear/eliminar el usuario en Firebase Console > Authentication > Users.
+    //   2. Actualizar la lista dentro de isStaff() en este archivo.
+    //   3. Actualizar ADMIN_EMAILS en src/firebase.ts.
+    //   4. Publicar (deploy) estas reglas nuevamente.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isStaff() {
+      return isSignedIn() && request.auth.token.email in [
+        'fornettiricardo@gmail.com'
+        // Agregar aquí más emails de staff/administradores autorizados,
+        // separados por coma, por ejemplo:
+        // , 'otro.admin@dominio.com'
+      ];
+    }
+
     // Helper functions for validation and ID poisoning protection
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Límite de tamaño para campos de imagen individuales en base64 (Data URL).
+    // El cliente comprime las imágenes antes de subirlas (ver
+    // src/utils/imageUtils.ts), por lo que un valor legítimo nunca debería
+    // acercarse a este límite. Esto evita que se llenen documentos con
+    // blobs de imagen gigantes.
+    function isValidImageField(value) {
+      return value is string && value.size() <= 300000;
+    }
+
+    // Algunos documentos de `settings` (ej. "team_logos", "standings_baselines")
+    // almacenan un JSON con varios logos/datos pequeños combinados, no una
+    // sola imagen. Se les permite más espacio, pero siempre acotado muy por
+    // debajo del límite de ~1MB por documento de Firestore.
+    function isValidSettingsValue(value) {
+      return value is string && value.size() <= 900000;
     }
 
     function isValidPlayer(data) {
@@ -14,7 +60,8 @@ service cloud.firestore {
         && data.apellido is string && data.apellido.size() <= 100
         && data.numeroCamiseta is int
         && data.posicion in ['Arquera', 'Defensora', 'Volante', 'Delantera']
-        && data.categoria in ['7ma', '6ta', '5ta', 'Intermedia', 'Primera'];
+        && data.categoria in ['7ma', '6ta', '5ta', 'Intermedia', 'Primera']
+        && (!('fotoUrl' in data) || isValidImageField(data.fotoUrl));
     }
 
     function isValidMatch(data) {
@@ -25,7 +72,8 @@ service cloud.firestore {
         && data.rival is string && data.rival.size() <= 100
         && data.categoria in ['7ma', '6ta', '5ta', 'Intermedia', 'Primera']
         && data.esLocal is bool
-        && data.estado in ['Programado', 'En juego', 'Finalizado', 'Suspendido'];
+        && data.estado in ['Programado', 'En juego', 'Finalizado', 'Suspendido']
+        && (!('rivalLogo' in data) || isValidImageField(data.rivalLogo));
     }
 
     function isValidStanding(data) {
@@ -49,14 +97,15 @@ service cloud.firestore {
         && data.titulo is string && data.titulo.size() <= 200
         && data.contenido is string && data.contenido.size() <= 10000
         && data.fecha is string
-        && data.autor is string;
+        && data.autor is string
+        && (!('imagenUrl' in data) || isValidImageField(data.imagenUrl));
     }
 
     function isValidGalleryItem(data) {
       return data.keys().hasAll(['id', 'titulo', 'imagenUrl', 'fecha', 'torneo'])
         && data.id is string
         && data.titulo is string && data.titulo.size() <= 200
-        && data.imagenUrl is string
+        && isValidImageField(data.imagenUrl)
         && data.fecha is string
         && data.torneo is string;
     }
@@ -81,9 +130,9 @@ service cloud.firestore {
 
     function isValidSettings(data) {
       return data.id is string && data.id.size() <= 128
-        && (!('value' in data) || (data.value is string && data.value.size() <= 5000000))
+        && (!('value' in data) || isValidSettingsValue(data.value))
         && (!('name' in data) || (data.name is string && data.name.size() <= 200))
-        && (!('fotoUrl' in data) || (data.fotoUrl is string && data.fotoUrl.size() <= 5000000));
+        && (!('fotoUrl' in data) || isValidImageField(data.fotoUrl));
     }
 
     // Default catch-all rule: Deny all access
@@ -91,53 +140,54 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Explicit structural paths for each collection matching the blueprint
+    // Explicit structural paths for each collection matching the blueprint.
+    // Lectura: pública. Escritura/borrado: solo staff autenticado.
     match /players/{playerId} {
       allow read: if true;
-      allow create, update: if isValidId(playerId) && isValidPlayer(request.resource.data);
-      allow delete: if isValidId(playerId);
+      allow create, update: if isStaff() && isValidId(playerId) && isValidPlayer(request.resource.data);
+      allow delete: if isStaff() && isValidId(playerId);
     }
 
     match /matches/{matchId} {
       allow read: if true;
-      allow create, update: if isValidId(matchId) && isValidMatch(request.resource.data);
-      allow delete: if isValidId(matchId);
+      allow create, update: if isStaff() && isValidId(matchId) && isValidMatch(request.resource.data);
+      allow delete: if isStaff() && isValidId(matchId);
     }
 
     match /standings/{standingId} {
       allow read: if true;
-      allow create, update: if isValidId(standingId) && isValidStanding(request.resource.data);
-      allow delete: if isValidId(standingId);
+      allow create, update: if isStaff() && isValidId(standingId) && isValidStanding(request.resource.data);
+      allow delete: if isStaff() && isValidId(standingId);
     }
 
     match /news/{newsId} {
       allow read: if true;
-      allow create, update: if isValidId(newsId) && isValidNewsItem(request.resource.data);
-      allow delete: if isValidId(newsId);
+      allow create, update: if isStaff() && isValidId(newsId) && isValidNewsItem(request.resource.data);
+      allow delete: if isStaff() && isValidId(newsId);
     }
 
     match /gallery/{galleryId} {
       allow read: if true;
-      allow create, update: if isValidId(galleryId) && isValidGalleryItem(request.resource.data);
-      allow delete: if isValidId(galleryId);
+      allow create, update: if isStaff() && isValidId(galleryId) && isValidGalleryItem(request.resource.data);
+      allow delete: if isStaff() && isValidId(galleryId);
     }
 
     match /convocations/{convocationId} {
       allow read: if true;
-      allow create, update: if isValidId(convocationId) && isValidConvocation(request.resource.data);
-      allow delete: if isValidId(convocationId);
+      allow create, update: if isStaff() && isValidId(convocationId) && isValidConvocation(request.resource.data);
+      allow delete: if isStaff() && isValidId(convocationId);
     }
 
     match /notifications/{notificationId} {
       allow read: if true;
-      allow create, update: if isValidId(notificationId) && isValidNotificationLog(request.resource.data);
-      allow delete: if isValidId(notificationId);
+      allow create, update: if isStaff() && isValidId(notificationId) && isValidNotificationLog(request.resource.data);
+      allow delete: if isStaff() && isValidId(notificationId);
     }
 
     match /settings/{settingId} {
       allow read: if true;
-      allow create, update: if isValidId(settingId) && isValidSettings(request.resource.data);
-      allow delete: if isValidId(settingId);
+      allow create, update: if isStaff() && isValidId(settingId) && isValidSettings(request.resource.data);
+      allow delete: if isStaff() && isValidId(settingId);
     }
   }
 }
