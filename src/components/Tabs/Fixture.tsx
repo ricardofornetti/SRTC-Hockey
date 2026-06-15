@@ -8,6 +8,10 @@ import { Calendar, MapPin, Clock, Edit3, Plus, Trophy, Save, Trash2, Award, Chec
 import { Match, Player, UserRole, MatchState, Category } from '../../types';
 import SrtcLogo from '../SrtcLogo';
 import ClubLogo from '../ClubLogo';
+import Button from '../ui/Button';
+import { motion } from 'motion/react';
+import { INITIAL_MATCH_LIST } from '../../data';
+import HockeyAnim from '../HockeyAnim';
 
 interface FixtureProps {
   matches: Match[];
@@ -93,10 +97,288 @@ const POPULAR_CLUBS = [
   'Teqüe Rugby Club'
 ];
 
+export function getPlayoffStandings(matches: Match[], category: Category) {
+  const baselines: { [key: string]: { pg: number; pe: number; pp: number; gf: number; gc: number } } = {
+    'RIVADAVIA - A': { pg: 12, pe: 0, pp: 0, gf: 103, gc: 1 },
+    'SAN RAFAEL TENIS CLUB - A': { pg: 8, pe: 4, pp: 0, gf: 29, gc: 7 },
+    'LOS TORDOS - C': { pg: 8, pe: 3, pp: 1, gf: 26, gc: 6 },
+    'LOS TORDOS - B': { pg: 8, pe: 2, pp: 2, gf: 28, gc: 11 },
+    'MENDOZA R. C. - A': { pg: 7, pe: 4, pp: 1, gf: 36, gc: 8 },
+    'MARISTA - B': { pg: 7, pe: 2, pp: 3, gf: 21, gc: 15 },
+    'TACURU - A': { pg: 7, pe: 1, pp: 4, gf: 18, gc: 24 },
+    'BANCO MENDOZA - B': { pg: 5, pe: 4, pp: 3, gf: 16, gc: 12 },
+    'MARISTA - C': { pg: 4, pe: 2, pp: 6, gf: 8, gc: 19 },
+    'PUMAI RUGBY CLUB - A': { pg: 3, pe: 4, pp: 5, gf: 11, gc: 15 },
+    'SAN JORGE S.R. - A': { pg: 2, pe: 3, pp: 7, gf: 6, gc: 23 },
+    'CABNA - A': { pg: 2, pe: 3, pp: 7, gf: 5, gc: 32 },
+    'MURIALDO - B': { pg: 2, pe: 2, pp: 8, gf: 2, gc: 27 },
+    'ALEMAN - B': { pg: 2, pe: 0, pp: 10, gf: 5, gc: 43 },
+    'TEQÜE RUGBY CLUB - B': { pg: 0, pe: 3, pp: 9, gf: 1, gc: 33 },
+    'BANCO MENDOZA - C': { pg: 0, pe: 1, pp: 11, gf: 1, gc: 40 }
+  };
+
+  const BASELINE_MATCH_IDS = new Set<string>([
+    'm1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'm14', 'm15',
+    'm_f1_g1', 'm_f1_g2', 'm_f1_g3', 'm_f2_g1', 'm_f2_g2', 'm_f3_g1', 'm_f3_g2', 'm_f4_g1', 'm_f4_g2',
+    'm_f5_g1', 'm_f5_g2', 'm_f6_g1', 'm6_1', 'm6_2', 'm_f7_g1', 'm_f7_g2', 'm_f8_g1', 'm_f8_g2',
+    'm_f9_g1', 'm_f9_g2', 'm_f10_g1', 'm_f10_g2', 'm_f14_g1', 'm_f15_g1',
+    'm_f1_g_riva', 'm_f2_g_riva', 'm_f4_g_riva', 'm_f6_g_riva', 'm_f8_g_riva', 'm_f9_g_riva', 'm_f10_g_riva', 'm_f14_g_riva', 'm_f15_g_riva',
+    'm_f1_g_ltod', 'm_f2_g_ltod', 'm_f3_g_ltod', 'm_f4_g_ltod', 'm_f7_g_ltod', 'm_f9_g_ltod', 'm_f10_g_ltod', 'm_f14_g_ltod',
+    'm_f2_g_ltob', 'm_f3_g_ltob', 'm_f4_g_ltob', 'm_f5_g_ltob', 'm_f6_g_ltob', 'm_f7_g_ltob', 'm_f9_g_ltob', 'm_f10_g_ltob', 'm_f14_g_ltob', 'm_f15_g_ltob',
+    'm_f1_g_mendo', 'm_f5_g_mendo', 'm_f7_g_mendo', 'm_f8_g_mendo', 'm_f15_g_mendo',
+    'm_f2_g_marb', 'm_f4_g_marb', 'm_f7_g_marb', 'm_f8_g_marb', 'm_f9_g_marb', 'm_f15_g_marb', 'm_f14_g_marb',
+    'm_f2_g_teq_marb_c', 'm_f5_g_bmz_b_teq', 'm_f10_g_teq_cabna', 'm_f15_g_teq_tacuru',
+    'm_f3_g_mar_c_tacu_a', 'm_f6_g_tacu_bco_mza_b', 'm_f7_g_mur_b_tacu_a', 'm_f8_g_tacu_sjor_a', 'm_f14_g_tacu_pumai_a',
+    'm_f3_g_sjor_cabna_a', 'm_f5_g_sjor_alem_b', 'm_f6_g_pumai_sjor_a', 'm_f10_g_mar_c_sjor_a', 'm_f14_g_mur_b_sjor_a',
+    'm_f4_g_pumai_bmz_b', 'm_f5_g_mur_b_pumai_a', 'm_f9_g_cabna_pumai_a',
+    'm_f1_g_bmz_b_cabna', 'm_f3_g_bmz_b_alem_b', 'm_f8_g_marc_bmz_b'
+  ]);
+
+  function normalizeName(n: string) {
+    if (!n) return '';
+    const name = n.toLowerCase().trim();
+    if (name.includes('san rafael') || name.includes('srtc')) return 'SAN RAFAEL TENIS CLUB - A';
+    if (name.includes('rivadavia')) return 'RIVADAVIA - A';
+    if (name.includes('los tordos - c') || name === 'los tordos c' || name.includes('los tordos c')) return 'LOS TORDOS - C';
+    if (name.includes('los tordos - b') || name === 'los tordos b' || name.includes('los tordos b')) return 'LOS TORDOS - B';
+    if (name.includes('mendoza r.c.') || name.includes('mendoza r. c.') || name.includes('mendoza rc') || name === 'mendoza') return 'MENDOZA R. C. - A';
+    if (name.includes('marista b') || name.includes('maristas b') || name.includes('marista - b')) return 'MARISTA - B';
+    if (name.includes('marista c') || name.includes('maristas c') || name.includes('marista - c')) return 'MARISTA - C';
+    if (name.includes('tacuru') || name === 'tacurú' || name.includes('tacurú')) return 'TACURU - A';
+    if (name.includes('bco mza - b') || name.includes('bco mza b') || name.includes('banco mendoza b') || name.includes('banco mendoza - b')) return 'BANCO MENDOZA - B';
+    if (name.includes('bco mza - c') || name.includes('bco mza c') || name.includes('banco mendoza c') || name.includes('banco mendoza - c')) return 'BANCO MENDOZA - C';
+    if (name.includes('pumai') || name.includes('peumayen') || name.includes('peumayén')) return 'PUMAI RUGBY CLUB - A';
+    if (name.includes('san jorge s.r.') || name.includes('san jorge')) return 'SAN JORGE S.R. - A';
+    if (name.includes('cabna')) return 'CABNA - A';
+    if (name.includes('murialdo')) return 'MURIALDO - B';
+    if (name.includes('aleman') || name.includes('alemán') || name.includes('alemán b')) return 'ALEMAN - B';
+    if (name.includes('teqüe') || name.includes('teque')) return 'TEQÜE RUGBY CLUB - B';
+    return n.toUpperCase().trim();
+  }
+
+  const activeMatches = matches.filter(m => m.categoria === category && m.estado === 'Finalizado');
+  const working = JSON.parse(JSON.stringify(baselines));
+
+  const savedBaselines = localStorage.getItem('srtc_standings_baseline_db_v5');
+  let finalWorking = working;
+  if (savedBaselines) {
+    try {
+      finalWorking = JSON.parse(savedBaselines);
+    } catch (e) {}
+  }
+
+  activeMatches.forEach(match => {
+    if (BASELINE_MATCH_IDS.has(match.id)) {
+      const originalMatch = INITIAL_MATCH_LIST.find(o => o.id === match.id);
+      if (originalMatch) {
+         const isModified = 
+           match.golesPropios !== originalMatch.golesPropios || 
+           match.golesRival !== originalMatch.golesRival || 
+           match.estado !== originalMatch.estado ||
+           (match.localNombre || '') !== (originalMatch.localNombre || '') ||
+           (match.visitanteNombre || '') !== (originalMatch.visitanteNombre || '');
+
+         if (!isModified) return;
+
+         const rawLocalOrig = originalMatch.localNombre || (originalMatch.esLocal ? 'SAN RAFAEL TENIS CLUB - A' : originalMatch.rival);
+         const rawVisitorOrig = originalMatch.visitanteNombre || (!originalMatch.esLocal ? 'SAN RAFAEL TENIS CLUB - A' : originalMatch.rival);
+         const localOrig = normalizeName(rawLocalOrig);
+         const visitorOrig = normalizeName(rawVisitorOrig);
+
+         let localGOrig = 0;
+         let visitorGOrig = 0;
+         if (localOrig === 'SAN RAFAEL TENIS CLUB - A') {
+           localGOrig = originalMatch.golesPropios;
+           visitorGOrig = originalMatch.golesRival;
+         } else if (visitorOrig === 'SAN RAFAEL TENIS CLUB - A') {
+           localGOrig = originalMatch.golesRival;
+           visitorGOrig = originalMatch.golesPropios;
+         } else {
+           localGOrig = originalMatch.golesPropios;
+           visitorGOrig = originalMatch.golesRival;
+         }
+
+         const lE = finalWorking[localOrig];
+         const vE = finalWorking[visitorOrig];
+         if (lE) {
+           lE.gf = Math.max(0, lE.gf - localGOrig);
+           lE.gc = Math.max(0, lE.gc - visitorGOrig);
+           if (localGOrig > visitorGOrig) lE.pg = Math.max(0, lE.pg - 1);
+           else if (localGOrig < visitorGOrig) lE.pp = Math.max(0, lE.pp - 1);
+           else lE.pe = Math.max(0, lE.pe - 1);
+         }
+         if (vE) {
+           vE.gf = Math.max(0, vE.gf - visitorGOrig);
+           vE.gc = Math.max(0, vE.gc - localGOrig);
+           if (visitorGOrig > localGOrig) vE.pg = Math.max(0, vE.pg - 1);
+           else if (visitorGOrig < localGOrig) vE.pp = Math.max(0, vE.pp - 1);
+           else vE.pe = Math.max(0, vE.pe - 1);
+         }
+      }
+    }
+
+    const localTeam = normalizeName(match.localNombre || (match.esLocal ? 'SAN RAFAEL TENIS CLUB - A' : match.rival));
+    const visitorTeam = normalizeName(match.visitanteNombre || (!match.esLocal ? 'SAN RAFAEL TENIS CLUB - A' : match.rival));
+
+    let localGoles = 0;
+    let visitorGoles = 0;
+    if (localTeam === 'SAN RAFAEL TENIS CLUB - A') {
+      localGoles = match.golesPropios;
+      visitorGoles = match.golesRival;
+    } else if (visitorTeam === 'SAN RAFAEL TENIS CLUB - A') {
+      localGoles = match.golesRival;
+      visitorGoles = match.golesPropios;
+    } else {
+      localGoles = match.golesPropios;
+      visitorGoles = match.golesRival;
+    }
+
+    if (!finalWorking[localTeam]) {
+      finalWorking[localTeam] = { pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 };
+    }
+    if (!finalWorking[visitorTeam]) {
+      finalWorking[visitorTeam] = { pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 };
+    }
+
+    const lEntry = finalWorking[localTeam];
+    const vEntry = finalWorking[visitorTeam];
+    lEntry.gf += localGoles;
+    lEntry.gc += visitorGoles;
+    vEntry.gf += visitorGoles;
+    vEntry.gc += localGoles;
+
+    if (localGoles > visitorGoles) {
+      lEntry.pg += 1;
+      vEntry.pp += 1;
+    } else if (localGoles < visitorGoles) {
+      lEntry.pp += 1;
+      vEntry.pg += 1;
+    } else {
+      lEntry.pe += 1;
+      vEntry.pe += 1;
+    }
+  });
+
+  const list = Object.keys(finalWorking).map(key => {
+    const base = finalWorking[key];
+    const pts = (base.pg * 3) + (base.pe * 1);
+    const dg = base.gf - base.gc;
+    return { equipo: key, pts, pg: base.pg, dg, gf: base.gf };
+  });
+
+  return list.sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.pg !== a.pg) return b.pg - a.pg;
+    if (b.dg !== a.dg) return b.dg - a.dg;
+    return b.gf - a.gf;
+  });
+}
+
+export function getPlayoffMatchTeams(match: Match, allMatches: Match[]): { localTeam: string; visitorTeam: string } {
+  const standings = getPlayoffStandings(allMatches, match.categoria);
+  
+  let localTeam = match.localNombre || (match.esLocal ? 'San Rafael Tenis Club' : match.rival);
+  let visitorTeam = match.visitanteNombre || (!match.esLocal ? 'San Rafael Tenis Club' : match.rival);
+
+  if (match.fase === 'cuartos') {
+    const isGenericL = ['1er clasificado', '1er CLASIFICADO', '1CO CLASIFICADO'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericV = ['8vo clasificado', '8vo CLASIFICADO', '8CO CLASIFICADO'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericL2 = ['2do clasificado', '2do CLASIFICADO'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericV2 = ['7mo clasificado', '7mo CLASIFICADO'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericL3 = ['3er clasificado', '3er CLASIFICADO'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericV3 = ['6to clasificado', '6to CLASIFICADO'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericL4 = ['4to clasificado', '4to CLASIFICADO'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericV4 = ['5to clasificado', '5to CLASIFICADO'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
+
+    if (match.id === 'match_cuartos_1' || isGenericL || isGenericV) {
+      const t1 = standings[0]?.equipo || '1er CLASIFICADO';
+      const t8 = standings[7]?.equipo || '8vo CLASIFICADO';
+      if (isGenericL) localTeam = t1;
+      if (isGenericV) visitorTeam = t8;
+    }
+    if (match.id === 'match_cuartos_2' || isGenericL2 || isGenericV2) {
+      const t2 = standings[1]?.equipo || '2do CLASIFICADO';
+      const t7 = standings[6]?.equipo || '7mo CLASIFICADO';
+      if (isGenericL2) localTeam = t2;
+      if (isGenericV2) visitorTeam = t7;
+    }
+    if (match.id === 'match_cuartos_3' || isGenericL3 || isGenericV3) {
+      const t3 = standings[2]?.equipo || '3er CLASIFICADO';
+      const t6 = standings[5]?.equipo || '6to CLASIFICADO';
+      if (isGenericL3) localTeam = t3;
+      if (isGenericV3) visitorTeam = t6;
+    }
+    if (match.id === 'match_cuartos_4' || isGenericL4 || isGenericV4) {
+      const t4 = standings[3]?.equipo || '4to CLASIFICADO';
+      const t5 = standings[4]?.equipo || '5to CLASIFICADO';
+      if (isGenericL4) localTeam = t4;
+      if (isGenericV4) visitorTeam = t5;
+    }
+  }
+
+  const getWinnerOfMatch = (matchId: string): string | null => {
+    const target = allMatches.find(m => m.id === matchId);
+    if (!target) return null;
+    if (target.estado !== 'Finalizado') return null;
+    
+    const resolved = getPlayoffMatchTeams(target, allMatches);
+    const lTeam = resolved.localTeam;
+    const vTeam = resolved.visitorTeam;
+    
+    const isVisitorSrtc = vTeam.toLowerCase().includes('san rafael') || vTeam.toLowerCase().includes('srtc');
+
+    let lG = target.golesPropios;
+    let vG = target.golesRival;
+    if (isVisitorSrtc) {
+      lG = target.golesRival;
+      vG = target.golesPropios;
+    }
+
+    if (lG > vG) return lTeam;
+    if (vG > lG) return vTeam;
+    return lTeam;
+  };
+
+  if (match.fase === 'semifinal') {
+    const isGenericL = ['ganador 1', 'GANADOR 1'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericV = ['ganador 2', 'GANADOR 2'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericL2 = ['ganador 3', 'GANADOR 3'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericV2 = ['ganador 4', 'GANADOR 4'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
+
+    if (match.id === 'match_semi_1' || isGenericL || isGenericV) {
+      const w1 = getWinnerOfMatch('match_cuartos_1');
+      const w2 = getWinnerOfMatch('match_cuartos_2');
+      if (isGenericL) localTeam = w1 || 'Ganador Cuartos 1';
+      if (isGenericV) visitorTeam = w2 || 'Ganador Cuartos 2';
+    }
+    if (match.id === 'match_semi_2' || isGenericL2 || isGenericV2) {
+      const w3 = getWinnerOfMatch('match_cuartos_3');
+      const w4 = getWinnerOfMatch('match_cuartos_4');
+      if (isGenericL2) localTeam = w3 || 'Ganador Cuartos 3';
+      if (isGenericV2) visitorTeam = w4 || 'Ganador Cuartos 4';
+    }
+  }
+
+  if (match.fase === 'final') {
+    const isGenericL = ['ganador semi 1', 'GANADOR SEMI 1', 'ganador de semis 1'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericV = ['ganador semi 2', 'GANADOR SEMI 2', 'ganador de semis 2'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
+
+    if (match.id === 'match_final_1' || isGenericL || isGenericV) {
+      const ws1 = getWinnerOfMatch('match_semi_1');
+      const ws2 = getWinnerOfMatch('match_semi_2');
+      if (isGenericL) localTeam = ws1 || 'Ganador Semifinal 1';
+      if (isGenericV) visitorTeam = ws2 || 'Ganador Semifinal 2';
+    }
+  }
+
+  return { localTeam, visitorTeam };
+}
+
 export default function Fixture({ matches, players, userRole, selectedCategory, onUpdateMatches, onShare, onTabChange }: FixtureProps) {
   const [filter, setFilter] = useState<'todos' | 'proximos' | 'jugados'>('todos');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [faseFilter, setFaseFilter] = useState<'regular' | 'cuartos' | 'semifinal' | 'final'>('regular');
+  const [fechaTorneoFilter, setFechaTorneoFilter] = useState<number | 'todas'>('todas');
   
   // State for Editing
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
@@ -133,6 +415,10 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
       // Phase filtering: fallback to 'regular' if not specified
       const matchFase = m.fase || 'regular';
       return matchFase === faseFilter;
+    })
+    .filter(m => {
+      if (faseFilter !== 'regular' || fechaTorneoFilter === 'todas') return true;
+      return getMatchFechaNumber(m) === fechaTorneoFilter;
     })
     .filter(m => {
       if (filter === 'proximos') return m.estado === 'Programado' || m.estado === 'En juego';
@@ -433,13 +719,33 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
   const getStatusBadge = (state: MatchState) => {
     switch (state) {
       case 'Finalizado':
-        return <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full text-[9px] font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Finalizado</span>;
+        return (
+          <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Finalizado</span>
+          </span>
+        );
       case 'En juego':
-        return <span className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded-full text-[9px] font-bold flex items-center gap-1 animate-pulse"><Play className="w-3 h-3" /> En juego</span>;
+        return (
+          <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-md shadow-emerald-950/40 animate-pulse">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-ping mr-0.5" />
+            <span>En Vivo</span>
+          </span>
+        );
       case 'Suspendido':
-        return <span className="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-full text-[9px] font-bold flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Suspendido</span>;
+        return (
+          <span className="bg-rose-500/10 text-rose-400 border border-rose-500/25 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+            <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+            <span>Suspendido</span>
+          </span>
+        );
       default:
-        return <span className="bg-neutral-800 text-neutral-400 border border-neutral-700 px-2 py-0.5 rounded-full text-[9px] font-bold">Programado</span>;
+        return (
+          <span className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-lighter flex items-center gap-1.5 shadow-sm">
+            <Clock className="w-3.5 h-3.5 text-amber-500" />
+            <span>Programado</span>
+          </span>
+        );
     }
   };
 
@@ -598,6 +904,52 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
           )}
         </div>
       </div>
+
+      {/* Selector de Fecha del Torneo (Fase Regular) */}
+      {faseFilter === 'regular' && (
+        <div className="bg-club-gradient-elements p-3 rounded-2xl border border-white/10 shadow-lg space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5 font-sans select-none">
+              <Trophy className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
+              Filtrar por Fecha del Torneo
+            </span>
+            {fechaTorneoFilter !== 'todas' && (
+              <button
+                onClick={() => setFechaTorneoFilter('todas')}
+                className="text-[10px] bg-white/5 hover:bg-white/10 text-indigo-200 hover:text-white px-2 py-0.5 rounded border border-white/5 font-sans transition cursor-pointer"
+              >
+                Limpiar Filtro
+              </button>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-1.5 overflow-x-auto w-full no-scrollbar py-1">
+            <button
+              onClick={() => setFechaTorneoFilter('todas')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-150 shrink-0 cursor-pointer border ${
+                fechaTorneoFilter === 'todas'
+                  ? 'bg-emerald-500 border-emerald-400 text-neutral-950 font-extrabold shadow shadow-emerald-500/20'
+                  : 'bg-white/5 border-white/10 text-indigo-400 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              Todas las Fechas
+            </button>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((num) => (
+              <button
+                key={num}
+                onClick={() => setFechaTorneoFilter(num)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-150 shrink-0 cursor-pointer border ${
+                  fechaTorneoFilter === num
+                    ? 'bg-emerald-500 border-emerald-400 text-neutral-950 font-extrabold shadow shadow-emerald-500/20'
+                    : 'bg-white/5 border-white/10 text-indigo-400 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                Fecha {num}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Editor Modal Overlay */}
       {(isCreating || editingMatch) && (
@@ -973,8 +1325,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                   {filteredMatches.map((match) => {
                     const isPlayed = match.estado === 'Finalizado';
                     const isLive = match.estado === 'En juego';
-                    const localTeam = match.localNombre || (match.esLocal ? 'San Rafael Tenis Club' : match.rival);
-                    const visitorTeam = match.visitanteNombre || (!match.esLocal ? 'San Rafael Tenis Club' : match.rival);
+                    const { localTeam, visitorTeam } = getPlayoffMatchTeams(match, matches);
                     const isLocalSrtc = localTeam.toLowerCase().includes('san rafael') || localTeam.toLowerCase().includes('srtc');
                     const isVisitorSrtc = visitorTeam.toLowerCase().includes('san rafael') || visitorTeam.toLowerCase().includes('srtc');
 
@@ -993,11 +1344,17 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                     }
 
                     return (
-                      <div
+                      <motion.div
                         key={match.id}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        whileHover={{ y: -5, scale: 1.01 }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
                         className={`bg-club-gradient-elements border ${
-                          isLive ? 'border-emerald-500 shadow-emerald-500/15 scale-[1.01]' : 'border-white/10'
-                        } rounded-2xl p-5 shadow-xl relative flex flex-col transition duration-350 hover:border-emerald-500/30 w-full hover:-translate-y-0.5`}
+                          isLive 
+                            ? 'border-emerald-500 shadow-[0_0_20px_rgba(52,211,153,0.15)] ring-1 ring-emerald-500/20' 
+                            : 'border-white/10 hover:border-emerald-500/30'
+                        } rounded-2xl p-5 shadow-xl relative flex flex-col w-full`}
                       >
                         {/* Upper row: Date & status */}
                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2 flex-wrap gap-2 text-left">
@@ -1064,7 +1421,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                           </div>
                         </div>
 
-                        {/* Beautiful list of scorers listed vertically (uno debajo del otro) */}
+                        {/* Beautiful list of scorers listed vertically */}
                         {isPlayed && match.goleadorasIds && match.goleadorasIds.length > 0 && (
                           <div className="mt-4 bg-black/20 rounded-xl p-3 border border-white/10 text-left">
                             <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2 flex items-center gap-1.5 border-b border-white/5 pb-1.5 font-sans">
@@ -1110,34 +1467,38 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
                           {/* Operational actions */}
                           <div className="flex items-center justify-end gap-2 shrink-0 pt-2 sm:pt-0">
-                            <button
-                               onClick={() => handleShareResultDirect(match)}
-                               className="px-2.5 py-1.5 rounded bg-white/10 hover:bg-white/20 text-white font-extrabold transition text-[11px] font-bold cursor-pointer font-sans"
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="text-[10px]"
+                              onClick={() => handleShareResultDirect(match)}
                             >
                               Compartir
-                            </button>
-                            {(userRole === 'admin') && (
+                            </Button>
+                            {userRole === 'admin' && (
                               <>
-                                <button
+                                <Button
+                                  variant="primary"
+                                  size="sm"
+                                  className="text-[10px] flex items-center gap-1"
                                   onClick={() => handleStartEdit(match)}
-                                  className="px-2.5 py-1.5 rounded bg-emerald-600/35 text-white hover:bg-emerald-500 hover:text-white transition text-[11px] font-bold flex items-center gap-1 cursor-pointer font-sans"
                                 >
-                                  <Edit3 className="w-3 h-3 text-white" /> Cargar
-                                </button>
-                                {userRole === 'admin' && (
-                                  <button
-                                    onClick={() => handleDelete(match.id)}
-                                    className="px-2.5 py-1.5 rounded bg-rose-600/15 text-rose-400 hover:bg-rose-600 hover:text-white transition text-[11px] font-bold cursor-pointer font-sans"
-                                    title="Eliminar Partido"
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </button>
-                                )}
+                                  <Edit3 className="w-3.5 h-3.5" /> Cargar
+                                </Button>
+                                <Button
+                                  variant="danger"
+                                  size="sm"
+                                  className="text-[10px] p-2"
+                                  onClick={() => handleDelete(match.id)}
+                                  title="Eliminar Partido"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
                               </>
                             )}
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -1161,9 +1522,10 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
           if (sortedKeys.length === 0) {
             return (
-              <div className="text-center py-10 bg-club-gradient-elements border border-white/10 rounded-2xl">
-                <Trophy className="w-10 h-10 text-indigo-200/40 mx-auto mb-2" />
-                <p className="text-indigo-200 font-medium text-xs">No se encontraron partidos para esta categoría con los filtros aplicados.</p>
+              <div className="text-center py-12 bg-club-gradient-elements border border-white/10 rounded-2xl flex flex-col items-center justify-center p-8 shadow-inner">
+                <HockeyAnim size="lg" className="mb-4" />
+                <p className="text-indigo-200 font-semibold text-sm max-w-sm">No se encontraron partidos para esta categoría.</p>
+                <p className="text-indigo-400/80 text-xs mt-1 max-w-xs">Probá cambiando los filtros o la fecha seleccionada.</p>
               </div>
             );
           }
@@ -1183,8 +1545,7 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                   {matchesInFecha.map((match) => {
                     const isPlayed = match.estado === 'Finalizado';
                     const isLive = match.estado === 'En juego';
-                    const localTeam = match.localNombre || (match.esLocal ? 'San Rafael Tenis Club' : match.rival);
-                    const visitorTeam = match.visitanteNombre || (!match.esLocal ? 'San Rafael Tenis Club' : match.rival);
+                    const { localTeam, visitorTeam } = getPlayoffMatchTeams(match, matches);
                     const isLocalSrtc = localTeam.toLowerCase().includes('san rafael') || localTeam.toLowerCase().includes('srtc');
                     const isVisitorSrtc = visitorTeam.toLowerCase().includes('san rafael') || visitorTeam.toLowerCase().includes('srtc');
 
@@ -1204,11 +1565,17 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                     }
                     
                     return (
-                      <div
+                      <motion.div
                         key={match.id}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        whileHover={{ y: -5, scale: 1.01 }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
                         className={`bg-club-gradient-elements border ${
-                          isLive ? 'border-emerald-500 shadow-emerald-500/15 scale-[1.01]' : 'border-white/10'
-                        } rounded-2xl p-5 shadow-xl relative flex flex-col transition duration-350 hover:border-emerald-500/30 w-full hover:-translate-y-0.5`}
+                          isLive 
+                            ? 'border-emerald-500 shadow-[0_0_20px_rgba(52,211,153,0.15)] ring-1 ring-emerald-500/20' 
+                            : 'border-white/10 hover:border-emerald-500/30'
+                        } rounded-2xl p-5 shadow-xl relative flex flex-col w-full`}
                       >
                         {/* Upper row: Date & status */}
                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2 flex-wrap gap-2 text-left">
@@ -1324,34 +1691,38 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
                           {/* Operational actions */}
                           <div className="flex items-center justify-end gap-2 shrink-0 pt-2 sm:pt-0">
-                            <button
-                               onClick={() => handleShareResultDirect(match)}
-                               className="px-2.5 py-1.5 rounded bg-white/10 hover:bg-white/20 text-white font-extrabold transition text-[11px] font-bold cursor-pointer"
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="text-[10px]"
+                              onClick={() => handleShareResultDirect(match)}
                             >
                               Compartir
-                            </button>
-                            {(userRole === 'admin') && (
+                            </Button>
+                            {userRole === 'admin' && (
                               <>
-                                <button
+                                <Button
+                                  variant="primary"
+                                  size="sm"
+                                  className="text-[10px] flex items-center gap-1"
                                   onClick={() => handleStartEdit(match)}
-                                  className="px-2.5 py-1.5 rounded bg-emerald-600/35 text-white hover:bg-emerald-500 hover:text-white transition text-[11px] font-bold flex items-center gap-1 cursor-pointer"
                                 >
-                                  <Edit3 className="w-3 h-3 text-white" /> Cargar
-                                </button>
-                                {userRole === 'admin' && (
-                                  <button
-                                    onClick={() => handleDelete(match.id)}
-                                    className="px-2.5 py-1.5 rounded bg-rose-600/15 text-rose-400 hover:bg-rose-600 hover:text-white transition text-[11px] font-bold cursor-pointer"
-                                    title="Eliminar Partido"
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </button>
-                                )}
+                                  <Edit3 className="w-3.5 h-3.5" /> Cargar
+                                </Button>
+                                <Button
+                                  variant="danger"
+                                  size="sm"
+                                  className="text-[10px] p-2"
+                                  onClick={() => handleDelete(match.id)}
+                                  title="Eliminar Partido"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
                               </>
                             )}
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>

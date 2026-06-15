@@ -71,14 +71,25 @@ export default function ClubLogo({ teamName, className = 'w-12 h-12' }: ClubLogo
     };
   }, [teamName]);
 
+  const isSRTC = teamName ? (teamName.toLowerCase().includes('san rafael') || teamName.toLowerCase().includes('srtc')) : false;
+
+  // Render wrapper with gradient borders & shadows
+  const containerStyle = isSRTC
+    ? 'relative p-[2px] bg-gradient-to-tr from-indigo-500 via-emerald-500 to-indigo-300 rounded-2xl shadow-lg ring-2 ring-emerald-500/20 shadow-emerald-950/20 ring-offset-2 ring-offset-neutral-950 accent-glow animate-in fade-in duration-300 shrink-0'
+    : 'relative p-[1.5px] bg-gradient-to-tr from-neutral-800 to-neutral-700/55 rounded-2xl shadow-md border border-white/5 shrink-0';
+
   if (logo) {
     return (
-      <img
-        src={logo}
-        alt={`Logo de ${teamName}`}
-        referrerPolicy="no-referrer"
-        className={`${className} object-contain p-1 bg-white rounded-full border border-white/20 shadow-md shrink-0`}
-      />
+      <div className={`${containerStyle} ${className}`}>
+        <div className="w-full h-full bg-neutral-900 rounded-[14px] overflow-hidden flex items-center justify-center p-0.5">
+          <img
+            src={logo}
+            alt={`Logo de ${teamName}`}
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-contain mix-blend-normal rounded-xl"
+          />
+        </div>
+      </div>
     );
   }
 
@@ -100,9 +111,12 @@ export default function ClubLogo({ teamName, className = 'w-12 h-12' }: ClubLogo
   }
 
   return (
-    <div className={`${className} bg-club-gradient-elements border border-white/20 rounded-full flex items-center justify-center font-extrabold text-white text-xs md:text-sm shadow-md shrink-0`}>
-      {displayInitials}
+    <div className={`${containerStyle} ${className}`}>
+      <div className="w-full h-full bg-neutral-950 rounded-[14px] flex items-center justify-center font-extrabold text-neutral-100 select-none shadow-inner">
+        <span className="font-sport tracking-wider text-[11px] sm:text-xs">
+          {displayInitials}
+        </span>
+      </div>
     </div>
   );
 }
-
