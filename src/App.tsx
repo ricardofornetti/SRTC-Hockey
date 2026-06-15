@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, 
   Newspaper, 
@@ -46,7 +47,11 @@ import {
   seedInitialDataIfCollectionIsEmpty, 
   syncCollection,
   saveDocument,
-  deleteDocument
+  deleteDocument,
+  onAuthStateChanged,
+  isAdminUser,
+  signInAdmin,
+  signOutAdmin
 } from './firebase';
 
 import RoleSelector from './components/RoleSelector';
@@ -75,10 +80,13 @@ export default function App() {
   const [notifications, setNotifications] = useState<NotificationLog[]>(INITIAL_NOTIFICATIONS);
 
   // App settings
-  const [userRole, setUserRole] = useState<UserRole>(() => {
-    const saved = localStorage.getItem('srtc_user_role');
-    return (saved as UserRole) || 'public';
-  });
+  // El rol del usuario ya NO se elige manualmente ni se guarda en localStorage.
+  // Se deriva exclusivamente del estado de sesión de Firebase Authentication
+  // (ver useEffect de onAuthStateChanged más abajo). Por defecto, sin sesión
+  // iniciada, el rol es 'public' (solo lectura).
+  const [userRole, setUserRole] = useState<UserRole>('public');
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   
   const [selectedCategory, setSelectedCategory] = useState<Category>('7ma');
   const [activeTab, setActiveTab] = useState<string>('inicio');
@@ -91,18 +99,12 @@ export default function App() {
   });
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
 
-  // Trigger seeding and bind real-time Firestore synchronization on load
+  // Bind real-time Firestore synchronization on load.
+  // NOTA: la siembra de datos iniciales (seedInitialDataIfCollectionIsEmpty)
+  // requiere permisos de escritura y solo se ejecuta cuando hay una sesión
+  // de administrador activa (ver useEffect de autenticación más abajo),
+  // ya que las reglas de Firestore ya no permiten escrituras públicas.
   useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        console.log('Seeding initial data if empty...');
-        await seedInitialDataIfCollectionIsEmpty();
-      } catch (err) {
-        console.warn('Unable to seed/connect on startup. Operating with local data fallback.', err);
-      }
-    };
-    initializeApp();
-
     // Attach real-time subscriptions with a fallback to local changes
     const unsubPlayers = subscribeToCollection<Player>('players', (data) => {
       if (data && data.length > 0) setPlayers(data);
@@ -179,11 +181,42 @@ export default function App() {
     };
   }, []);
 
-  // Sync state changes to local storage role preference
-  const handleRoleChange = (role: UserRole) => {
-    setUserRole(role);
-    localStorage.setItem('srtc_user_role', role);
-    showToast('Rol de Acceso Actualizado', `Ahora tienes permisos de: ${role === 'admin' ? 'Administrador' : role === 'coach' ? 'Entrenador' : 'Usuario Público'}`, 'info');
+  // Suscripción al estado de autenticación de Firebase.
+  // El rol 'admin' solo se otorga si hay una sesión válida cuyo email
+  // figura en ADMIN_EMAILS (src/firebase.ts). La validación que realmente
+  // importa para la seguridad de los datos ocurre en firestore.rules;
+  // esto solo controla qué controles de edición se muestran en la interfaz.
+  useEffect(() => {
+    const unsubAuth = onAuthStateChanged((user) => {
+      if (user && isAdminUser(user)) {
+        setUserRole('admin');
+        setCurrentUserEmail(user.email);
+        // La siembra de datos iniciales requiere permisos de escritura,
+        // por lo que solo se intenta cuando hay sesión de administrador.
+        seedInitialDataIfCollectionIsEmpty().catch((err) => {
+          if (import.meta.env.DEV) console.warn('No se pudo sembrar datos iniciales:', err);
+        });
+      } else {
+        setUserRole('public');
+        setCurrentUserEmail(null);
+      }
+      setAuthLoading(false);
+    });
+    return () => unsubAuth();
+  }, []);
+
+  const handleSignIn = async (email: string, password: string) => {
+    const user = await signInAdmin(email, password);
+    if (!isAdminUser(user)) {
+      await signOutAdmin();
+      throw new Error('Esta cuenta no tiene permisos de administrador.');
+    }
+    showToast('Sesión iniciada', 'Acceso de administrador habilitado.', 'success');
+  };
+
+  const handleSignOut = async () => {
+    await signOutAdmin();
+    showToast('Sesión cerrada', 'Volviste al modo de solo lectura.', 'info');
   };
 
   const handleCategoryChange = (category: Category) => {
@@ -792,11 +825,13 @@ export default function App() {
 
   return (
     <div id="app-root-container" className="min-h-screen bg-club-gradient text-neutral-100 flex flex-col font-sans pb-10">
-      {/* 1. Control de Rol / Simulación de Entorno */}
+      {/* 1. Indicador de sesión / Acceso de Staff */}
       <RoleSelector 
         currentRole={userRole} 
-        onChangeRole={handleRoleChange} 
-        currentUserEmail="fornettiricardo@gmail.com" 
+        currentUserEmail={currentUserEmail}
+        authLoading={authLoading}
+        onSignIn={handleSignIn}
+        onSignOut={handleSignOut}
       />
 
       {activeTab !== 'inicio' ? (
@@ -847,7 +882,17 @@ export default function App() {
               </div>
             </div>
 
-            {renderTabContent()}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+              >
+                {renderTabContent()}
+              </motion.div>
+            </AnimatePresence>
           </main>
         </div>
       ) : (
@@ -890,107 +935,75 @@ export default function App() {
           <div className="sticky top-0 z-30 bg-club-gradient/95 backdrop-blur-md border-b border-white/10 shadow-xl w-full">
             <div className="max-w-7xl mx-auto w-full">
               <div className="grid grid-cols-6 gap-0 bg-club-gradient-elements overflow-hidden shadow-inner w-full">
-                <button 
-                  onClick={() => setActiveTab('inicio')} 
-                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
-                    activeTab === 'inicio' 
-                      ? 'bg-club-gradient text-white font-black shadow-inner' 
-                      : 'hover:bg-white/5 text-indigo-200'
-                  }`}
-                >
-                  <Home className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'inicio' ? 'text-white' : 'text-indigo-350'}`} />
-                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Inicio</span>
-                </button>
-
-                <button 
-                  onClick={() => setActiveTab('fixture')} 
-                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
-                    activeTab === 'fixture' 
-                      ? 'bg-club-gradient text-white font-black shadow-inner' 
-                      : 'hover:bg-white/5 text-indigo-200'
-                  }`}
-                >
-                  <Calendar className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'fixture' ? 'text-white' : 'text-indigo-350'}`} />
-                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Fixture</span>
-                </button>
-
-                <button 
-                  onClick={() => setActiveTab('tabla')} 
-                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
-                    activeTab === 'tabla' 
-                      ? 'bg-club-gradient text-white font-black shadow-inner' 
-                      : 'hover:bg-white/5 text-indigo-200'
-                  }`}
-                >
-                  <Trophy className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'tabla' ? 'text-white' : 'text-indigo-350'}`} />
-                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Tabla</span>
-                </button>
-
-                <button 
-                  onClick={() => setActiveTab('plantel')} 
-                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
-                    activeTab === 'plantel' 
-                      ? 'bg-club-gradient text-white font-black shadow-inner' 
-                      : 'hover:bg-white/5 text-indigo-200'
-                  }`}
-                >
-                  <Users className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'plantel' ? 'text-white' : 'text-indigo-350'}`} />
-                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Plantel</span>
-                </button>
-
-                <button 
-                  onClick={() => setActiveTab('estadisticas')} 
-                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
-                    activeTab === 'estadisticas' 
-                      ? 'bg-club-gradient text-white font-black shadow-inner' 
-                      : 'hover:bg-white/5 text-indigo-200'
-                  }`}
-                >
-                  <BarChart3 className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'estadisticas' ? 'text-white' : 'text-indigo-350'}`} />
-                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Estadísticas</span>
-                </button>
-
-                <button 
-                  onClick={() => setActiveTab('galeria')} 
-                  className={`flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
-                    activeTab === 'galeria' 
-                      ? 'bg-club-gradient text-white font-black shadow-inner' 
-                      : 'hover:bg-white/5 text-indigo-200'
-                  }`}
-                >
-                  <ImageIcon className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${activeTab === 'galeria' ? 'text-white' : 'text-indigo-350'}`} />
-                  <span className="text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">Galería</span>
-                </button>
+                {tabsConfig.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`relative flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 ${
+                        isActive ? 'text-white font-black' : 'hover:bg-white/5 text-indigo-200'
+                      }`}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="nav-active-pill"
+                          className="absolute inset-0 bg-club-gradient shadow-inner"
+                          transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                        />
+                      )}
+                      <Icon className={`relative z-10 w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-indigo-350'}`} />
+                      <span className="relative z-10 text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5">{tab.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* 3. Main Tab View Area */}
           <main id="app-viewport" className="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
-            {renderTabContent()}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+              >
+                {renderTabContent()}
+              </motion.div>
+            </AnimatePresence>
           </main>
         </>
       )}
 
       {/* 6. Dynamic Toast Banner Panel */}
-      {toast && (
-        <div 
-          id="toast-notification-panel" 
-          className="fixed bottom-4 md:bottom-8 right-4 left-4 md:left-auto md:w-96 bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-2xl flex gap-3 items-start animate-in slide-in-from-bottom-5 fade-in duration-300 z-50 transform"
-        >
-          <div className="shrink-0 mt-0.5">
-            {toast.type === 'success' ? (
-              <CheckCircle className="w-5 h-5 text-emerald-400" />
-            ) : (
-              <AlertCircle className={`w-5 h-5 ${toast.type === 'error' ? 'text-rose-500' : 'text-indigo-400'}`} />
-            )}
-          </div>
-          <div>
-            <p className="text-xs font-black text-white">{toast.title}</p>
-            <p className="text-[11px] text-neutral-400 mt-1 leading-relaxed">{toast.body}</p>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            id="toast-notification-panel"
+            initial={{ opacity: 0, y: 24, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.97 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            className="fixed bottom-4 md:bottom-8 right-4 left-4 md:left-auto md:w-96 modern-card p-4 rounded-2xl shadow-2xl flex gap-3 items-start z-50"
+          >
+            <div className="shrink-0 mt-0.5">
+              {toast.type === 'success' ? (
+                <CheckCircle className="w-5 h-5 text-emerald-400" />
+              ) : (
+                <AlertCircle className={`w-5 h-5 ${toast.type === 'error' ? 'text-rose-500' : 'text-indigo-400'}`} />
+              )}
+            </div>
+            <div>
+              <p className="text-xs font-black text-white">{toast.title}</p>
+              <p className="text-[11px] text-neutral-400 mt-1 leading-relaxed">{toast.body}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type UserRole = 'admin' | 'coach' | 'public';
+export type UserRole = 'admin' | 'public';
 
 export type Category = '7ma' | '6ta' | '5ta' | 'Intermedia' | 'Primera';
 

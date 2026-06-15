@@ -1,5 +1,11 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { 
+  getAuth, 
+  onAuthStateChanged as firebaseOnAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  signOut as firebaseSignOut,
+  type User
+} from 'firebase/auth';
 import { 
   getFirestore, 
   doc, 
@@ -10,6 +16,14 @@ import {
   onSnapshot,
   getDocFromServer
 } from 'firebase/firestore';
+// NOTA DE SEGURIDAD: Este archivo de configuración contiene la "apiKey" pública
+// de Firebase para esta aplicación web. Es información pública por diseño:
+// Firebase está hecho para que esta clave viaje al navegador del usuario.
+// NO mover esto a variables de entorno ni intentar "ocultarla": no aporta
+// seguridad y puede romper el build (Vite necesita este valor en build-time).
+// La seguridad real de los datos se controla exclusivamente desde
+// `firestore.rules`, validando quién está autenticado (request.auth) y
+// comparando su email contra la lista de administradores autorizados.
 import firebaseConfig from '../firebase-applet-config.json';
 import { 
   INITIAL_PLAYERS, 
@@ -28,7 +42,69 @@ const app = initializeApp(firebaseConfig);
 export const db = (firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== "(default)")
   ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
   : getFirestore(app);
-export const auth = getAuth();
+export const auth = getAuth(app);
+
+// -----------------------------------------------------------------------
+// AUTENTICACIÓN / ROLES
+// -----------------------------------------------------------------------
+// Lista de emails con permisos de Administrador (control total de la app).
+// Esta lista debe coincidir EXACTAMENTE con la definida en `firestore.rules`
+// (función isAdmin()/isStaff()), porque las reglas de Firestore son la
+// verificación real: esto solo controla qué ve la interfaz.
+// Para agregar/quitar administradores:
+//   1. Crear/eliminar el usuario en Firebase Console > Authentication > Users.
+//   2. Actualizar este arreglo y la lista equivalente en firestore.rules.
+export const ADMIN_EMAILS: string[] = [
+  'fornettiricardo@gmail.com',
+];
+
+/**
+ * Inicia sesión como administrador con email y contraseña.
+ * Lanza un error con un mensaje amigable en español si falla.
+ */
+export async function signInAdmin(email: string, password: string): Promise<User> {
+  try {
+    const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+    return credential.user;
+  } catch (error) {
+    // No exponemos el detalle técnico de Firebase al usuario final.
+    if (import.meta.env.DEV) {
+      console.error('signInAdmin error:', error);
+    }
+    throw new Error('No se pudo iniciar sesión. Verifica el email y la contraseña.');
+  }
+}
+
+/**
+ * Cierra la sesión actual.
+ */
+export async function signOutAdmin(): Promise<void> {
+  try {
+    await firebaseSignOut(auth);
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error('signOutAdmin error:', error);
+    }
+  }
+}
+
+/**
+ * Suscribe un callback a los cambios de sesión de Firebase Auth.
+ * Devuelve la función de desuscripción.
+ */
+export function onAuthStateChanged(callback: (user: User | null) => void): () => void {
+  return firebaseOnAuthStateChanged(auth, callback);
+}
+
+/**
+ * Determina si el usuario autenticado actual tiene permisos de administrador,
+ * comparando su email contra ADMIN_EMAILS. Esto es solo para la interfaz;
+ * la validación real ocurre en `firestore.rules`.
+ */
+export function isAdminUser(user: User | null): boolean {
+  if (!user || !user.email) return false;
+  return ADMIN_EMAILS.includes(user.email);
+}
 
 // Verification of Connection
 async function testConnection() {
@@ -36,7 +112,9 @@ async function testConnection() {
     await getDocFromServer(doc(db, 'test', 'connection'));
   } catch (error) {
     if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration or network status.");
+      if (import.meta.env.DEV) {
+        console.error("Please check your Firebase configuration or network status.");
+      }
     }
   }
 }
@@ -56,38 +134,35 @@ export interface FirestoreErrorInfo {
   error: string;
   operationType: OperationType;
   path: string | null;
-  authInfo: {
-    userId?: string | null;
-    email?: string | null;
-    emailVerified?: boolean | null;
-    isAnonymous?: boolean | null;
-    tenantId?: string | null;
-    providerInfo?: {
-      providerId?: string | null;
-      email?: string | null;
-    }[];
-  }
 }
 
+/**
+ * Maneja errores de Firestore de forma segura:
+ * - En desarrollo, registra el detalle completo (incluyendo info de sesión)
+ *   solo en la consola local para facilitar el debugging.
+ * - En producción, registra y propaga únicamente un mensaje genérico, sin
+ *   datos de autenticación (uid, email, proveedor, etc.), para evitar
+ *   exponer información de sesión en la consola del navegador del usuario.
+ */
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData?.map(provider => ({
-        providerId: provider.providerId,
-        email: provider.email,
-      })) || []
-    },
-    operationType,
-    path
-  };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (import.meta.env.DEV) {
+    console.error('Firestore Error (detalle dev):', {
+      message,
+      operationType,
+      path,
+      authInfo: {
+        userId: auth.currentUser?.uid,
+        email: auth.currentUser?.email,
+        isAnonymous: auth.currentUser?.isAnonymous,
+      },
+    });
+  } else {
+    console.error('Firestore Error:', JSON.stringify({ error: message, operationType, path }));
+  }
+
+  throw new Error(`Error de Firestore (${operationType}): ${message}`);
 }
 
 /**

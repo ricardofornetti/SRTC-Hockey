@@ -1,59 +1,125 @@
 @import "tailwindcss";
 
+/* -------------------------------------------------------------------------
+   TIPOGRAFÍA
+   - Outfit: tipografía display moderna y geométrica para títulos y números
+     destacados (marcadores, posiciones, estadísticas).
+   - Inter: tipografía sans-serif muy legible para textos de cuerpo.
+   ------------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap');
+
+/* -------------------------------------------------------------------------
+   IDENTIDAD DEL CLUB
+   Colores extraídos del escudo de San Rafael Tenis Club:
+     - Azul institucional: #3e7496
+     - Verde institucional: #7a9660
+     - Blanco
+   Toda la paleta de abajo está derivada de estos dos tonos, en vez de un
+   azul/verde "genéricos", para que la app se sienta del club.
+   ------------------------------------------------------------------------- */
+
 @theme {
-  --font-sans: Arial, Helvetica, sans-serif;
-  --font-display: Arial, sans-serif;
-  --font-sport: Arial, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-display: "Outfit", "Inter", system-ui, sans-serif;
+  --font-sport: "Outfit", "Inter", system-ui, sans-serif;
 
-  /* Premium Emerald Green Sports Palette (Neutral mappings for background & cards) */
-  --color-neutral-950: #f0faf6; /* Soft, beautiful minty turf green background */
-  --color-neutral-900: #ffffff; /* Fresh highlight white card containers */
-  --color-neutral-850: #def3eb; /* Subtle soft active selection tint */
-  --color-neutral-800: #c2ebd9; /* Elegant border and separating lines */
-  --color-neutral-750: #a7dec5; /* Hover states for border elements */
-  --color-neutral-700: #427e65; /* Standard metadata context green */
-  --color-neutral-600: #10b981; /* High contrast energetic Emerald Green accent */
-  --color-neutral-550: #059669; /* Richer green hover states */
-  --color-neutral-500: #034e36; /* Dark moss green for strong subheadings */
-  --color-neutral-450: #022319;
-  --color-neutral-400: #2d5045; /* Clean body text - superb contrast against light mint */
-  --color-neutral-300: #173b30; /* Dark green headings */
-  --color-neutral-200: #0d2820; /* Heavy high-contrast main headings */
-  --color-neutral-100: #061a14; /* Deep solid charcoal-green for absolute readability */
-  --color-neutral-550: #010604;
+  /* =========================================================================
+     PALETA "NEUTRAL" — Escala de superficies oscuras (AZUL marino del club)
+     Usada para fondos de cards, paneles y bordes. 950 = más oscuro/profundo,
+     100 = texto casi blanco sobre fondos oscuros.
+     ========================================================================= */
+  --color-neutral-950: #0a141c; /* Fondo más profundo (paneles internos, inputs) */
+  --color-neutral-900: #11202d; /* Fondo de cards principales */
+  --color-neutral-850: #17293a; /* Selección activa / hover sutil */
+  --color-neutral-800: #1f3548; /* Bordes y separadores */
+  --color-neutral-750: #29445b; /* Hover de bordes */
+  --color-neutral-700: #3c5d78; /* Texto metadata sobre fondo oscuro */
+  --color-neutral-600: #6f93ac; /* Texto secundario */
+  --color-neutral-550: #9bb7c9; /* Texto secundario claro */
+  --color-neutral-500: #c2d4e1; /* Subtítulos sobre fondo oscuro */
+  --color-neutral-450: #9bbf7a; /* Acento verde club para iconos sobre fondo oscuro */
+  --color-neutral-400: #dce8ef; /* Texto de cuerpo, alto contraste */
+  --color-neutral-300: #eaf1f6; /* Encabezados */
+  --color-neutral-200: #f3f7fa; /* Encabezados de alto contraste */
+  --color-neutral-100: #ffffff; /* Texto principal (blanco puro) */
 
-  /* Replicate custom zinc matches to green palette for maximum coverage */
-  --color-zinc-950: #f0faf6;
-  --color-zinc-900: #ffffff;
-  --color-zinc-850: #def3eb;
-  --color-zinc-800: #c2ebd9;
-  --color-zinc-750: #a7dec5;
-  --color-zinc-700: #427e65;
-  --color-zinc-650: #10b981;
-  --color-zinc-600: #059669;
-  --color-zinc-500: #034e36;
-  --color-zinc-400: #2d5045;
-  --color-zinc-300: #173b30;
-  --color-zinc-200: #0d2820;
-  --color-zinc-100: #061a14;
-  --color-zinc-50: #010604;
+  /* Réplica de "zinc" alineada a la misma escala oscura, para máxima cobertura */
+  --color-zinc-950: #0a141c;
+  --color-zinc-900: #11202d;
+  --color-zinc-850: #17293a;
+  --color-zinc-800: #1f3548;
+  --color-zinc-750: #29445b;
+  --color-zinc-700: #3c5d78;
+  --color-zinc-650: #6f93ac;
+  --color-zinc-600: #9bb7c9;
+  --color-zinc-500: #c2d4e1;
+  --color-zinc-400: #dce8ef;
+  --color-zinc-300: #eaf1f6;
+  --color-zinc-200: #f3f7fa;
+  --color-zinc-100: #ffffff;
+  --color-zinc-50: #ffffff;
 
-  /* Premium Sports Greens mapping for Indigo variables used in top bars and navigators */
-  --color-indigo-50: #f4fdfa;
-  --color-indigo-100: #edfdf7;
-  --color-indigo-200: #def7ec;
-  --color-indigo-300: #a7f3d0;
-  --color-indigo-400: #6ee7b7;
-  --color-indigo-400-hover: #34d399;
-  --color-indigo-500: #10b981; /* Club Emerald Active Indicator */
-  --color-indigo-600: #059669; /* Energetic header action / button greens */
-  --color-indigo-600-hover: #047857;
-  --color-indigo-700: #047857;
-  --color-indigo-800: #065f46;
-  --color-indigo-900: #044e39; /* Deep majestic official club forest-green header */
-  --color-indigo-950: #022c20;
+  /* =========================================================================
+     PALETA "INDIGO" — AZUL institucional del club (#3e7496), tonos para texto
+     y detalles sobre el header/gradiente oscuro
+     ========================================================================= */
+  --color-indigo-100: #edf3f8;
+  --color-indigo-150: #dbe8f0;
+  --color-indigo-200: #c5dbe9;
+  --color-indigo-205: #bed5e4;
+  --color-indigo-250: #aecddf;
+  --color-indigo-300: #a1c3d8;
+  --color-indigo-350: #84b0cc;
+  --color-indigo-400: #679ec0;
+  --color-indigo-400-hover: #5a90b3;
+  --color-indigo-500: #4b8cb4;
+  --color-indigo-600: #3c7090;
+  --color-indigo-600-hover: #335f7a;
+  --color-indigo-650: #2d546c;
+  --color-indigo-700: #25455a;
+  --color-indigo-800: #1b3241;
+  --color-indigo-900: #152733;
+  --color-indigo-950: #0f1c24;
+
+  /* =========================================================================
+     ACENTO PRIMARIO — VERDE institucional del club (#7a9660)
+     ========================================================================= */
+  --color-emerald-300: #b2c3a2;
+  --color-emerald-350: #a5b992;
+  --color-emerald-400: #98af83;
+  --color-emerald-450: #8ba573;
+  --color-emerald-500: #7a9660;
+  --color-emerald-550: #748f5c;
+  --color-emerald-600: #60764c;
+  --color-emerald-650: #56693f;
+
+  /* =========================================================================
+     ACENTO SECUNDARIO — Rojo/rosa institucional (admin, alertas, énfasis)
+     Se mantiene un rojo/rosa funcional (no es color de marca, pero se usa
+     como código de color universal para "administración" y "alertas").
+     ========================================================================= */
+  --color-rose-200: #fecdd3;
+  --color-rose-300: #fda4af;
+  --color-rose-400: #fb7185;
+  --color-rose-450: #f9586f;
+  --color-rose-500: #f43f5e;
+  --color-rose-600: #e11d48;
+  --color-rose-650: #c81e44;
+  --color-rose-950: #4c0519;
+
+  /* =========================================================================
+     ACENTO TERCIARIO — Dorado/ámbar (logros, MVP, destacados)
+     ========================================================================= */
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-450: #f7b817;
+  --color-amber-500: #f59e0b;
+  --color-amber-800: #92400e;
 }
 
+/* ---------------------------------------------------------------------------
+   UTILIDADES Y ESTILOS GLOBALES
+   --------------------------------------------------------------------------- */
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
@@ -62,38 +128,102 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
-  /* Disable text shadows and glows completely */
+
+  /* Resplandor sutil de texto para títulos destacados (verde del club) */
   .text-shadow-glow {
-    text-shadow: none !important;
-  }
-  
-  .font-sports-condensed {
-    font-family: Arial, sans-serif;
+    text-shadow: 0 0 18px rgba(122, 150, 96, 0.35);
   }
 
-  /* Club visual gradient */
-  .bg-club-gradient {
-    background: linear-gradient(135deg, #0f1c3f 0%, #0a3d25 50%, #0d1b38 100%) !important;
-    background-attachment: fixed !important;
-  }
-
-  /* Richer/darker gradient for header, navigation bar, buttons, and sections */
-  .bg-club-gradient-elements {
-    background: linear-gradient(135deg, #15264f 0%, #0d4f32 100%) !important;
-  }
-
-  /* Ultimate legibility standards: Soft white for dark layers, dark text for light elements */
   .text-white-pure {
     color: #ffffff !important;
   }
+
+  /* Tipografía display "deportiva": condensada, geométrica, en mayúsculas */
+  .font-sports-condensed {
+    font-family: var(--font-display);
+    letter-spacing: 0.02em;
+  }
+
+  /* Fondo principal de la app: degradado azul marino institucional con
+     un toque del verde del club */
+  .bg-club-gradient {
+    background:
+      radial-gradient(circle at 15% 0%, rgba(122, 150, 96, 0.10) 0%, transparent 45%),
+      radial-gradient(circle at 85% 100%, rgba(62, 116, 150, 0.16) 0%, transparent 50%),
+      linear-gradient(160deg, #0a141c 0%, #102230 45%, #0a1620 100%) !important;
+    background-attachment: fixed !important;
+  }
+
+  /* Fondo para header, navegación y secciones destacadas: azul y verde
+     institucionales del club */
+  .bg-club-gradient-elements {
+    background: linear-gradient(135deg, #1b3548 0%, #3e7496 50%, #56693f 100%) !important;
+  }
+
+  /* Efecto "glass" sutil para paneles flotantes */
+  .glass-panel {
+    background: rgba(17, 32, 45, 0.65);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /* Tarjeta moderna estándar: borde sutil + sombra suave + esquinas redondeadas */
+  .modern-card {
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Resplandor de acento para elementos seleccionados / próximos partidos / MVP
+     (verde institucional del club) */
+  .accent-glow {
+    box-shadow: 0 0 0 1px rgba(122, 150, 96, 0.3), 0 8px 30px -10px rgba(122, 150, 96, 0.4);
+  }
+
+  .gold-glow {
+    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.3), 0 8px 30px -10px rgba(245, 158, 11, 0.35);
+  }
 }
 
-/* Global Typography Cleanups: Enforces Arial, normal weight, and removes shadows entirely */
-html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video, input, button, select, textarea, b, strong, strong {
-  font-family: Arial, Helvetica, sans-serif !important;
-  font-weight: 400 !important;
-  text-shadow: none !important;
-  font-style: normal !important;
+/* ---------------------------------------------------------------------------
+   TIPOGRAFÍA GLOBAL
+   Reemplaza el "Arial !important" forzado anteriormente por una jerarquía
+   tipográfica moderna: Inter para texto general, Outfit para títulos y
+   elementos "display" (marcadores, números grandes, encabezados de sección).
+   --------------------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
 }
 
+body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* Transiciones suaves por defecto para hover/focus de elementos interactivos */
+button, a, input, select, textarea {
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, opacity 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+
+/* Scrollbar fina y discreta (navegadores basados en WebKit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
