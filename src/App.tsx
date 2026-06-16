@@ -19,7 +19,11 @@ import {
   Share2, 
   CheckCircle,
   AlertCircle,
-  ChevronLeft
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  X,
+  Settings
 } from 'lucide-react';
 import { 
   UserRole, 
@@ -56,6 +60,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import RoleSelector from './components/RoleSelector';
 import ClubLogo from './components/ClubLogo';
 import SrtcLogo from './components/SrtcLogo';
+import HockeyStickBall from './components/HockeyStickBall';
 
 // Tab components
 import Inicio from './components/Tabs/Inicio';
@@ -84,6 +89,10 @@ export default function App() {
   
   const [selectedCategory, setSelectedCategory] = useState<Category>('7ma');
   const [activeTab, setActiveTab] = useState<string>('inicio');
+  const [isNavCollapsed, setIsNavCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('srtc_nav_collapsed') === 'true';
+  });
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
 
   // Shared status banners / alerts
   const [toast, setToast] = useState<{ title: string; body: string; type: 'success' | 'info' | 'error' } | null>(null);
@@ -669,6 +678,14 @@ export default function App() {
     }
   };
 
+  const toggleNavCollapse = () => {
+    setIsNavCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('srtc_nav_collapsed', String(next));
+      return next;
+    });
+  };
+
   // Clear toast after timeout
   useEffect(() => {
     if (toast) {
@@ -794,174 +811,529 @@ export default function App() {
 
   // Beautiful Tab Definitions
   const tabsConfig = [
-    { id: 'inicio', label: 'Inicio', icon: Home },
-    { id: 'fixture', label: 'Fixture', icon: Calendar },
-    { id: 'tabla', label: 'Tabla', icon: Trophy },
-    { id: 'plantel', label: 'Plantel', icon: Users },
-    { id: 'estadisticas', label: 'Estadísticas', icon: BarChart3 },
-    { id: 'galeria', label: 'Galería', icon: ImageIcon },
+    { id: 'inicio', label: 'Inicio', icon: Home, category: 'Torneo y Equipo' },
+    { id: 'fixture', label: 'Fixture', icon: Calendar, category: 'Torneo y Equipo' },
+    { id: 'tabla', label: 'Tabla', icon: Trophy, category: 'Torneo y Equipo' },
+    { id: 'plantel', label: 'Plantel', icon: Users, category: 'Torneo y Equipo' },
+    { id: 'estadisticas', label: 'Estadísticas', icon: BarChart3, category: 'Torneo y Equipo' },
+    { id: 'galeria', label: 'Galería', icon: ImageIcon, category: 'Torneo y Equipo' },
+  ];
+
+  const extraTabsConfig = [
+    { id: 'convocatorias', label: 'Convocadas', icon: Award, category: 'Club y Comunidad' },
+    { id: 'noticias', label: 'Noticias', icon: Newspaper, category: 'Club y Comunidad' },
+    { id: 'mas', label: 'Ajustes', icon: Settings, category: 'Preferencias' }
   ];
 
   return (
-    <div id="app-root-container" className="min-h-screen bg-club-gradient text-neutral-100 flex flex-col font-sans pb-10">
-      {/* 1. Control de Rol / Simulación de Entorno con Firebase Real Auth */}
-      <RoleSelector 
-        currentRole={userRole} 
-        currentUserEmail={currentUserEmail} 
-        showToast={showToast}
-      />
-
-      {activeTab !== 'inicio' ? (
-        /* Standalone Page View for sub-tabs */
-        <div className="flex flex-col flex-1">
-          <main id="app-viewport" className="flex-1 max-w-7xl w-full mx-auto px-4 pt-4 pb-8">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
-              <div>
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-                  {activeTab === 'fixture' && (
-                    <>
-                      <Calendar className="w-8 h-8 text-emerald-450" />
-                      CALENDARIO
-                    </>
-                  )}
-                  {activeTab === 'tabla' && (
-                    <>
-                      <Trophy className="w-8 h-8 text-emerald-450" />
-                      POSICIONES
-                    </>
-                  )}
-                  {activeTab === 'plantel' && (
-                    <>
-                      <Users className="w-8 h-8 text-emerald-450" />
-                      JUGADORAS
-                    </>
-                  )}
-                  {activeTab === 'estadisticas' && (
-                    <>
-                      <BarChart3 className="w-8 h-8 text-emerald-450" />
-                      ESTADISTICAS
-                    </>
-                  )}
-                  {activeTab === 'galeria' && (
-                    <>
-                      <ImageIcon className="w-8 h-8 text-emerald-450" />
-                      IMAGENES
-                    </>
-                  )}
-                </h2>
-                <p className="text-xs sm:text-sm text-indigo-200 mt-1 uppercase tracking-wider font-semibold">
-                  {activeTab === 'fixture' && 'Torneo Apertura "Damas B"'}
-                  {activeTab === 'tabla' && 'Torneo Apertura Damas B 2026. 7ma Categoria'}
-                  {activeTab === 'plantel' && '7ma Division - San Rafael Tenis Club'}
-                  {activeTab === 'estadisticas' && 'Torneo Apertura Damas B 2026. 7ma Categoria'}
-                  {activeTab === 'galeria' && 'Capturas, festejos y entrenamientos'}
-                </p>
-              </div>
-            </div>
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.22, ease: "easeInOut" }}
-                className="w-full flex-1"
-              >
-                {renderTabContent()}
-              </motion.div>
-            </AnimatePresence>
-          </main>
-        </div>
-      ) : (
-        /* Regular Standard Hub Layout with Tab bar navigation */
-        <>
-          {/* 2. Header de la Aplicación */}
-          <header id="main-header" className="bg-club-gradient-elements border-b border-white/10 px-5 py-5 md:py-6 shadow-xl relative z-40">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
-              
-              {/* Logo y Nombre del Club */}
-              <div className="flex flex-col sm:flex-row items-center gap-4.5 select-none md:scale-100">
-                {/* Highly prominent and glowing official club logo card - enlarged and static */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 p-1.5 bg-white border-2 border-white/20 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/10">
-                  {customClubLogo ? (
-                    <img 
-                      src={customClubLogo} 
-                      alt="Logo Club personalizado" 
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-contain rounded-xl"
-                    />
-                  ) : (
-                    <SrtcLogo className="w-16 h-16 sm:w-18 sm:h-18" />
-                  )}
-                </div>
-                <div className="cursor-pointer text-center sm:text-left flex-1" onClick={() => setActiveTab('inicio')}>
-                  <h1 className="text-2xl xs:text-3.5xl sm:text-4.5xl md:text-5.5xl lg:text-6.5xl xl:text-7.5xl font-black text-white uppercase tracking-[0.03em] xs:tracking-[0.06em] sm:tracking-[0.12em] md:tracking-[0.18em] lg:tracking-[0.24em] xl:tracking-[0.28em] leading-none hover:text-amber-350 transition-all duration-300 select-none">
-                    SAN RAFAEL TENIS CLUB
-                  </h1>
-                  <p className="text-xs text-indigo-100/90 font-bold leading-normal mt-1 flex items-center justify-center sm:justify-start gap-2">
-                    <span className="w-2 h-2 bg-emerald-450 rounded-full animate-pulse"></span>
-                    <span className="font-sports-condensed uppercase tracking-wider text-[11px] text-indigo-100">Sitio Oficial de Hockey • Mendoza</span>
-                  </p>
-                </div>
-              </div>
-
-            </div>
-          </header>
-
-          {/* 2.5 Quick Navigation Actions (Sticky/Fixed on scroll) */}
-          <div className="sticky top-0 z-30 bg-club-gradient/95 backdrop-blur-md border-b border-white/10 shadow-xl w-full">
-            <div className="max-w-7xl mx-auto w-full">
-              <div className="grid grid-cols-6 gap-0 bg-club-gradient-elements overflow-hidden shadow-inner w-full relative">
-                {tabsConfig.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className="flex flex-col items-center justify-center gap-1.5 p-1 bg-transparent transition-all duration-300 text-center cursor-pointer group border-r border-white/10 last:border-r-0 h-13 xs:h-15 sm:h-18 md:h-20 relative overflow-hidden"
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="nav-active-pill"
-                          className="absolute inset-0 bg-club-gradient z-0"
-                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+    <div id="app-root-container" className="min-h-screen bg-club-gradient text-neutral-100 flex flex-row font-sans relative overflow-x-hidden">
+      
+      {/* Drawer Móvil deslizable (desde la izquierda) controlado por AnimatePresence */}
+      <AnimatePresence>
+        {isMobileDrawerOpen && (
+          <>
+            {/* Backdrop con desenfoque de fondo */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileDrawerOpen(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 md:hidden"
+            />
+            {/* Contenedor del Drawer */}
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className="fixed top-0 bottom-0 left-0 w-72 bg-[#090d22] border-r border-white/10 z-50 flex flex-col justify-between shadow-2xl md:hidden"
+            >
+              <div className="flex flex-col flex-grow py-5 px-4 overflow-y-auto no-scrollbar">
+                {/* Header del Drawer Móvil */}
+                <div className="flex items-center justify-between pb-5 border-b border-white/5 mb-5 shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 p-0.5 bg-white rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/10">
+                      {customClubLogo ? (
+                        <img 
+                          src={customClubLogo} 
+                          alt="Logo SRTC Custom" 
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-contain rounded"
                         />
+                      ) : (
+                        <SrtcLogo className="w-8 h-8" />
                       )}
-                      
-                      <div className="z-10 flex flex-col items-center justify-center gap-1.5 w-full">
-                        <Icon className={`w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white font-black' : 'text-indigo-350'}`} />
-                        <span className={`text-[7.5px] xs:text-[9px] sm:text-[10px] md:text-[11px] font-black tracking-wide uppercase block truncate max-w-full px-0.5 ${isActive ? 'text-white' : 'text-indigo-200'}`}>
-                          {tab.label}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-white uppercase tracking-wider leading-none">TENIS CLUB</h3>
+                      <span className="text-[9px] text-[#7a9660] font-bold uppercase tracking-widest leading-none mt-1 block">Hockey Césped</span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setIsMobileDrawerOpen(false)}
+                    className="p-1 rounded-lg bg-white/5 border border-white/10 text-neutral-400 hover:text-white cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Decoración Temática Ligera de Hockey */}
+                <div className="bg-gradient-to-r from-emerald-950/20 to-indigo-950/20 border border-white/5 rounded-xl p-3 mb-5 flex items-center gap-2 relative overflow-hidden">
+                  <div className="absolute -right-3 -bottom-3 opacity-15">
+                    <HockeyStickBall className="w-16 h-16 animate-pulse" animate={false} />
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">SRTC - HOCKEY</h4>
+                    <p className="text-[10px] text-indigo-200/85 font-medium mt-1">Sitio Oficial de Hockey • Mendoza</p>
+                  </div>
+                </div>
+
+                {/* Listado de Navegación del Drawer Móvil */}
+                <div className="space-y-6 flex-grow font-sports-condensed">
+                  <div>
+                    <span className="text-[9px] font-black uppercase text-indigo-300/40 tracking-widest block mb-1.5 px-3">Principal</span>
+                    <nav className="space-y-1">
+                      {tabsConfig.map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            onClick={() => {
+                              setActiveTab(tab.id);
+                              setIsMobileDrawerOpen(false);
+                            }}
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-left w-full transition-all duration-200 cursor-pointer ${
+                              isActive 
+                                ? 'bg-gradient-to-r from-[#3e7496]/20 to-[#7a9660]/30 text-white font-extrabold border-l-4 border-emerald-450 pl-3' 
+                                : 'text-indigo-200 hover:text-white hover:bg-white/5'
+                            }`}
+                          >
+                            <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-emerald-450' : 'text-indigo-350'}`} />
+                            <span className="text-xs uppercase font-bold tracking-wider">{tab.label}</span>
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+
+                  <div>
+                    <span className="text-[9px] font-black uppercase text-indigo-300/40 tracking-widest block mb-1.5 px-3">Comunidad y Más</span>
+                    <nav className="space-y-1">
+                      {extraTabsConfig.map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            onClick={() => {
+                              setActiveTab(tab.id);
+                              setIsMobileDrawerOpen(false);
+                            }}
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-left w-full transition-all duration-200 cursor-pointer ${
+                              isActive 
+                                ? 'bg-gradient-to-r from-[#3e7496]/20 to-[#7a9660]/30 text-white font-extrabold border-l-4 border-emerald-450 pl-3' 
+                                : 'text-indigo-200 hover:text-white hover:bg-white/5'
+                            }`}
+                          >
+                            <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-emerald-450' : 'text-indigo-350'}`} />
+                            <span className="text-xs uppercase font-bold tracking-wider">{tab.label}</span>
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                </div>
               </div>
+
+              {/* Pie del Drawer Móvil */}
+              <div className="p-4 border-t border-white/5 shrink-0 bg-[#070b1e] text-center">
+                <span className="text-[8px] uppercase tracking-widest text-neutral-500 font-bold block mb-2">San Rafael Tenis Club</span>
+                <div className="flex justify-center">
+                  <RoleSelector 
+                    currentRole={userRole} 
+                    currentUserEmail={currentUserEmail} 
+                    showToast={showToast}
+                  />
+                </div>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* =========================================================================
+         1. SIDEBAR FIJO LATERAL - DESKTOP & TABLET (≥768px)
+         ========================================================================= */}
+      <aside 
+        id="desktop-sidebar" 
+        className={`hidden md:flex flex-col justify-between h-screen sticky top-0 bg-[#090d22] border-r border-white/10 z-40 transition-all duration-300 relative shrink-0 overflow-y-auto no-scrollbar ${
+          isNavCollapsed ? 'w-20' : 'w-72'
+        }`}
+      >
+        {/* Capa de destello superior */}
+        <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-[#3e7496] via-[#7a9660] to-[#3e7496]" />
+
+        {/* Bloque Superior: Logo + Header de Club */}
+        <div className="p-5 flex flex-col shrink-0">
+          <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-5">
+            <div className="flex items-center gap-3.5 select-none overflow-hidden">
+              {/* Logo SRTC */}
+              <div 
+                onClick={() => setActiveTab('inicio')}
+                className="w-11 h-11 shrink-0 p-1 bg-white border border-white/10 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/10 cursor-pointer"
+              >
+                {customClubLogo ? (
+                  <img 
+                    src={customClubLogo} 
+                    alt="Logo Club" 
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-contain rounded-lg"
+                  />
+                ) : (
+                  <SrtcLogo className="w-8 h-8" />
+                )}
+              </div>
+              
+              {/* Título (visible solo si NO está colapsado) */}
+              {!isNavCollapsed && (
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex flex-col"
+                >
+                  <h1 className="text-sm font-black text-white leading-none tracking-tight uppercase hover:text-amber-305 cursor-pointer transition font-display" onClick={() => setActiveTab('inicio')}>
+                    SRTC HOCKEY
+                  </h1>
+                  <span className="text-[10px] text-emerald-450 uppercase tracking-widest font-black leading-none mt-1">Sitio Oficial</span>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Botón de alternancia de colapsado (Toggle) */}
+            <button 
+              onClick={toggleNavCollapse}
+              className="p-1 px-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white transition cursor-pointer self-center"
+              title={isNavCollapsed ? "Expandir Menú" : "Colapsar Menú"}
+            >
+              {isNavCollapsed ? (
+                <ChevronRight className="w-4 h-4 text-emerald-400" />
+              ) : (
+                <ChevronLeft className="w-4 h-4 text-emerald-400" />
+              )}
+            </button>
+          </div>
+
+          {/* Sticker de Hockey Césped en Sidebar (solo si está expandido) */}
+          {!isNavCollapsed && (
+            <div className="bg-gradient-to-r from-emerald-950/20 to-indigo-950/20 border border-white/5 rounded-xl py-3 px-2 flex items-center justify-between gap-1 mt-4 relative overflow-hidden group">
+              <div className="flex items-center gap-2.5">
+                <HockeyStickBall className="w-10 h-10" />
+                <div>
+                  <h4 className="text-[9px] font-black text-emerald-450 tracking-widest uppercase mb-0.5">ESTADO VIVO</h4>
+                  <p className="text-[9px] text-indigo-200/80 leading-snug font-bold">Instalaciones Listas</p>
+                </div>
+              </div>
+              {/* Un destello sutil de fondo */}
+              <div className="absolute right-0 bottom-0 top-0 w-1/3 bg-gradient-to-l from-emerald-500/5 to-transparent pointer-events-none" />
+            </div>
+          )}
+        </div>
+
+        {/* Bloque Medio: Listado de Ítems de Navegación Vertical */}
+        <div className="flex-grow px-3 space-y-6 overflow-y-auto no-scrollbar py-2 font-sports-condensed">
+          
+          {/* Categoría: Torneo y Equipo */}
+          <div>
+            {!isNavCollapsed && (
+              <span className="text-[9px] font-black uppercase text-indigo-300/30 tracking-widest block mb-2 px-3 animate-pulse">TORNEO Y EQUIPO</span>
+            )}
+            <nav className="space-y-1">
+              {tabsConfig.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center rounded-xl text-left transition-all duration-200 cursor-pointer h-11 relative group w-full ${
+                      isNavCollapsed ? 'justify-center px-1' : 'px-4 py-2.5'
+                    } ${
+                      isActive 
+                        ? 'bg-gradient-to-r from-[#3e7496]/20 to-[#7a9660]/20 text-white font-black border-l-4 border-emerald-450 pl-3' 
+                        : 'text-indigo-200 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Icon className={`w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-emerald-450 font-black' : 'text-indigo-300'}`} />
+                    
+                    {!isNavCollapsed && (
+                      <span className="text-xs uppercase font-extrabold tracking-wider ml-3">{tab.label}</span>
+                    )}
+
+                    {/* Transición suave para tab activa utilizando layoutId de motion */}
+                    {isActive && !isNavCollapsed && (
+                      <motion.div
+                        layoutId="sidebar-active-pill"
+                        className="absolute right-2 w-1.5 h-1.5 rounded-full bg-emerald-450"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+
+                    {/* Tooltip flotante en hover al estar colapsado */}
+                    {isNavCollapsed && (
+                      <div className="absolute left-20 z-50 bg-[#0c122c] border border-white/15 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-2xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 pointer-events-none transition-all duration-150 whitespace-nowrap">
+                        {tab.label}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Categoría: Club y Comunidad */}
+          <div>
+            {!isNavCollapsed && (
+              <span className="text-[9px] font-black uppercase text-indigo-300/30 tracking-widest block mb-2 px-3 animate-pulse">CLUB Y COMUNIDAD</span>
+            )}
+            <nav className="space-y-1">
+              {extraTabsConfig.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center rounded-xl text-left transition-all duration-200 cursor-pointer h-11 relative group w-full ${
+                      isNavCollapsed ? 'justify-center px-1' : 'px-4 py-2.5'
+                    } ${
+                      isActive 
+                        ? 'bg-gradient-to-r from-[#3e7496]/20 to-[#7a9660]/20 text-white font-black border-l-4 border-emerald-450 pl-3' 
+                        : 'text-indigo-200 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Icon className={`w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-emerald-450 font-black' : 'text-indigo-300'}`} />
+                    
+                    {!isNavCollapsed && (
+                      <span className="text-xs uppercase font-extrabold tracking-wider ml-3">{tab.label}</span>
+                    )}
+
+                    {/* Tooltip flotante en hover al estar colapsado */}
+                    {isNavCollapsed && (
+                      <div className="absolute left-20 z-50 bg-[#0c122c] border border-white/15 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-2xl opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 pointer-events-none transition-all duration-150 whitespace-nowrap">
+                        {tab.label}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+        </div>
+
+        {/* Bloque Inferior del Sidebar */}
+        <div className="p-3 border-t border-white/5 shrink-0 bg-[#070b1e]">
+          {/* Info del Rol de Acceso */}
+          <div className="flex flex-col items-center justify-center gap-1">
+            <RoleSelector 
+              currentRole={userRole} 
+              currentUserEmail={currentUserEmail} 
+              showToast={showToast}
+            />
+            {!isNavCollapsed && (
+              <span className="text-[8px] text-neutral-500 font-bold uppercase tracking-wider mt-1 text-center select-none block">
+                San Rafael Tenis Club © 2026
+              </span>
+            )}
+          </div>
+        </div>
+      </aside>
+
+      {/* =========================================================================
+         2. CONTENEDOR DE CONTENIDO PRINCIPAL (Derecha del Sidebar en Desktop)
+         ========================================================================= */}
+      <div className="flex-grow flex flex-col min-w-0 bg-[#060919] min-h-screen pb-24 md:pb-8 relative">
+        
+        {/* =====================================================================
+           2.1 CABECERA MÓVIL (Visible únicamente en Mobile <768px)
+           ===================================================================== */}
+        <header id="mobile-navigation-header" className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0a0f24] border-b border-white/15 shadow-xl sticky top-0 z-30">
+          <div className="flex items-center gap-2.5">
+            {/* Botón Hamburguesa que abre el drawer */}
+            <button 
+              onClick={() => setIsMobileDrawerOpen(true)}
+              className="p-1 px-1.5 rounded-lg bg-white/5 border border-white/12 text-white hover:bg-white/10 transition cursor-pointer"
+              title="Abrir Menú"
+            >
+              <Menu className="w-5.5 h-5.5 text-emerald-400" />
+            </button>
+
+            {/* Escudo Oficial en Miniatura */}
+            <div 
+              onClick={() => setActiveTab('inicio')}
+              className="w-8 h-8 p-0.5 bg-white rounded-lg flex items-center justify-center shadow-md cursor-pointer shrink-0"
+            >
+              {customClubLogo ? (
+                <img 
+                  src={customClubLogo} 
+                  alt="Logo Club" 
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-contain rounded"
+                />
+              ) : (
+                <SrtcLogo className="w-6 h-6" />
+              )}
+            </div>
+
+            {/* Título de SRTC */}
+            <div onClick={() => setActiveTab('inicio')} className="cursor-pointer select-none">
+              <h1 className="text-sm font-black text-white hover:text-amber-350 leading-tight uppercase tracking-wider block font-display">
+                SRTC HOCKEY
+              </h1>
+              <span className="text-[8px] text-[#7a9660] font-black uppercase tracking-widest leading-none block font-sports-condensed">7ma división</span>
             </div>
           </div>
 
-          {/* 3. Main Tab View Area with Entry Animation */}
-          <main id="app-viewport" className="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.22, ease: "easeInOut" }}
-                className="w-full flex-1"
-              >
-                {renderTabContent()}
-              </motion.div>
-            </AnimatePresence>
-          </main>
-        </>
-      )}
+          <div className="flex items-center gap-2">
+            <RoleSelector 
+              currentRole={userRole} 
+              currentUserEmail={currentUserEmail} 
+              showToast={showToast}
+            />
+          </div>
+        </header>
 
-      {/* 6. Dynamic Toast Banner Panel (Animated with AnimatePresence) */}
+        {/* =====================================================================
+           2.2 SUB-HEADER / CONTROL CENTRAL SUPERIOR (Común a Desktop, para todas las Tabs)
+           Incluye breadcrumbs consistentes y el selector ágil de categorías
+           ===================================================================== */}
+        <div className="bg-club-gradient-elements/40 border-b border-white/5 px-4 md:px-8 py-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 select-none shrink-0">
+          {/* Breadcrumb sutil e indicador de página actual */}
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-bold text-indigo-300/50 uppercase tracking-widest font-mono">
+              <span>Club San Rafael Tenis</span>
+              <span className="text-emerald-450">/</span>
+              <span className="text-indigo-200">Categorías</span>
+              <span className="text-emerald-450">/</span>
+              <span className="text-white font-extrabold">{selectedCategory.toUpperCase()}</span>
+            </div>
+            
+            {/* Título adaptativo dinámico */}
+            <div className="flex items-center gap-2 mt-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-450 animate-pulse shrink-0" />
+              <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-wider leading-none font-display">
+                {activeTab === 'inicio' && 'Panel de Inicio'}
+                {activeTab === 'fixture' && 'Calendario y Resultados'}
+                {activeTab === 'tabla' && 'Tabla de Posiciones'}
+                {activeTab === 'plantel' && 'Plantel de Jugadoras'}
+                {activeTab === 'estadisticas' && 'Estadísticas del Torneo'}
+                {activeTab === 'galeria' && 'Galería del Torneo'}
+                {activeTab === 'convocatorias' && 'Planillas de Convocadas'}
+                {activeTab === 'noticias' && 'Noticias e Informaciones'}
+                {activeTab === 'mas' && 'Configuraciones Generales'}
+              </h2>
+            </div>
+          </div>
+
+          {/* Selector de Divisiones / Categorías para cambios ágiles */}
+          <div className="flex items-center gap-2 shrink-0 self-start sm:self-center bg-black/25 p-1 rounded-xl border border-white/10">
+            <span className="text-[9px] font-black text-indigo-300/60 uppercase tracking-widest px-2 font-sports-condensed">División:</span>
+            <div className="flex items-center gap-1 font-sports-condensed">
+              {(['7ma', '6ta', '5ta', 'Intermedia', 'Primera'] as Category[]).map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => handleCategoryChange(cat)}
+                  className={`px-2.5 py-1 text-[10px] font-black rounded-lg uppercase tracking-wider cursor-pointer transition-all duration-150 shrink-0 ${
+                    selectedCategory === cat
+                      ? 'bg-gradient-to-tr from-[#3e7496] to-[#7a9660] text-white shadow-md border border-white/10 font-black'
+                      : 'text-indigo-200 hover:text-white hover:bg-white/5 border border-transparent'
+                  }`}
+                >
+                  {cat === 'Intermedia' ? 'Inter' : cat === 'Primera' ? '1ra' : cat.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* =====================================================================
+           2.3 ÁREA DE CONTENIDO DE LA PÁGINA (Viewport con animación de entrada)
+           ===================================================================== */}
+        <main className="flex-grow p-4 md:p-8 max-w-7xl w-full mx-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.22, ease: "easeInOut" }}
+              className="w-full flex-1"
+            >
+              {renderTabContent()}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+
+      </div>
+
+      {/* =======================================================================
+         3. BOTTOM NAVIGATION BAR - EXCLUSIVO MÓVIL (<768px)
+         Diseño compacto, similar a app nativa deportiva premium
+         ======================================================================= */}
+      <nav id="mobile-bottom-navigation" className="md:hidden fixed bottom-2 left-4 right-4 bg-[#0a0f24]/95 backdrop-blur-md border border-white/15 p-1 rounded-2xl shadow-2xl z-45 flex items-center justify-between h-14">
+        {[
+          { id: 'inicio', label: 'Inicio', icon: Home },
+          { id: 'fixture', label: 'Fixture', icon: Calendar },
+          { id: 'tabla', label: 'Posiciones', icon: Trophy },
+          { id: 'plantel', label: 'Plantel', icon: Users },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setIsMobileDrawerOpen(false);
+              }}
+              className="flex-1 flex flex-col items-center justify-center h-full relative cursor-pointer group"
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="mobile-nav-active-pill"
+                  className="absolute inset-x-2 inset-y-1 bg-gradient-to-tr from-[#3e7496]/25 to-[#7a9660]/25 border border-white/10 rounded-xl z-0"
+                  transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                />
+              )}
+              
+              <div className="z-10 flex flex-col items-center justify-center font-sports-condensed">
+                <Icon className={`w-4.5 h-4.5 mb-0.5 shrink-0 transition-transform ${isActive ? 'text-emerald-450 font-extrabold scale-110' : 'text-indigo-300'}`} />
+                <span className={`text-[8.5px] font-black uppercase tracking-wider block ${isActive ? 'text-white' : 'text-indigo-200/70'}`}>
+                  {tab.label}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+
+        {/* Botón "Más" (abre el Drawer deslizable lateral) */}
+        <button
+          onClick={() => setIsMobileDrawerOpen(true)}
+          className="flex-1 flex flex-col items-center justify-center h-full relative cursor-pointer group font-sports-condensed"
+        >
+          <div className="z-10 flex flex-col items-center justify-center">
+            <Menu className="w-4.5 h-4.5 mb-0.5 text-indigo-300 shrink-0 group-hover:text-emerald-450 transition" />
+            <span className="text-[8.5px] font-black uppercase tracking-wider text-indigo-200/70 block">
+              Menú
+            </span>
+          </div>
+        </button>
+      </nav>
+
+      {/* =======================================================================
+         4. DIALOG PANEL TO CONFIGURE ALERTS / TOAST
+         ======================================================================= */}
       <AnimatePresence>
         {toast && (
           <motion.div 
@@ -970,7 +1342,7 @@ export default function App() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className="fixed bottom-4 md:bottom-8 right-4 left-4 md:left-auto md:w-96 bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-2xl flex gap-3 items-start z-50 transform"
+            className="fixed bottom-18 md:bottom-8 right-4 left-4 md:left-auto md:w-96 bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-2xl flex gap-3 items-start z-50 transform"
           >
             <div className="shrink-0 mt-0.5">
               {toast.type === 'success' ? (

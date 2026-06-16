@@ -4,12 +4,12 @@
  */
 
 import React, { useState } from 'react';
-import { Calendar, MapPin, Clock, Edit3, Plus, Trophy, Save, Trash2, Award, CheckCircle2, AlertTriangle, Play, ChevronLeft } from 'lucide-react';
+import { Calendar, MapPin, Clock, Edit3, Plus, Trophy, Save, Trash2, Award, CheckCircle2, AlertTriangle, Play, ChevronLeft, ChevronDown, Check, Filter } from 'lucide-react';
 import { Match, Player, UserRole, MatchState, Category } from '../../types';
 import SrtcLogo from '../SrtcLogo';
 import ClubLogo from '../ClubLogo';
 import Button from '../ui/Button';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { INITIAL_MATCH_LIST } from '../../data';
 import HockeyAnim from '../HockeyAnim';
 
@@ -379,6 +379,10 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [faseFilter, setFaseFilter] = useState<'regular' | 'cuartos' | 'semifinal' | 'final'>('regular');
   const [fechaTorneoFilter, setFechaTorneoFilter] = useState<number | 'todas'>('todas');
+  
+  const [isEstadoOpen, setIsEstadoOpen] = useState(false);
+  const [isFaseOpen, setIsFaseOpen] = useState(false);
+  const [isFechaOpen, setIsFechaOpen] = useState(false);
   
   // Dynamic unique fixture round numbers for the active category
   const uniqueFechas = Array.from(
@@ -770,206 +774,256 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
   return (
     <div id="fixture-tab" className="space-y-4">
-      {/* Tournament Phase Navigation Bar */}
-      <div className="bg-club-gradient-elements p-2 rounded-2xl border border-white/10 shadow-lg flex items-center justify-between w-full overflow-hidden">
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full no-scrollbar py-0.5 font-sports-condensed">
-          <button
-            onClick={() => setFaseFilter('regular')}
-            className={`px-4 py-2 text-xs font-black rounded-xl border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
-              faseFilter === 'regular'
-                ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md scale-102 font-extrabold'
-                : 'bg-white/5 border-white/10 text-indigo-200 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            Fase Regular
-          </button>
+      {/* 3 Dropdowns Unificados Modernos */}
+      <div className="bg-club-gradient-elements p-4 rounded-2xl border border-white/10 shadow-xl space-y-4">
+        
+        {/* Encabezado y Acciones Rápidas */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
+          <div className="flex items-center gap-2 select-none">
+            <Filter className="w-4 h-4 text-emerald-450 shrink-0" />
+            <h3 className="text-xs font-black text-indigo-100 uppercase tracking-wider font-sans">
+              Filtros Avanzados de Competencia
+            </h3>
+          </div>
           
-          <button
-            onClick={() => setFaseFilter('cuartos')}
-            className={`px-4 py-2 text-xs font-black rounded-xl border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
-              faseFilter === 'cuartos'
-                ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md scale-102 font-extrabold'
-                : 'bg-white/5 border-white/10 text-indigo-200 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            Cuartos de Final
-          </button>
-
-          <button
-            onClick={() => setFaseFilter('semifinal')}
-            className={`px-4 py-2 text-xs font-black rounded-xl border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
-              faseFilter === 'semifinal'
-                ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md scale-102 font-extrabold'
-                : 'bg-white/5 border-white/10 text-indigo-200 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            Semifinal
-          </button>
-
-          <button
-            onClick={() => setFaseFilter('final')}
-            className={`px-4 py-2 text-xs font-black rounded-xl border uppercase tracking-wider cursor-pointer shrink-0 transition-all duration-200 ${
-              faseFilter === 'final'
-                ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md scale-102 font-extrabold'
-                : 'bg-white/5 border-white/10 text-indigo-200 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            Final
-          </button>
-        </div>
-      </div>
-
-      {/* Search and Filters Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-club-gradient-elements p-3 rounded-xl border border-white/10 shadow-lg">
-        {/* Desktop-only Filters */}
-        <div className="hidden sm:flex items-center gap-1.5 font-sports-condensed">
-          <button
-            onClick={() => setFilter('todos')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
-              filter === 'todos' ? 'bg-club-gradient text-white shadow border border-white/10' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            Todos
-          </button>
-          <button
-            onClick={() => setFilter('proximos')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
-              filter === 'proximos' ? 'bg-club-gradient text-white shadow border border-white/10' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            Próximos
-          </button>
-          <button
-            onClick={() => setFilter('jugados')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
-              filter === 'jugados' ? 'bg-club-gradient text-white shadow border border-white/10' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            Jugados
-          </button>
-        </div>
-
-        {/* Desktop-only Actions */}
-        <div className="hidden sm:flex items-center gap-2 justify-end">
-          {userRole === 'admin' && (
-            <button
-              id="create-match-button"
-              onClick={handleStartCreate}
-              className="flex items-center justify-center gap-1.5 bg-emerald-650 hover:bg-emerald-550 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-150 shadow-md cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" /> Agregar Partido
-            </button>
-          )}
-
-          <button
-            onClick={() => onTabChange('inicio')}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer"
-          >
-            <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
-            Volver
-          </button>
-        </div>
-
-        {/* Mobile unified horizontal scrollbar */}
-        <div className="flex sm:hidden items-center gap-1.5 overflow-x-auto w-full no-scrollbar py-1 font-sports-condensed">
-          <button
-            onClick={() => onTabChange('inicio')}
-            className="flex items-center gap-1 px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer shrink-0"
-          >
-            <ChevronLeft className="w-3 h-3 text-emerald-400" />
-            Volver
-          </button>
-
-          <button
-            onClick={() => setFilter('todos')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
-              filter === 'todos' ? 'bg-emerald-500 text-neutral-950 border border-emerald-400 font-extrabold' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white border border-white/10'
-            }`}
-          >
-            Todos
-          </button>
-          <button
-            onClick={() => setFilter('proximos')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
-              filter === 'proximos' ? 'bg-emerald-500 text-neutral-950 border border-emerald-400 font-extrabold' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white border border-white/10'
-            }`}
-          >
-            Próximos
-          </button>
-          <button
-            onClick={() => setFilter('jugados')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
-              filter === 'jugados' ? 'bg-emerald-500 text-neutral-950 border border-emerald-400 font-extrabold' : 'bg-white/5 text-indigo-200 hover:bg-white/10 hover:text-white border border-white/10'
-            }`}
-          >
-            Jugados
-          </button>
-
-          {userRole === 'admin' && (
-            <button
-              onClick={handleStartCreate}
-              className="flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-450 text-neutral-950 px-2.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider cursor-pointer shrink-0 transition shadow-md shadow-emerald-500/10"
-            >
-              <Plus className="w-3 h-3" /> Agregar
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Selector de Fecha del Torneo (Fase Regular) */}
-      {faseFilter === 'regular' && (
-        <div className="bg-club-gradient-elements p-4 rounded-2xl border border-white/10 shadow-xl space-y-3">
-          <div className="flex items-center justify-between pb-1 border-b border-white/5">
-            <span className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 font-sans select-none">
-              <Trophy className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
-              Filtrar por Jornada / Fecha
-            </span>
-            {fechaTorneoFilter !== 'todas' && (
+          <div className="flex items-center gap-2">
+            {userRole === 'admin' && (
               <button
-                onClick={() => setFechaTorneoFilter('todas')}
-                className="text-[10px] bg-white/5 hover:bg-white/10 text-indigo-200 hover:text-white px-2.5 py-1 rounded-lg border border-white/10 font-sans font-bold uppercase tracking-wider transition cursor-pointer"
+                id="create-match-button"
+                onClick={handleStartCreate}
+                className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-150 shadow-md cursor-pointer shrink-0 font-sports-condensed uppercase tracking-wider"
               >
-                Limpiar Filtro
+                <Plus className="w-3.5 h-3.5" /> Agregar Partido
               </button>
             )}
-          </div>
-          
-          <div className="relative w-full overflow-hidden rounded-xl">
-            {/* Elegant fading borders at scrolling boundaries */}
-            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-neutral-950/20 to-transparent pointer-events-none z-10" />
-            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-neutral-950/20 to-transparent pointer-events-none z-10" />
-            
-            <div className="flex items-center gap-2 overflow-x-auto w-full no-scrollbar py-2 scroll-smooth px-1">
-              <button
-                onClick={() => setFechaTorneoFilter('todas')}
-                className={`flex flex-col items-center justify-center min-w-[76px] h-13 rounded-xl border transition-all duration-200 shrink-0 cursor-pointer ${
-                  fechaTorneoFilter === 'todas'
-                    ? 'bg-gradient-to-tr from-emerald-500 to-teal-500 border-emerald-400 text-neutral-950 font-black shadow-lg shadow-emerald-500/20'
-                    : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white hover:bg-white/10 hover:border-white/20'
-                }`}
-              >
-                <span className={`text-[9px] font-bold uppercase tracking-widest leading-none ${fechaTorneoFilter === 'todas' ? 'text-neutral-950/80' : 'text-indigo-300/60'}`}>TORNEO</span>
-                <span className="text-xs font-black leading-none mt-1 uppercase tracking-wide">TODAS</span>
-              </button>
-              
-              {fechasToRender.map((num) => (
-                <button
-                  key={num}
-                  onClick={() => setFechaTorneoFilter(num)}
-                  className={`flex flex-col items-center justify-center min-w-[64px] h-13 rounded-xl border transition-all duration-200 shrink-0 cursor-pointer ${
-                    fechaTorneoFilter === num
-                      ? 'bg-gradient-to-tr from-emerald-500 to-teal-500 border-emerald-400 text-neutral-950 font-black shadow-lg shadow-emerald-500/20'
-                      : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className={`text-[9px] font-bold uppercase tracking-widest leading-none ${fechaTorneoFilter === num ? 'text-neutral-950/80' : 'text-indigo-300/60'}`}>FECHA</span>
-                  <span className="text-xs font-black leading-none mt-1 tracking-wider">{num}</span>
-                </button>
-              ))}
-            </div>
+
+            <button
+              onClick={() => onTabChange('inicio')}
+              className="flex items-center gap-1 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer shrink-0"
+            >
+              <ChevronLeft className="w-3.5 h-3.5 text-emerald-400" />
+              Volver
+            </button>
           </div>
         </div>
-      )}
+
+        {/* Grilla de Dropdowns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 relative">
+          
+          {/* Dropdown 1 — Estado de Partido */}
+          <div className="relative">
+            <label className="text-[10px] font-black uppercase text-indigo-300/50 block mb-1.5 tracking-wider font-sans">
+              Estado de Partido
+            </label>
+            <button
+              onClick={() => {
+                setIsEstadoOpen(!isEstadoOpen);
+                setIsFaseOpen(false);
+                setIsFechaOpen(false);
+              }}
+              className="w-full flex items-center justify-between bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-indigo-100 font-bold transition cursor-pointer"
+            >
+              <span className="capitalize">{filter === 'todos' ? 'Todos los Partidos' : filter === 'proximos' ? 'Partidos Próximos' : 'Partidos Jugados'}</span>
+              <motion.div
+                animate={{ rotate: isEstadoOpen ? 180 : 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <ChevronDown className="w-4 h-4 text-emerald-450 shrink-0" />
+              </motion.div>
+            </button>
+
+            <AnimatePresence>
+              {isEstadoOpen && (
+                <>
+                  {/* Backdrop de clic invisible para cerrar dropdown */}
+                  <div className="fixed inset-0 z-30" onClick={() => setIsEstadoOpen(false)} />
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-0 right-0 mt-1.5 bg-[#0e142d] border border-white/15 rounded-xl overflow-hidden shadow-2xl z-40"
+                  >
+                    {[
+                      { val: 'todos', label: 'Todos los Partidos' },
+                      { val: 'proximos', label: 'Partidos Próximos' },
+                      { val: 'jugados', label: 'Partidos Jugados' }
+                    ].map((opt) => (
+                      <button
+                        key={opt.val}
+                        onClick={() => {
+                          setFilter(opt.val as any);
+                          setIsEstadoOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-2.5 text-xs text-left cursor-pointer transition ${
+                          filter === opt.val
+                            ? 'bg-gradient-to-r from-[#3e7496]/20 to-[#7a9660]/20 text-white font-extrabold border-l-3 border-[#7a9660]'
+                            : 'text-indigo-200 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {filter === opt.val && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      </button>
+                    ))}
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Dropdown 2 — Fase del Torneo */}
+          <div className="relative">
+            <label className="text-[10px] font-black uppercase text-indigo-300/50 block mb-1.5 tracking-wider font-sans">
+              Fase del Torneo
+            </label>
+            <button
+              onClick={() => {
+                setIsFaseOpen(!isFaseOpen);
+                setIsEstadoOpen(false);
+                setIsFechaOpen(false);
+              }}
+              className="w-full flex items-center justify-between bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-indigo-100 font-bold transition cursor-pointer"
+            >
+              <span>
+                {faseFilter === 'regular' ? 'Fase Regular' : faseFilter === 'cuartos' ? 'Cuartos de Final' : faseFilter === 'semifinal' ? 'Semifinal' : 'Final'}
+              </span>
+              <motion.div
+                animate={{ rotate: isFaseOpen ? 180 : 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <ChevronDown className="w-4 h-4 text-emerald-450 shrink-0" />
+              </motion.div>
+            </button>
+
+            <AnimatePresence>
+              {isFaseOpen && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setIsFaseOpen(false)} />
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-0 right-0 mt-1.5 bg-[#0e142d] border border-white/15 rounded-xl overflow-hidden shadow-2xl z-40"
+                  >
+                    {[
+                      { val: 'regular', label: 'Fase Regular' },
+                      { val: 'cuartos', label: 'Cuartos de Final' },
+                      { val: 'semifinal', label: 'Semifinal' },
+                      { val: 'final', label: 'Final de Torneo' }
+                    ].map((opt) => (
+                      <button
+                        key={opt.val}
+                        onClick={() => {
+                          setFaseFilter(opt.val as any);
+                          // Reset round trigger if transition away from regular
+                          if (opt.val !== 'regular') {
+                            setFechaTorneoFilter('todas');
+                          }
+                          setIsFaseOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-2.5 text-xs text-left cursor-pointer transition ${
+                          faseFilter === opt.val
+                            ? 'bg-gradient-to-r from-[#3e7496]/20 to-[#7a9660]/20 text-white font-extrabold border-l-3 border-[#7a9660]'
+                            : 'text-indigo-200 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {faseFilter === opt.val && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      </button>
+                    ))}
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Dropdown 3 — Fecha de Torneo (Condicionado a Regular) */}
+          <div className="relative">
+            <label className="text-[10px] font-black uppercase text-indigo-300/50 block mb-1.5 tracking-wider font-sans">
+              Jornada / Fecha
+            </label>
+            <button
+              disabled={faseFilter !== 'regular'}
+              onClick={() => {
+                setIsFechaOpen(!isFechaOpen);
+                setIsEstadoOpen(false);
+                setIsFaseOpen(false);
+              }}
+              className={`w-full flex items-center justify-between border rounded-xl px-4 py-2.5 text-xs font-bold transition ${
+                faseFilter === 'regular'
+                  ? 'bg-white/5 border-white/10 text-indigo-100 hover:bg-white/10 cursor-pointer'
+                  : 'bg-white/5 border-white/5 text-indigo-200/40 opacity-55 cursor-not-allowed'
+              }`}
+            >
+              <span>
+                {faseFilter !== 'regular' 
+                  ? 'No Aplica en Playoffs' 
+                  : fechaTorneoFilter === 'todas' 
+                    ? 'Todas las Fechas' 
+                    : `Fecha ${fechaTorneoFilter}`}
+              </span>
+              <motion.div
+                animate={{ rotate: isFechaOpen ? 180 : 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <ChevronDown className="w-4 h-4 text-emerald-450 shrink-0" />
+              </motion.div>
+            </button>
+
+            <AnimatePresence>
+              {isFechaOpen && faseFilter === 'regular' && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setIsFechaOpen(false)} />
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-0 right-0 mt-1.5 bg-[#0e142d] border border-white/15 rounded-xl overflow-hidden shadow-2xl z-40 max-h-60 overflow-y-auto no-scrollbar font-sans"
+                  >
+                    {/* Opción todas */}
+                    <button
+                      onClick={() => {
+                        setFechaTorneoFilter('todas');
+                        setIsFechaOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-2.5 text-xs text-left cursor-pointer transition ${
+                        fechaTorneoFilter === 'todas'
+                          ? 'bg-gradient-to-r from-[#3e7496]/20 to-[#7a9660]/20 text-white font-extrabold border-l-3 border-[#7a9660]'
+                          : 'text-indigo-200 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <span className="font-extrabold uppercase text-[10px] tracking-widest text-[#7a9660]">Todas las Fechas</span>
+                      {fechaTorneoFilter === 'todas' && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                    </button>
+
+                    {/* Cada número de fecha */}
+                    {fechasToRender.map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => {
+                          setFechaTorneoFilter(num);
+                          setIsFechaOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-2.5 text-xs text-left cursor-pointer transition ${
+                          fechaTorneoFilter === num
+                            ? 'bg-gradient-to-r from-[#3e7496]/20 to-[#7a9660]/20 text-white font-extrabold border-l-3 border-[#7a9660]'
+                            : 'text-indigo-200 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <span>Fecha {num}</span>
+                        {fechaTorneoFilter === num && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      </button>
+                    ))}
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+
+        </div>
+      </div>
 
       {/* Editor Modal Overlay */}
       {(isCreating || editingMatch) && (
