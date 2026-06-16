@@ -5,7 +5,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { 
-  getFirestore, 
+  initializeFirestore, 
   doc, 
   collection, 
   getDocs, 
@@ -28,10 +28,10 @@ import {
 // Initialize Firebase app
 const app = initializeApp(firebaseConfig);
 
-// Initialize services
+// Initialize services with long polling enabled to override iframe sandbox connection blocks
 export const db = (firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== "(default)")
-  ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
-  : getFirestore(app);
+  ? initializeFirestore(app, { experimentalForceLongPolling: true }, firebaseConfig.firestoreDatabaseId)
+  : initializeFirestore(app, { experimentalForceLongPolling: true });
 export const auth = getAuth();
 
 // Admin / authorized staff emails
