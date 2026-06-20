@@ -60,8 +60,10 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
         setErrorMessage('La contraseña es demasiado corta. Debe tener al menos 6 caracteres.');
       } else if (error.code === 'auth/too-many-requests') {
         setErrorMessage('La cuenta está temporalmente bloqueada debido a demasiados intentos fallidos. Intenta más tarde.');
+      } else if (error.code === 'auth/operation-not-allowed') {
+        setErrorMessage('El método de inicio de sesión con Correo/Contraseña no está habilitado en tu consola de Firebase. Debes ir a Firebase Console > Authentication > Sign-in method y habilitar "Correo electrónico/contraseña".');
       } else {
-        setErrorMessage('Ocurrió un error al procesar el acceso. Por favor, intenta de nuevo.');
+        setErrorMessage(`Ocurrió un error al procesar el acceso: ${error.message || 'Error desconocido'} (${error.code || 'sin_codigo'})`);
       }
     } finally {
       setIsLoading(false);
