@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Shield, User, ChevronDown, Check, LogIn, LogOut, X, Loader2 } from 'lucide-react';
 import { UserRole } from '../types';
 import { auth, ADMIN_EMAILS } from '../firebase';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
 
 interface RoleSelectorProps {
   currentRole: UserRole;
@@ -21,6 +21,7 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,20 +38,30 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
     }
 
     try {
-      await signInWithEmailAndPassword(auth, targetEmail, password);
-      showToast('Sesión Iniciada', 'Has accedido exitosamente como Administrador.', 'success');
+      if (isRegistering) {
+        await createUserWithEmailAndPassword(auth, targetEmail, password);
+        showToast('Cuenta Creada', 'Tu cuenta de Administrador ha sido registrada y has iniciado sesión.', 'success');
+      } else {
+        await signInWithEmailAndPassword(auth, targetEmail, password);
+        showToast('Sesión Iniciada', 'Has accedido exitosamente como Administrador.', 'success');
+      }
       setIsLoginModalOpen(false);
       setEmail('');
       setPassword('');
+      setIsRegistering(false);
     } catch (error: any) {
       console.error('Login error:', error);
       // Clean and user-friendly Spanish error messages
       if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        setErrorMessage('Correo electrónico o contraseña incorrectos. Por favor, intenta de nuevo.');
+        setErrorMessage('Correo electrónico o contraseña incorrectos. Por favor, intenta de nuevo o regístrate si es tu primera vez.');
+      } else if (error.code === 'auth/email-already-in-use') {
+        setErrorMessage('Este correo ya está registrado. Por favor, selecciona "Iniciar Sesión" para ingresar.');
+      } else if (error.code === 'auth/weak-password') {
+        setErrorMessage('La contraseña es demasiado corta. Debe tener al menos 6 caracteres.');
       } else if (error.code === 'auth/too-many-requests') {
         setErrorMessage('La cuenta está temporalmente bloqueada debido a demasiados intentos fallidos. Intenta más tarde.');
       } else {
-        setErrorMessage('Ocurrió un error al iniciar sesión. Por favor, verifica tus datos de conexión.');
+        setErrorMessage('Ocurrió un error al procesar el acceso. Por favor, intenta de nuevo.');
       }
     } finally {
       setIsLoading(false);
@@ -157,13 +168,16 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-neutral-500" />
-                <h3 className="text-base font-bold text-white">Inicio de Sesión — Staff</h3>
+                <h3 className="text-base font-bold text-white">
+                  {isRegistering ? 'Registro de Staff' : 'Inicio de Sesión — Staff'}
+                </h3>
               </div>
               <button
                 type="button"
                 onClick={() => {
                   setIsLoginModalOpen(false);
                   setErrorMessage(null);
+                  setIsRegistering(false);
                 }}
                 className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer"
               >
@@ -171,9 +185,41 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
               </button>
             </div>
 
+            {/* Selector de Pestañas: Login vs Registro */}
+            <div className="flex border-b border-neutral-800 text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegistering(false);
+                  setErrorMessage(null);
+                }}
+                className={`flex-1 py-2 text-center font-bold border-b-2 transition ${
+                  !isRegistering
+                    ? 'border-neutral-200 text-white'
+                    : 'border-transparent text-neutral-400 hover:text-neutral-200'
+                }`}
+              >
+                Iniciar Sesión
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegistering(true);
+                  setErrorMessage(null);
+                }}
+                className={`flex-1 py-2 text-center font-bold border-b-2 transition ${
+                  isRegistering
+                    ? 'border-neutral-200 text-white'
+                    : 'border-transparent text-neutral-400 hover:text-neutral-200'
+                }`}
+              >
+                Crear / Registrar Cuenta
+              </button>
+            </div>
+
             <form onSubmit={handleLoginSubmit} className="flex flex-col gap-4 text-xs">
               <div className="flex flex-col gap-1.5">
-                <label className="text-neutral-300 font-medium">Correo Electrónico</label>
+                <label className="text-neutral-300 font-medium">Correo Electrónico (Registrado en Staff)</label>
                 <input
                   type="email"
                   required
@@ -186,7 +232,9 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-neutral-300 font-medium">Contraseña</label>
+                <label className="text-neutral-300 font-medium font-sans">
+                  {isRegistering ? 'Elige una Contraseña' : 'Contraseña'}
+                </label>
                 <input
                   type="password"
                   required
@@ -204,18 +252,24 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
                 </div>
               )}
 
+              {isRegistering && (
+                <p className="text-[10px] text-neutral-400 leading-normal">
+                  Nota: Al registrarte, un administrador de la plataforma ya debe haber habilitado tu correo en el sistema (por ejemplo: <strong className="text-indigo-300">fornettiricardo@gmail.com</strong>).
+                </p>
+              )}
+
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-neutral-500 hover:bg-neutral-600 disabled:bg-neutral-700 text-white py-2 px-4 rounded-lg font-bold flex items-center justify-center gap-2 transition cursor-pointer mt-2 h-9"
+                className="w-full bg-neutral-500 hover:bg-neutral-600 disabled:bg-neutral-700 text-white py-2 px-4 rounded-lg font-bold flex items-center justify-center gap-2 transition cursor-pointer mt-2 h-9 text-xs"
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Iniciando sesión...</span>
+                    <span>{isRegistering ? 'Haciendo Registro...' : 'Iniciando sesión...'}</span>
                   </>
                 ) : (
-                  <span>Iniciar Sesión</span>
+                  <span>{isRegistering ? 'Registrar y Acceder' : 'Iniciar Sesión'}</span>
                 )}
               </button>
             </form>
