@@ -1,10 +1,10 @@
 {
-  "projectId": "san-rafael-tenis-club-hockey",
-  "appId": "1:637516811427:web:3cdbffad78cdb584768316",
-  "apiKey": "AIzaSyDJP4vuchX1akdgqEiySDTF1uNxJIVxQbg",
-  "authDomain": "san-rafael-tenis-club-hockey.firebaseapp.com",
-  "firestoreDatabaseId": "(default)",
-  "storageBucket": "san-rafael-tenis-club-hockey.firebasestorage.app",
-  "messagingSenderId": "637516811427",
-  "measurementId": "G-47GF185QY8"
+  "projectId": "silken-concept-wsjh2",
+  "appId": "1:1034403352770:web:f9cef5c0d728fe9c632b5b",
+  "apiKey": "AIzaSyDQjXf8P4CPlhVTDmlXFDou6jnqqPKDSHU",
+  "authDomain": "silken-concept-wsjh2.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-cad8a50e-a3c6-4736-b207-7d2994b4d7a8",
+  "storageBucket": "silken-concept-wsjh2.firebasestorage.app",
+  "messagingSenderId": "1034403352770",
+  "measurementId": ""
 }
