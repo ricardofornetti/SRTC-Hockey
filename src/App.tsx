@@ -201,6 +201,20 @@ export default function App() {
     };
   }, []);
 
+  // Trigger automatic statistics and standings compilation when matches load or are modified
+  useEffect(() => {
+    if (matches && matches.length > 0 && players && players.length > 0) {
+      // Build a signature of matches to avoid redundant runs on player-state updates
+      const matchesSignature = matches.map(m => `${m.id}-${m.estado}-${m.golesPropios}-${m.golesRival}`).join('|');
+      
+      const lastSignature = localStorage.getItem('srtc_last_matches_recalc_sig');
+      if (lastSignature !== matchesSignature) {
+        localStorage.setItem('srtc_last_matches_recalc_sig', matchesSignature);
+        recalculateAndSyncPlayersAndStandings(matches);
+      }
+    }
+  }, [matches, players.length]);
+
   // Sync state changes
   const handleRoleChange = (role: UserRole) => {
     setUserRole(role);

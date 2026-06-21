@@ -8,7 +8,7 @@ import { Calendar, MapPin, Trophy, Users, BarChart3, Image, ChevronRight, Clock,
 import { Player, Match, Standing, GalleryItem, Category, UserRole } from '../../types';
 import ClubLogo from '../ClubLogo';
 import SrtcLogo from '../SrtcLogo';
-import { formatFechaDdmmyyyy } from './Fixture';
+import { formatFechaDdmmyyyy, getPlayoffMatchTeams } from './Fixture';
 
 interface InicioProps {
   players: Player[];
@@ -37,11 +37,24 @@ export default function Inicio({
   onSaveLogo,
   onResetLogo
 }: InicioProps) {
-  // Filter matches involving SRTC
+  // Filter matches involving SRTC for the active division
+  const activeCategory = selectedCategory || '7ma';
+
   const srtcMatches = matches.filter(m => {
-    const localTeam = m.localNombre || (m.esLocal ? 'San Rafael Tenis Club' : m.rival);
-    const visitorTeam = m.visitanteNombre || (!m.esLocal ? 'San Rafael Tenis Club' : m.rival);
-    return localTeam === 'San Rafael Tenis Club' || visitorTeam === 'San Rafael Tenis Club';
+    if (m.categoria !== activeCategory) return false;
+
+    // Resolve real team names (utilizing dynamic playoff team assignments if play-off match)
+    const isPlayoff = m.fase === 'cuartos' || m.fase === 'semifinal' || m.fase === 'final';
+    const { localTeam, visitorTeam } = isPlayoff
+      ? getPlayoffMatchTeams(m, matches)
+      : {
+          localTeam: m.localNombre || (m.esLocal ? 'San Rafael Tenis Club' : m.rival),
+          visitorTeam: m.visitanteNombre || (!m.esLocal ? 'San Rafael Tenis Club' : m.rival)
+        };
+
+    const isSrtcLocal = localTeam?.toLowerCase().includes('san rafael') || localTeam?.toLowerCase().includes('srtc');
+    const isSrtcVisitor = visitorTeam?.toLowerCase().includes('san rafael') || visitorTeam?.toLowerCase().includes('srtc');
+    return isSrtcLocal || isSrtcVisitor;
   });
 
   // Próximo partido: primer partido programado de SRTC
@@ -56,13 +69,25 @@ export default function Inicio({
     .sort((a,b) => `${b.fecha}T${b.hora}`.localeCompare(`${a.fecha}T${a.hora}`));
   const lastResult = playedMatches[0];
 
-  // Próximo partido names
-  const nextMatchLocalTeam = nextMatch ? (nextMatch.localNombre || (nextMatch.esLocal ? 'San Rafael Tenis Club' : nextMatch.rival)) : '';
-  const nextMatchVisitorTeam = nextMatch ? (nextMatch.visitanteNombre || (!nextMatch.esLocal ? 'San Rafael Tenis Club' : nextMatch.rival)) : '';
+  // Próximo partido names (integrated with getPlayoffMatchTeams)
+  const { localTeam: nextMatchLocalTeam, visitorTeam: nextMatchVisitorTeam } = nextMatch
+    ? (nextMatch.fase === 'cuartos' || nextMatch.fase === 'semifinal' || nextMatch.fase === 'final')
+      ? getPlayoffMatchTeams(nextMatch, matches)
+      : {
+          localTeam: nextMatch.localNombre || (nextMatch.esLocal ? 'San Rafael Tenis Club' : nextMatch.rival),
+          visitorTeam: nextMatch.visitanteNombre || (!nextMatch.esLocal ? 'San Rafael Tenis Club' : nextMatch.rival)
+        }
+    : { localTeam: '', visitorTeam: '' };
 
-  // Último resultado names & goals
-  const lastResultLocalTeam = lastResult ? (lastResult.localNombre || (lastResult.esLocal ? 'San Rafael Tenis Club' : lastResult.rival)) : '';
-  const lastResultVisitorTeam = lastResult ? (lastResult.visitanteNombre || (!lastResult.esLocal ? 'San Rafael Tenis Club' : lastResult.rival)) : '';
+  // Último resultado names & goals (integrated with getPlayoffMatchTeams)
+  const { localTeam: lastResultLocalTeam, visitorTeam: lastResultVisitorTeam } = lastResult
+    ? (lastResult.fase === 'cuartos' || lastResult.fase === 'semifinal' || lastResult.fase === 'final')
+      ? getPlayoffMatchTeams(lastResult, matches)
+      : {
+          localTeam: lastResult.localNombre || (lastResult.esLocal ? 'San Rafael Tenis Club' : lastResult.rival),
+          visitorTeam: lastResult.visitanteNombre || (!lastResult.esLocal ? 'San Rafael Tenis Club' : lastResult.rival)
+        }
+    : { localTeam: '', visitorTeam: '' };
 
   let lastResultLocalGoles = 0;
   let lastResultVisitorGoles = 0;
@@ -82,7 +107,6 @@ export default function Inicio({
   }
 
   // Goleadoras de la división/equipo
-  const activeCategory = selectedCategory || '7ma';
   const categoryPlayers = players.filter(p => p.categoria === activeCategory);
   const playersWithGoals = categoryPlayers.filter(p => (p.goles || 0) > 0);
   const maxGoles = playersWithGoals.length > 0 ? Math.max(...playersWithGoals.map(p => p.goles || 0)) : 0;

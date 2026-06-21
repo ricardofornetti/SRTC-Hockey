@@ -293,26 +293,26 @@ export function getPlayoffMatchTeams(match: Match, allMatches: Match[]): { local
     if (match.id === 'match_cuartos_1' || isGenericL || isGenericV) {
       const t1 = standings[0]?.equipo || '1er CLASIFICADO';
       const t8 = standings[7]?.equipo || '8vo CLASIFICADO';
-      if (isGenericL) localTeam = t1;
-      if (isGenericV) visitorTeam = t8;
+      localTeam = t1;
+      visitorTeam = t8;
     }
     if (match.id === 'match_cuartos_2' || isGenericL2 || isGenericV2) {
       const t2 = standings[1]?.equipo || '2do CLASIFICADO';
       const t7 = standings[6]?.equipo || '7mo CLASIFICADO';
-      if (isGenericL2) localTeam = t2;
-      if (isGenericV2) visitorTeam = t7;
+      localTeam = t2;
+      visitorTeam = t7;
     }
     if (match.id === 'match_cuartos_3' || isGenericL3 || isGenericV3) {
       const t3 = standings[2]?.equipo || '3er CLASIFICADO';
       const t6 = standings[5]?.equipo || '6to CLASIFICADO';
-      if (isGenericL3) localTeam = t3;
-      if (isGenericV3) visitorTeam = t6;
+      localTeam = t3;
+      visitorTeam = t6;
     }
     if (match.id === 'match_cuartos_4' || isGenericL4 || isGenericV4) {
       const t4 = standings[3]?.equipo || '4to CLASIFICADO';
       const t5 = standings[4]?.equipo || '5to CLASIFICADO';
-      if (isGenericL4) localTeam = t4;
-      if (isGenericV4) visitorTeam = t5;
+      localTeam = t4;
+      visitorTeam = t5;
     }
   }
 
