@@ -8,7 +8,10 @@
  * El dropdown y el modal se montan con un Portal de React directamente en
  * document.body para que nunca queden cortados por el sidebar u otros
  * contenedores con overflow/transform, sin importar desde qué parte del
- * layout se renderice este componente.
+ * layout se renderice este componente. La posición se recalcula con
+ * clamping para que el dropdown nunca quede fuera del viewport, sin
+ * importar si el botón disparador está a la izquierda (sidebar) o a la
+ * derecha (header) de la pantalla.
  */
 import React, { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -22,6 +25,9 @@ interface RoleSelectorProps {
   currentUserEmail: string;
   showToast: (title: string, body: string, type: 'success' | 'info' | 'error') => void;
 }
+
+const DROPDOWN_WIDTH = 288; // w-72
+const VIEWPORT_MARGIN = 12;
 
 export default function RoleSelector({ currentRole, currentUserEmail, showToast }: RoleSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,7 +46,7 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
       const result = await signInWithPopup(auth, provider);
       const signedInEmail = result.user.email;
 
-      if (!signedInEmail || !ADMIN_EMAILS.includes(signedInEmail.toLowerCase())) {
+      if (!signedInEmail || !ADMIN_EMAILS.includes(signedInEmail)) {
         await signOut(auth);
         setErrorMessage('Esta cuenta de Google no tiene permisos de administrador. Contactá al club si creés que es un error.');
         setIsLoading(false);
@@ -55,7 +61,7 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
       if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
         // El usuario cerró la ventana de Google: no es un error real, no mostramos nada.
       } else if (error?.code === 'auth/unauthorized-domain') {
-        setErrorMessage('Este sitio no está autorizado para iniciar sesión todavía. Contactá al administrador del sistema.');
+        setErrorMessage(`Este sitio (${window.location.hostname}) no está autorizado para iniciar sesión todavía. Agregalo en Firebase Console > Authentication > Configuración > Dominios autorizados.`);
       } else if (error?.code === 'auth/popup-blocked') {
         setErrorMessage('El navegador bloqueó la ventana de Google. Habilitá las ventanas emergentes para este sitio e intentá de nuevo.');
       } else {
@@ -76,16 +82,30 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
     }
   };
 
-  // Posición del dropdown calculada en base al botón disparador, para que el
-  // Portal (montado en document.body) lo ubique exactamente debajo del botón.
-  const dropdownStyle = (() => {
+  // Posición del dropdown calculada en base al botón disparador, con
+  // "clamping" para que nunca quede fuera de la pantalla sin importar si el
+  // botón está a la izquierda (sidebar) o a la derecha (header) del layout.
+  const getDropdownStyle = (): React.CSSProperties => {
     const rect = triggerRef.current?.getBoundingClientRect();
-    if (!rect) return { top: 60, right: 16 };
-    return {
-      top: rect.bottom + 8,
-      right: Math.max(8, window.innerWidth - rect.right),
-    };
-  })();
+    if (!rect) return { top: 60, left: 16 };
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let left = rect.right - DROPDOWN_WIDTH;
+    if (left < VIEWPORT_MARGIN) {
+      left = Math.min(rect.left, viewportWidth - DROPDOWN_WIDTH - VIEWPORT_MARGIN);
+    }
+    left = Math.max(VIEWPORT_MARGIN, Math.min(left, viewportWidth - DROPDOWN_WIDTH - VIEWPORT_MARGIN));
+
+    const estimatedHeight = 200;
+    let top = rect.bottom + 8;
+    if (top + estimatedHeight > viewportHeight - VIEWPORT_MARGIN) {
+      top = Math.max(VIEWPORT_MARGIN, rect.top - estimatedHeight - 8);
+    }
+
+    return { top, left, width: DROPDOWN_WIDTH };
+  };
 
   return (
     <div id="role-selector-container" className="text-xs text-neutral-350 select-none">
@@ -97,7 +117,7 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
       >
         <Shield className={`w-3.5 h-3.5 ${isLoggedAsAdmin ? 'text-amber-500' : 'text-neutral-400'}`} />
         <span>Perfil: {isLoggedAsAdmin ? 'Administrador' : 'Visitante'}</span>
-        <ChevronDown className={`w-3 h-3 text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && createPortal(
@@ -108,8 +128,8 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
           />
           <div
             id="role-dropdown-menu"
-            className="fixed z-[91] w-72 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl p-4 flex flex-col gap-3 animate-in fade-in duration-100"
-            style={dropdownStyle}
+            className="fixed z-[91] bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl p-4 flex flex-col gap-3 animate-in fade-in duration-100"
+            style={getDropdownStyle()}
           >
             <div className="border-b border-neutral-800 pb-2.5 mb-1.5">
               <div className="flex items-center justify-between">
