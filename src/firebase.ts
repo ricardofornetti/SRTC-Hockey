@@ -29,8 +29,8 @@ import {
 const app = initializeApp(firebaseConfig);
 
 // Initialize services with long polling enabled to override iframe sandbox connection blocks
-export const db = (firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== "(default)")
-  ? initializeFirestore(app, { experimentalForceLongPolling: true }, firebaseConfig.firestoreDatabaseId)
+export const db = ((firebaseConfig as any).firestoreDatabaseId && (firebaseConfig as any).firestoreDatabaseId !== "(default)")
+  ? initializeFirestore(app, { experimentalForceLongPolling: true }, (firebaseConfig as any).firestoreDatabaseId)
   : initializeFirestore(app, { experimentalForceLongPolling: true });
 export const auth = getAuth();
 

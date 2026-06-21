@@ -1,10 +1,8 @@
 {
-  "projectId": "silken-concept-wsjh2",
-  "appId": "1:1034403352770:web:f9cef5c0d728fe9c632b5b",
-  "apiKey": "AIzaSyDQjXf8P4CPlhVTDmlXFDou6jnqqPKDSHU",
-  "authDomain": "silken-concept-wsjh2.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-cad8a50e-a3c6-4736-b207-7d2994b4d7a8",
-  "storageBucket": "silken-concept-wsjh2.firebasestorage.app",
-  "messagingSenderId": "1034403352770",
-  "measurementId": ""
+  "apiKey": "AIzaSyBVHhUYzU-VfmpF0HAcVbTmGdFar7nKTVU",
+  "authDomain": "hockey-san-rafael.firebaseapp.com",
+  "projectId": "hockey-san-rafael",
+  "storageBucket": "hockey-san-rafael.firebasestorage.app",
+  "messagingSenderId": "944432198046",
+  "appId": "1:944432198046:web:47a694ed78c41c0f85268f"
 }
