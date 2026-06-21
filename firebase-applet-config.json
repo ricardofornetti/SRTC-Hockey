@@ -1,8 +1,10 @@
 {
-  "apiKey": "AIzaSyBVHhUYzU-VfmpF0HAcVbTmGdFar7nKTVU",
-  "authDomain": "hockey-san-rafael.firebaseapp.com",
-  "projectId": "hockey-san-rafael",
-  "storageBucket": "hockey-san-rafael.firebasestorage.app",
-  "messagingSenderId": "944432198046",
-  "appId": "1:944432198046:web:47a694ed78c41c0f85268f"
+  "projectId": "padel-tournament-manager-93278",
+  "appId": "1:234015150140:web:3da23ac00d979185917339",
+  "apiKey": "AIzaSyCTqscJefWh-USjgDaydjLx4qAfhTPyDw",
+  "authDomain": "padel-tournament-manager-93278.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "padel-tournament-manager-93278.firebasestorage.app",
+  "messagingSenderId": "234015150140",
+  "measurementId": "G-K53NC78ZT2"
 }
