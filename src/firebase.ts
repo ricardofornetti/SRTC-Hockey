@@ -199,18 +199,15 @@ export async function seedInitialDataIfCollectionIsEmpty(): Promise<void> {
         await setDoc(doc(db, 'matches', m.id), m);
       }
     } else {
-      // Backport playoff matches if they are not in Firestore
-      const existingIds = new Set(matchesSnap.docs.map(doc => doc.id));
+      // Overwrite/backport playoff matches to ensure they reflect the actual team names
       const playoffMatches = INITIAL_MATCH_LIST.filter(m => m.fase === 'cuartos' || m.fase === 'semifinal' || m.fase === 'final');
       let backportedCount = 0;
       for (const m of playoffMatches) {
-        if (!existingIds.has(m.id)) {
-          await setDoc(doc(db, 'matches', m.id), m);
-          backportedCount++;
-        }
+        await setDoc(doc(db, 'matches', m.id), m);
+        backportedCount++;
       }
       if (backportedCount > 0) {
-        console.log(`Backported ${backportedCount} playoff matches to Firestore.`);
+        console.log(`Ensured/backported ${backportedCount} playoff matches in Firestore.`);
       }
     }
 

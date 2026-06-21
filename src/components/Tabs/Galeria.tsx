@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Eye, Trash2, Plus, Save, Calendar, Link, X, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
 import { GalleryItem, Match, UserRole } from '../../types';
+import { saveDocument, deleteDocument } from '../../firebase';
 
 interface GaleriaProps {
   gallery: GalleryItem[];
@@ -86,7 +87,38 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
-        setImagenUrl(event.target.result as string);
+        // High-quality client-side image compression to fit perfectly under Firebase constraints
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH_OR_HEIGHT = 850;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH_OR_HEIGHT) {
+              height *= MAX_WIDTH_OR_HEIGHT / width;
+              width = MAX_WIDTH_OR_HEIGHT;
+            }
+          } else {
+            if (height > MAX_WIDTH_OR_HEIGHT) {
+              width *= MAX_WIDTH_OR_HEIGHT / height;
+              height = MAX_WIDTH_OR_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.70); // Compress to compressed JPEG
+            setImagenUrl(dataUrl);
+          } else {
+            setImagenUrl(event.target?.result as string);
+          }
+        };
+        img.src = event.target.result as string;
       }
     };
     reader.readAsDataURL(file);
@@ -115,9 +147,13 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
     setPartidoRelacionado('');
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!imagenUrl.trim()) return;
+    if (!imagenUrl.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
 
     const newItem: GalleryItem = {
       id: 'gal_' + Date.now(),
@@ -131,8 +167,17 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
       newItem.partidoRelacionado = partidoRelacionado;
     }
 
-    onUpdateGallery([...gallery, newItem]);
-    setIsCreating(false);
+    try {
+      // Direct, independent write to Firestore
+      await saveDocument('gallery', newItem.id, newItem);
+      onUpdateGallery([...gallery, newItem]);
+      setIsCreating(false);
+    } catch (err) {
+      console.error("Error direct-saving photo in gallery:", err);
+      alert("Hubo un error al guardar la foto en Firestore. Verifica que el archivo no sea demasiado pesado.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const [photoToDelete, setPhotoToDelete] = useState<string | null>(null);
@@ -142,10 +187,17 @@ export default function Galeria({ gallery, matches, userRole, onUpdateGallery, o
     setPhotoToDelete(itemId);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (photoToDelete) {
-      onUpdateGallery(gallery.filter(g => g.id !== photoToDelete));
-      setPhotoToDelete(null);
+      try {
+        // Direct, independent delete in Firestore
+        await deleteDocument('gallery', photoToDelete);
+        onUpdateGallery(gallery.filter(g => g.id !== photoToDelete));
+        setPhotoToDelete(null);
+      } catch (err) {
+        console.error("Error direct-deleting photo:", err);
+        alert("Hubo un error al eliminar la foto de Firestore.");
+      }
     }
   };
   return (

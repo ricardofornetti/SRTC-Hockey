@@ -46,7 +46,7 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
       const result = await signInWithPopup(auth, provider);
       const signedInEmail = result.user.email;
 
-      if (!signedInEmail || !ADMIN_EMAILS.includes(signedInEmail)) {
+      if (!signedInEmail || !ADMIN_EMAILS.includes(signedInEmail.toLowerCase())) {
         await signOut(auth);
         setErrorMessage('Esta cuenta de Google no tiene permisos de administrador. Contactá al club si creés que es un error.');
         setIsLoading(false);
@@ -117,7 +117,7 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
       >
         <Shield className={`w-3.5 h-3.5 ${isLoggedAsAdmin ? 'text-amber-500' : 'text-neutral-400'}`} />
         <span>Perfil: {isLoggedAsAdmin ? 'Administrador' : 'Visitante'}</span>
-        <ChevronDown className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3 h-3 text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && createPortal(

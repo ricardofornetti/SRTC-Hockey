@@ -27,7 +27,7 @@ service cloud.firestore {
 
     // Image size validators
     function isValidImageField(value) {
-      return value is string && value.size() <= 300000;
+      return value is string && value.size() <= 1000000;
     }
 
     function isValidSettingsValue(value) {

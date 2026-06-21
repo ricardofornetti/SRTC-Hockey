@@ -591,12 +591,7 @@ export default function App() {
 
   const handleUpdateGallery = async (updated: GalleryItem[]) => {
     setGallery(updated);
-    try {
-      await syncCollection('gallery', gallery, updated);
-      showToast('Galería sincronizada', 'Imagen subida al catálogo exitosamente.', 'success');
-    } catch (e) {
-      console.error(e);
-    }
+    showToast('Galería sincronizada', 'Catálogo de imágenes actualizado.', 'success');
   };
 
   const handleUpdateConvocations = async (updated: Convocation[]) => {
