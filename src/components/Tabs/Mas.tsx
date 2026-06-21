@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { Match, Player, NewsItem, GalleryItem, NotificationLog, UserRole, Category } from '../../types';
 import { HISTORICAL_SEASONS } from '../../data';
-import DataMigrationTool from '../DataMigrationTool';
 
 interface MasProps {
   notifications: NotificationLog[];
@@ -396,10 +395,6 @@ export default function Mas({
           </div>
         )}
       </div>
-
-      {userRole === 'admin' && (
-        <DataMigrationTool />
-      )}
     </div>
   );
 }

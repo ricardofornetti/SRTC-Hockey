@@ -311,8 +311,10 @@ export default function App() {
 
     try {
       setPlayers(updatedPlayers);
-      await syncCollection('players', players, updatedPlayers);
-      console.log('Player statistics recalculated and synchronized with Firestore.');
+      if (userRole === 'admin') {
+        await syncCollection('players', players, updatedPlayers);
+        console.log('Player statistics recalculated and synchronized with Firestore.');
+      }
     } catch (err) {
       console.error('Error syncing recalculated players:', err);
     }
@@ -553,8 +555,10 @@ export default function App() {
 
     try {
       setStandings(sortedStandings);
-      await syncCollection('standings', standings, sortedStandings);
-      console.log('Standings calculated and synchronized with Firestore.');
+      if (userRole === 'admin') {
+        await syncCollection('standings', standings, sortedStandings);
+        console.log('Standings calculated and synchronized with Firestore.');
+      }
     } catch (err) {
       console.error('Error syncing recalculated standings:', err);
     }
