@@ -28,6 +28,16 @@ function normalizeTeamName(teamName: string): string {
   return teamName.toUpperCase().trim();
 }
 
+let logoCache: Record<string, string> | null = null;
+let customClubLogoCache: string | null = null;
+let cacheInitialized = false;
+
+export function invalidateLogoCache() {
+  logoCache = null;
+  customClubLogoCache = null;
+  cacheInitialized = false;
+}
+
 export default function ClubLogo({ teamName, className = 'w-12 h-12' }: ClubLogoProps) {
   const [logo, setLogo] = useState<string | null>(null);
 
@@ -36,19 +46,30 @@ export default function ClubLogo({ teamName, className = 'w-12 h-12' }: ClubLogo
       try {
         const normalized = normalizeTeamName(teamName);
         if (normalized === 'SAN RAFAEL TENIS CLUB - A') {
-          const customLogo = localStorage.getItem('srtc_custom_club_logo');
-          if (customLogo) {
-            setLogo(customLogo);
+          if (customClubLogoCache === null) {
+            customClubLogoCache = localStorage.getItem('srtc_custom_club_logo');
+          }
+          if (customClubLogoCache) {
+            setLogo(customClubLogoCache);
             return;
           }
         }
-        const savedLogosStr = localStorage.getItem('srtc_team_logos_db');
-        if (savedLogosStr) {
-          const savedLogos = JSON.parse(savedLogosStr);
-          if (savedLogos[normalized]) {
-            setLogo(savedLogos[normalized]);
-            return;
+        if (!cacheInitialized) {
+          const savedLogosStr = localStorage.getItem('srtc_team_logos_db');
+          if (savedLogosStr) {
+            try {
+              logoCache = JSON.parse(savedLogosStr);
+            } catch (e) {
+              logoCache = {};
+            }
+          } else {
+            logoCache = {};
           }
+          cacheInitialized = true;
+        }
+        if (logoCache && logoCache[normalized]) {
+          setLogo(logoCache[normalized]);
+          return;
         }
       } catch (e) {
         console.error(e);
@@ -60,6 +81,7 @@ export default function ClubLogo({ teamName, className = 'w-12 h-12' }: ClubLogo
 
     // Listen for storage changes to update logos dynamically
     const handleStorageChange = () => {
+      invalidateLogoCache();
       loadLogo();
     };
 

@@ -58,7 +58,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
 
 import RoleSelector from './components/RoleSelector';
-import ClubLogo from './components/ClubLogo';
+import ClubLogo, { invalidateLogoCache } from './components/ClubLogo';
 import SrtcLogo from './components/SrtcLogo';
 import HockeyStickBall from './components/HockeyStickBall';
 
@@ -157,12 +157,14 @@ export default function App() {
       if (logoSetting && logoSetting.value) {
         setCustomClubLogo(logoSetting.value);
         localStorage.setItem('srtc_custom_club_logo', logoSetting.value);
+        invalidateLogoCache();
         window.dispatchEvent(new Event('srtc_logo_updated'));
       }
 
       const teamLogosSetting = data?.find(item => item.id === 'team_logos');
       if (teamLogosSetting && teamLogosSetting.value) {
         localStorage.setItem('srtc_team_logos_db', teamLogosSetting.value);
+        invalidateLogoCache();
         window.dispatchEvent(new Event('srtc_logo_updated'));
         window.dispatchEvent(new Event('storage'));
       }
@@ -662,6 +664,7 @@ export default function App() {
     try {
       setCustomClubLogo(logoData);
       localStorage.setItem('srtc_custom_club_logo', logoData);
+      invalidateLogoCache();
       window.dispatchEvent(new Event('srtc_logo_updated'));
       await saveDocument('settings', 'logo', { id: 'logo', value: logoData });
       showToast('Logo del Club Actualizado', 'El logo se guardó correctamente y se sincronizó con el servidor.', 'success');
@@ -677,6 +680,7 @@ export default function App() {
     try {
       setCustomClubLogo(null);
       localStorage.removeItem('srtc_custom_club_logo');
+      invalidateLogoCache();
       window.dispatchEvent(new Event('srtc_logo_updated'));
       await deleteDocument('settings', 'logo');
       showToast('Logo Restablecido', 'Se ha vuelto a configurar el escudo oficial predeterminado.', 'success');
@@ -685,6 +689,7 @@ export default function App() {
       console.error('Error resetting custom logo in Firebase:', err);
       setCustomClubLogo(null);
       localStorage.removeItem('srtc_custom_club_logo');
+      invalidateLogoCache();
       window.dispatchEvent(new Event('srtc_logo_updated'));
       showToast('Logo Restablecido', 'Se quitó de forma local en tu dispositivo.', 'info');
       setIsLogoModalOpen(false);
