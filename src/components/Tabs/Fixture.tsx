@@ -322,17 +322,13 @@ export function getPlayoffMatchTeams(match: Match, allMatches: Match[]): { local
     const lTeam = resolved.localTeam;
     const vTeam = resolved.visitorTeam;
     
-    const isVisitorSrtc = vTeam.toLowerCase().includes('san rafael') || vTeam.toLowerCase().includes('srtc');
-
-    let lG = target.golesPropios;
-    let vG = target.golesRival;
-    if (isVisitorSrtc) {
-      lG = target.golesRival;
-      vG = target.golesPropios;
-    }
+    // golesPropios = goles del equipo local, golesRival = goles del visitante
+    const lG = target.golesPropios;
+    const vG = target.golesRival;
 
     if (lG > vG) return lTeam;
     if (vG > lG) return vTeam;
+    // Empate: avanza el local
     return lTeam;
   };
 
