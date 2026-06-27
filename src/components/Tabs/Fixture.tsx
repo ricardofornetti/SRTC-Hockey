@@ -1,10 +1,5 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState } from 'react';
-import { Calendar, MapPin, Clock, Edit3, Plus, Trophy, Save, Trash2, Award, CheckCircle2, AlertTriangle, Play, ChevronLeft, ChevronDown, Check, Filter } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { Calendar, MapPin, Clock, Edit3, Plus, Trophy, Save, Trash2, Award, CheckCircle2, AlertTriangle, Play, ChevronLeft, ChevronDown, Check, Filter, GitBranch, Loader2 } from 'lucide-react';
 import { Match, Player, UserRole, MatchState, Category } from '../../types';
 import SrtcLogo from '../SrtcLogo';
 import ClubLogo from '../ClubLogo';
@@ -12,6 +7,8 @@ import Button from '../ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
 import { INITIAL_MATCH_LIST } from '../../data';
 import HockeyAnim from '../HockeyAnim';
+import { saveDocument, db } from '../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface FixtureProps {
   matches: Match[];
