@@ -153,7 +153,9 @@ export function getPlayoffStandings(matches: Match[], category: Category) {
     return n.toUpperCase().trim();
   }
 
-  const activeMatches = matches.filter(m => m.categoria === category && m.estado === 'Finalizado');
+  // Solo considerar partidos de la fase regular para calcular la tabla.
+  // Los partidos de playoff (cuartos, semifinal, final) no deben afectar las posiciones.
+  const activeMatches = matches.filter(m => m.categoria === category && m.estado === 'Finalizado' && (!m.fase || m.fase === 'regular'));
   const working = JSON.parse(JSON.stringify(baselines));
 
   const savedBaselines = localStorage.getItem('srtc_standings_baseline_db_v5');
@@ -1872,4 +1874,6 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
     </div>
   );
 }
+
+
 
