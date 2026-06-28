@@ -509,8 +509,20 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
     setEditingMatch(match);
     setIsCreating(false);
     
-    const calculatedLocal = match.localNombre || (match.esLocal ? 'San Rafael Tenis Club' : match.rival);
-    const calculatedVisitor = match.visitanteNombre || (!match.esLocal ? 'San Rafael Tenis Club' : match.rival);
+    // Para partidos de playoff, usamos getPlayoffMatchTeams para obtener los
+    // nombres reales (igual que en el renderizado de las cards), evitando
+    // que el formulario muestre datos cacheados o desactualizados.
+    let calculatedLocal: string;
+    let calculatedVisitor: string;
+    const isPlayoffEdit = (match.fase || 'regular') !== 'regular';
+    if (isPlayoffEdit) {
+      const resolved = getPlayoffMatchTeams(match, matches);
+      calculatedLocal = resolved.localTeam;
+      calculatedVisitor = resolved.visitorTeam;
+    } else {
+      calculatedLocal = match.localNombre || (match.esLocal ? 'San Rafael Tenis Club' : match.rival);
+      calculatedVisitor = match.visitanteNombre || (!match.esLocal ? 'San Rafael Tenis Club' : match.rival);
+    }
     
     const localMatchInPopular = POPULAR_CLUBS.find(c => c.toLowerCase() === calculatedLocal.toLowerCase()) || calculatedLocal;
     const visitorMatchInPopular = POPULAR_CLUBS.find(c => c.toLowerCase() === calculatedVisitor.toLowerCase()) || calculatedVisitor;
@@ -541,9 +553,14 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
     setCancha(match.cancha);
     
     // Determine goals local & visitor
+    // Para playoffs: no invertir, local = golesPropios, visitante = golesRival
+    const isPlayoffMatch = (match.fase || 'regular') !== 'regular';
     const isLocalSrtc = calculatedLocal.toLowerCase().includes('san rafael') || calculatedLocal.toLowerCase().includes('srtc');
     const isVisitorSrtc = calculatedVisitor.toLowerCase().includes('san rafael') || calculatedVisitor.toLowerCase().includes('srtc');
-    if (isLocalSrtc) {
+    if (isPlayoffMatch) {
+      setGolesLocal(match.golesPropios);
+      setGolesVisitante(match.golesRival);
+    } else if (isLocalSrtc) {
       setGolesLocal(match.golesPropios);
       setGolesVisitante(match.golesRival);
     } else if (isVisitorSrtc) {
@@ -1473,19 +1490,10 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                     const isLocalSrtc = localTeam.toLowerCase().includes('san rafael') || localTeam.toLowerCase().includes('srtc');
                     const isVisitorSrtc = visitorTeam.toLowerCase().includes('san rafael') || visitorTeam.toLowerCase().includes('srtc');
 
-                    let localGoles = 0;
-                    let visitorGoles = 0;
-
-                    if (isLocalSrtc) {
-                      localGoles = match.golesPropios;
-                      visitorGoles = match.golesRival;
-                    } else if (isVisitorSrtc) {
-                      localGoles = match.golesRival;
-                      visitorGoles = match.golesPropios;
-                    } else {
-                      localGoles = match.golesPropios;
-                      visitorGoles = match.golesRival;
-                    }
+                    // En playoffs, el marcador ya está guardado correctamente:
+                    // golesPropios = local, golesRival = visitante. No invertir.
+                    const localGoles = match.golesPropios;
+                    const visitorGoles = match.golesRival;
 
                     return (
                       <motion.div
@@ -1881,4 +1889,3 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
     </div>
   );
 }
-
