@@ -839,10 +839,13 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
                 className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-150 shadow-md cursor-pointer shrink-0 font-sports-condensed uppercase tracking-wider"
               >
                 <Plus className="w-3.5 h-3.5" /> Agregar Partido
+              <button
+                id="create-match-button"
+                onClick={handleStartCreate}
+                className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-150 shadow-md cursor-pointer shrink-0 font-sports-condensed uppercase tracking-wider"
+              >
+                <Plus className="w-3.5 h-3.5" /> Agregar Partido
               </button>
-            )}
-
-            <button
               onClick={() => onTabChange('inicio')}
               className="flex items-center gap-1 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-indigo-200 hover:text-white transition rounded-xl text-xs font-sports-condensed uppercase tracking-wider font-extrabold cursor-pointer shrink-0"
             >
