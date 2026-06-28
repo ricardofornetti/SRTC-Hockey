@@ -384,6 +384,46 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [faseFilter, setFaseFilter] = useState<'regular' | 'cuartos' | 'semifinal' | 'final'>('regular');
   const [fechaTorneoFilter, setFechaTorneoFilter] = useState<number | 'todas'>('todas');
+  const [isGeneratingPlayoffs, setIsGeneratingPlayoffs] = useState(false);
+
+  const handleGeneratePlayoffs = useCallback(async () => {
+    const standings = getPlayoffStandings(matches, selectedCategory);
+    if (standings.length < 8) {
+      alert('Se necesitan al menos 8 equipos con partidos jugados para generar los cuartos de final.');
+      return;
+    }
+    setIsGeneratingPlayoffs(true);
+    const playoffMatches: { id: string; fase: string; localNombre: string; rival: string }[] = [
+      { id: 'match_cuartos_1', fase: 'cuartos',   localNombre: standings[0].equipo, rival: standings[7].equipo },
+      { id: 'match_cuartos_2', fase: 'cuartos',   localNombre: standings[1].equipo, rival: standings[6].equipo },
+      { id: 'match_cuartos_3', fase: 'cuartos',   localNombre: standings[2].equipo, rival: standings[5].equipo },
+      { id: 'match_cuartos_4', fase: 'cuartos',   localNombre: standings[3].equipo, rival: standings[4].equipo },
+      { id: 'match_semi_1',    fase: 'semifinal', localNombre: 'Ganador Cuartos 1', rival: 'Ganador Cuartos 2' },
+      { id: 'match_semi_2',    fase: 'semifinal', localNombre: 'Ganador Cuartos 3', rival: 'Ganador Cuartos 4' },
+      { id: 'match_final_1',   fase: 'final',     localNombre: 'Ganador Semifinal 1', rival: 'Ganador Semifinal 2' },
+    ];
+    let creados = 0;
+    let saltados = 0;
+    for (const pm of playoffMatches) {
+      try {
+        const ref = doc(db, 'matches', pm.id);
+        const snap = await getDoc(ref);
+        if (snap.exists()) { saltados++; continue; }
+        const newMatch = {
+          id: pm.id, fase: pm.fase, categoria: selectedCategory,
+          localNombre: pm.localNombre, visitanteNombre: pm.rival, rival: pm.rival,
+          esLocal: true, fecha: '', hora: '', estado: 'Programado' as MatchState,
+          golesPropios: 0, golesRival: 0, cancha: '',
+          torneo: 'Apertura Asociación Mendocina',
+          goleadoras: [], asistidoras: [], tarjetas: [],
+        };
+        await saveDocument('matches', pm.id, newMatch);
+        creados++;
+      } catch (err) { console.error(`Error creando ${pm.id}:`, err); }
+    }
+    setIsGeneratingPlayoffs(false);
+    alert(`✅ Playoffs generados: ${creados} partido(s) creado(s), ${saltados} ya existían.`);
+  }, [matches, selectedCategory]);
   
   const [isEstadoOpen, setIsEstadoOpen] = useState(false);
   const [isFaseOpen, setIsFaseOpen] = useState(false);
