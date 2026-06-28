@@ -617,13 +617,24 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
 
     const isLocalSrtc = finalLocal.toLowerCase().includes('san rafael') || finalLocal.toLowerCase().includes('srtc');
     const isVisitorSrtc = finalVisitor.toLowerCase().includes('san rafael') || finalVisitor.toLowerCase().includes('srtc');
-    
+
+    // Para partidos de playoff (cuartos, semifinal, final), los equipos ya
+    // tienen nombres reales asignados y esLocal está definido correctamente.
+    // No invertimos goles/equipos: local = golesPropios, visitante = golesRival.
+    const isPlayoff = fase !== 'regular';
+
     let resolvedEsLocal = true;
     let resolvedRival = '';
     let resolvedGolesPropios = Number(golesLocal);
     let resolvedGolesRival = Number(golesVisitante);
-    
-    if (isLocalSrtc) {
+
+    if (isPlayoff) {
+      // Playoff: guardamos tal cual, sin inversión por SRTC
+      resolvedEsLocal = true;
+      resolvedRival = finalVisitor;
+      resolvedGolesPropios = Number(golesLocal);
+      resolvedGolesRival = Number(golesVisitante);
+    } else if (isLocalSrtc) {
       resolvedEsLocal = true;
       resolvedRival = finalVisitor;
       resolvedGolesPropios = Number(golesLocal);
@@ -634,7 +645,6 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
       resolvedGolesPropios = Number(golesVisitante);
       resolvedGolesRival = Number(golesLocal);
     } else {
-      // Neither is SRTC, assume local is primary/propios? Or just let standard behavior
       resolvedEsLocal = true;
       resolvedRival = finalVisitor;
       resolvedGolesPropios = Number(golesLocal);
