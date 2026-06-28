@@ -278,48 +278,21 @@ export function getPlayoffMatchTeams(match: Match, allMatches: Match[]): { local
   let visitorTeam = match.visitanteNombre || (!match.esLocal ? 'San Rafael Tenis Club' : match.rival);
 
   if (match.fase === 'cuartos') {
-    // Detectar si los nombres actuales son placeholders genéricos
-    const placeholders = ['clasificado', 'clasificación'];
-    const isGenericL = placeholders.some(p => localTeam.toLowerCase().includes(p));
-    const isGenericV = placeholders.some(p => visitorTeam.toLowerCase().includes(p));
-
-    // Si el partido ya tiene nombres reales de equipos (no placeholders),
-    // los respetamos y no los pisamos con la tabla de posiciones.
-    // Solo usamos la tabla cuando los nombres son placeholders genéricos.
+    // SIEMPRE usar la tabla de posiciones para los cruces estándar.
+    // Esto garantiza que los cruces sean siempre correctos según la
+    // clasificación final, sin depender de los datos guardados en Firestore.
     if (match.id === 'match_cuartos_1') {
-      if (isGenericL) localTeam = standings[0]?.equipo || '1er CLASIFICADO';
-      if (isGenericV) visitorTeam = standings[7]?.equipo || '8vo CLASIFICADO';
-    }
-    if (match.id === 'match_cuartos_2') {
-      if (isGenericL) localTeam = standings[1]?.equipo || '2do CLASIFICADO';
-      if (isGenericV) visitorTeam = standings[6]?.equipo || '7mo CLASIFICADO';
-    }
-    if (match.id === 'match_cuartos_3') {
-      if (isGenericL) localTeam = standings[2]?.equipo || '3er CLASIFICADO';
-      if (isGenericV) visitorTeam = standings[5]?.equipo || '6to CLASIFICADO';
-    }
-    if (match.id === 'match_cuartos_4') {
-      if (isGenericL) localTeam = standings[3]?.equipo || '4to CLASIFICADO';
-      if (isGenericV) visitorTeam = standings[4]?.equipo || '5to CLASIFICADO';
-    }
-    // Para partidos de cuartos con IDs no estándar o genéricos, usar tabla
-    if (!['match_cuartos_1','match_cuartos_2','match_cuartos_3','match_cuartos_4'].includes(match.id)) {
-      const isGL = ['1er clasificado','1co clasificado'].some(v => localTeam.toLowerCase().includes(v));
-      const isGV = ['8vo clasificado','8co clasificado'].some(v => visitorTeam.toLowerCase().includes(v));
-      const isGL2 = ['2do clasificado'].some(v => localTeam.toLowerCase().includes(v));
-      const isGV2 = ['7mo clasificado'].some(v => visitorTeam.toLowerCase().includes(v));
-      const isGL3 = ['3er clasificado'].some(v => localTeam.toLowerCase().includes(v));
-      const isGV3 = ['6to clasificado'].some(v => visitorTeam.toLowerCase().includes(v));
-      const isGL4 = ['4to clasificado'].some(v => localTeam.toLowerCase().includes(v));
-      const isGV4 = ['5to clasificado'].some(v => visitorTeam.toLowerCase().includes(v));
-      if (isGL) localTeam = standings[0]?.equipo || localTeam;
-      if (isGV) visitorTeam = standings[7]?.equipo || visitorTeam;
-      if (isGL2) localTeam = standings[1]?.equipo || localTeam;
-      if (isGV2) visitorTeam = standings[6]?.equipo || visitorTeam;
-      if (isGL3) localTeam = standings[2]?.equipo || localTeam;
-      if (isGV3) visitorTeam = standings[5]?.equipo || visitorTeam;
-      if (isGL4) localTeam = standings[3]?.equipo || localTeam;
-      if (isGV4) visitorTeam = standings[4]?.equipo || visitorTeam;
+      localTeam = standings[0]?.equipo || '1er CLASIFICADO';
+      visitorTeam = standings[7]?.equipo || '8vo CLASIFICADO';
+    } else if (match.id === 'match_cuartos_2') {
+      localTeam = standings[1]?.equipo || '2do CLASIFICADO';
+      visitorTeam = standings[6]?.equipo || '7mo CLASIFICADO';
+    } else if (match.id === 'match_cuartos_3') {
+      localTeam = standings[2]?.equipo || '3er CLASIFICADO';
+      visitorTeam = standings[5]?.equipo || '6to CLASIFICADO';
+    } else if (match.id === 'match_cuartos_4') {
+      localTeam = standings[3]?.equipo || '4to CLASIFICADO';
+      visitorTeam = standings[4]?.equipo || '5to CLASIFICADO';
     }
   }
 
@@ -1899,3 +1872,4 @@ export default function Fixture({ matches, players, userRole, selectedCategory, 
     </div>
   );
 }
+
