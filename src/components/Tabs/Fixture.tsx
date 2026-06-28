@@ -278,38 +278,48 @@ export function getPlayoffMatchTeams(match: Match, allMatches: Match[]): { local
   let visitorTeam = match.visitanteNombre || (!match.esLocal ? 'San Rafael Tenis Club' : match.rival);
 
   if (match.fase === 'cuartos') {
-    const isGenericL = ['1er clasificado', '1er CLASIFICADO', '1CO CLASIFICADO'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
-    const isGenericV = ['8vo clasificado', '8vo CLASIFICADO', '8CO CLASIFICADO'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
-    const isGenericL2 = ['2do clasificado', '2do CLASIFICADO'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
-    const isGenericV2 = ['7mo clasificado', '7mo CLASIFICADO'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
-    const isGenericL3 = ['3er clasificado', '3er CLASIFICADO'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
-    const isGenericV3 = ['6to clasificado', '6to CLASIFICADO'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
-    const isGenericL4 = ['4to clasificado', '4to CLASIFICADO'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
-    const isGenericV4 = ['5to clasificado', '5to CLASIFICADO'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
+    // Detectar si los nombres actuales son placeholders genéricos
+    const placeholders = ['clasificado', 'clasificación'];
+    const isGenericL = placeholders.some(p => localTeam.toLowerCase().includes(p));
+    const isGenericV = placeholders.some(p => visitorTeam.toLowerCase().includes(p));
 
-    if (match.id === 'match_cuartos_1' || isGenericL || isGenericV) {
-      const t1 = standings[0]?.equipo || '1er CLASIFICADO';
-      const t8 = standings[7]?.equipo || '8vo CLASIFICADO';
-      localTeam = t1;
-      visitorTeam = t8;
+    // Si el partido ya tiene nombres reales de equipos (no placeholders),
+    // los respetamos y no los pisamos con la tabla de posiciones.
+    // Solo usamos la tabla cuando los nombres son placeholders genéricos.
+    if (match.id === 'match_cuartos_1') {
+      if (isGenericL) localTeam = standings[0]?.equipo || '1er CLASIFICADO';
+      if (isGenericV) visitorTeam = standings[7]?.equipo || '8vo CLASIFICADO';
     }
-    if (match.id === 'match_cuartos_2' || isGenericL2 || isGenericV2) {
-      const t2 = standings[1]?.equipo || '2do CLASIFICADO';
-      const t7 = standings[6]?.equipo || '7mo CLASIFICADO';
-      localTeam = t2;
-      visitorTeam = t7;
+    if (match.id === 'match_cuartos_2') {
+      if (isGenericL) localTeam = standings[1]?.equipo || '2do CLASIFICADO';
+      if (isGenericV) visitorTeam = standings[6]?.equipo || '7mo CLASIFICADO';
     }
-    if (match.id === 'match_cuartos_3' || isGenericL3 || isGenericV3) {
-      const t3 = standings[2]?.equipo || '3er CLASIFICADO';
-      const t6 = standings[5]?.equipo || '6to CLASIFICADO';
-      localTeam = t3;
-      visitorTeam = t6;
+    if (match.id === 'match_cuartos_3') {
+      if (isGenericL) localTeam = standings[2]?.equipo || '3er CLASIFICADO';
+      if (isGenericV) visitorTeam = standings[5]?.equipo || '6to CLASIFICADO';
     }
-    if (match.id === 'match_cuartos_4' || isGenericL4 || isGenericV4) {
-      const t4 = standings[3]?.equipo || '4to CLASIFICADO';
-      const t5 = standings[4]?.equipo || '5to CLASIFICADO';
-      localTeam = t4;
-      visitorTeam = t5;
+    if (match.id === 'match_cuartos_4') {
+      if (isGenericL) localTeam = standings[3]?.equipo || '4to CLASIFICADO';
+      if (isGenericV) visitorTeam = standings[4]?.equipo || '5to CLASIFICADO';
+    }
+    // Para partidos de cuartos con IDs no estándar o genéricos, usar tabla
+    if (!['match_cuartos_1','match_cuartos_2','match_cuartos_3','match_cuartos_4'].includes(match.id)) {
+      const isGL = ['1er clasificado','1co clasificado'].some(v => localTeam.toLowerCase().includes(v));
+      const isGV = ['8vo clasificado','8co clasificado'].some(v => visitorTeam.toLowerCase().includes(v));
+      const isGL2 = ['2do clasificado'].some(v => localTeam.toLowerCase().includes(v));
+      const isGV2 = ['7mo clasificado'].some(v => visitorTeam.toLowerCase().includes(v));
+      const isGL3 = ['3er clasificado'].some(v => localTeam.toLowerCase().includes(v));
+      const isGV3 = ['6to clasificado'].some(v => visitorTeam.toLowerCase().includes(v));
+      const isGL4 = ['4to clasificado'].some(v => localTeam.toLowerCase().includes(v));
+      const isGV4 = ['5to clasificado'].some(v => visitorTeam.toLowerCase().includes(v));
+      if (isGL) localTeam = standings[0]?.equipo || localTeam;
+      if (isGV) visitorTeam = standings[7]?.equipo || visitorTeam;
+      if (isGL2) localTeam = standings[1]?.equipo || localTeam;
+      if (isGV2) visitorTeam = standings[6]?.equipo || visitorTeam;
+      if (isGL3) localTeam = standings[2]?.equipo || localTeam;
+      if (isGV3) visitorTeam = standings[5]?.equipo || visitorTeam;
+      if (isGL4) localTeam = standings[3]?.equipo || localTeam;
+      if (isGV4) visitorTeam = standings[4]?.equipo || visitorTeam;
     }
   }
 
