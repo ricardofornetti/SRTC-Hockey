@@ -332,23 +332,35 @@ export function getPlayoffMatchTeams(match: Match, allMatches: Match[]): { local
     return lTeam;
   };
 
-  if (match.fase === 'semifinal') {
-    const isGenericL = ['ganador 1', 'GANADOR 1'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
-    const isGenericV = ['ganador 2', 'GANADOR 2'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
-    const isGenericL2 = ['ganador 3', 'GANADOR 3'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
-    const isGenericV2 = ['ganador 4', 'GANADOR 4'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
+ if (match.fase === 'semifinal') {
+    const isGenericL = ['ganador cuartos 1', 'ganador 1', 'GANADOR 1'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericV = ['ganador cuartos 2', 'ganador 2', 'GANADOR 2'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericL2 = ['ganador cuartos 3', 'ganador 3', 'GANADOR 3'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericV2 = ['ganador cuartos 4', 'ganador 4', 'GANADOR 4'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
 
     if (match.id === 'match_semi_1' || isGenericL || isGenericV) {
       const w1 = getWinnerOfMatch('match_cuartos_1');
       const w2 = getWinnerOfMatch('match_cuartos_2');
-      if (isGenericL) localTeam = w1 || 'Ganador Cuartos 1';
-      if (isGenericV) visitorTeam = w2 || 'Ganador Cuartos 2';
+      localTeam = w1 || 'Ganador Cuartos 1';
+      visitorTeam = w2 || 'Ganador Cuartos 2';
     }
     if (match.id === 'match_semi_2' || isGenericL2 || isGenericV2) {
       const w3 = getWinnerOfMatch('match_cuartos_3');
       const w4 = getWinnerOfMatch('match_cuartos_4');
-      if (isGenericL2) localTeam = w3 || 'Ganador Cuartos 3';
-      if (isGenericV2) visitorTeam = w4 || 'Ganador Cuartos 4';
+      localTeam = w3 || 'Ganador Cuartos 3';
+      visitorTeam = w4 || 'Ganador Cuartos 4';
+    }
+  }
+
+  if (match.fase === 'final') {
+    const isGenericL = ['ganador semi 1', 'ganador semifinal 1', 'GANADOR SEMI 1', 'ganador de semis 1'].some(val => localTeam.toLowerCase().includes(val.toLowerCase()));
+    const isGenericV = ['ganador semi 2', 'ganador semifinal 2', 'GANADOR SEMI 2', 'ganador de semis 2'].some(val => visitorTeam.toLowerCase().includes(val.toLowerCase()));
+
+    if (match.id === 'match_final_1' || isGenericL || isGenericV) {
+      const ws1 = getWinnerOfMatch('match_semi_1');
+      const ws2 = getWinnerOfMatch('match_semi_2');
+      localTeam = ws1 || 'Ganador Semifinal 1';
+      visitorTeam = ws2 || 'Ganador Semifinal 2';
     }
   }
 
