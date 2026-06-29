@@ -9,6 +9,7 @@ import { Match, Standing, Category } from '../../types';
 import { INITIAL_MATCH_LIST } from '../../data';
 import ClubLogo from '../ClubLogo';
 import { saveDocument } from '../../firebase';
+import { processImageFile, IMAGE_PRESETS } from '../../utils/imageUtils';
 
 interface TablaProps {
   matches: Match[];
@@ -81,7 +82,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
       'MARISTA - C': { id: 'marb_c', equipo: 'MARISTA - C', pg: 4, pe: 2, pp: 6, gf: 8, gc: 19 },
       'PUMAI RUGBY CLUB - A': { id: 'pumai_a', equipo: 'PUMAI RUGBY CLUB - A', pg: 3, pe: 4, pp: 5, gf: 11, gc: 15 },
       'SAN JORGE S.R. - A': { id: 'sjor_a', equipo: 'SAN JORGE S.R. - A', pg: 2, pe: 3, pp: 7, gf: 6, gc: 23 },
-      'CABNA - A': { id: 'cabn_a', equipo: 'CABNA - A', pg: 2, pe: 3, pp: 7, gf: 5, gc: 32 },
+      'CABNA - A': { id: 'cabn_a', equipo: 'CABNA - A', pg: 2, py: 3, pe: 3, pp: 7, gf: 5, gc: 32 },
       'MURIALDO - B': { id: 'mur_b', equipo: 'MURIALDO - B', pg: 2, pe: 2, pp: 8, gf: 2, gc: 27 },
       'ALEMAN - B': { id: 'alem_b', equipo: 'ALEMAN - B', pg: 2, pe: 0, pp: 10, gf: 5, gc: 43 },
       'TEQÜE RUGBY CLUB - B': { id: 'teq_b', equipo: 'TEQÜE RUGBY CLUB - B', pg: 0, pe: 3, pp: 9, gf: 1, gc: 33 },
@@ -285,16 +286,16 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
   // Compile calculated list with PJ, PTS and DG
   const standingsList: Standing[] = Object.keys(workingBaselines).map(key => {
     const base = workingBaselines[key];
-    const pj = base.pg + base.pe + base.pp;
+    const pj = base.pg + (base.pe || 0) + base.pp;
     const dg = base.gf - base.gc;
-    const pts = (base.pg * 3) + (base.pe * 1);
+    const pts = (base.pg * 3) + ((base.pe || 0) * 1);
     
     return {
       id: base.id,
       equipo: base.equipo,
       pj,
       pg: base.pg,
-      pe: base.pe,
+      pe: base.pe || 0,
       pp: base.pp,
       gf: base.gf,
       gc: base.gc,
@@ -329,7 +330,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
     const baseRecord = baselines[teamName] || { pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 };
     setEditingTeam(teamName);
     setEditPG(baseRecord.pg);
-    setEditPE(baseRecord.pe);
+    setEditPE(baseRecord.pe || 0);
     setEditPP(baseRecord.pp);
     setEditGF(baseRecord.gf);
     setEditGC(baseRecord.gc);
@@ -386,16 +387,14 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
     }
   };
 
-  const processFile = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      alert('Por favor carga un archivo de tipo imagen.');
-      return;
+  const processFile = async (file: File) => {
+    try {
+      const compressedBase64 = await processImageFile(file, IMAGE_PRESETS.logo);
+      setLogoBase64(compressedBase64);
+    } catch (err: any) {
+      console.error('[Tabla.tsx] Error processing logo file:', err);
+      alert(err?.message || 'Error al procesar la imagen del escudo.');
     }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setLogoBase64(reader.result as string);
-    };
-    reader.readAsDataURL(file);
   };
 
   // Save changes
@@ -441,6 +440,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
 
     // Force refresh ClubLogo by creating dummy state or triggering storage event
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('srtc_logo_updated'));
 
     // Reset modals
     setEditingTeam(null);
@@ -468,6 +468,7 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
     setLogoBase64('');
     setLogoUrl('');
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('srtc_logo_updated'));
 
     try {
       await saveDocument('settings', 'team_logos', { id: 'team_logos', value: nextLogosStr });
@@ -698,6 +699,137 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
                   </div>
                 </div>
               )}
+
+              {/* CONFIGURAR ESCUDO / LOGO DEL EQUIPO */}
+              <div className="space-y-4 pt-5 border-t border-white/10">
+                <div className="flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-emerald-450 shrink-0" />
+                  <h4 className="font-extrabold text-white text-xs uppercase tracking-wider">Escudo / Logo del Club</h4>
+                </div>
+                <p className="text-xs text-indigo-200/90 leading-relaxed font-sans">
+                  Sube un escudo comprimido o proporciona una URL directa de imagen para este equipo en el torneo.
+                </p>
+
+                {/* Input Type selector */}
+                <div className="flex gap-2 p-1 bg-black/20 rounded-lg border border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setLogoInputType('upload')}
+                    className={`flex-1 py-1.5 px-3 rounded-md text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                      logoInputType === 'upload' ? 'bg-emerald-600 text-white' : 'text-indigo-200 hover:text-white'
+                    }`}
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    Subir Archivo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLogoInputType('url')}
+                    className={`flex-1 py-1.5 px-3 rounded-md text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                      logoInputType === 'url' ? 'bg-emerald-600 text-white' : 'text-indigo-200 hover:text-white'
+                    }`}
+                  >
+                    <HelpCircle className="w-3.5 h-3.5" />
+                    URL de Imagen
+                  </button>
+                </div>
+
+                {logoInputType === 'upload' ? (
+                  <div className="space-y-3">
+                    <div
+                      onDragEnter={handleDrag}
+                      onDragOver={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDrop={handleDrop}
+                      className={`border-2 border-dashed rounded-xl p-5 text-center transition flex flex-col items-center justify-center gap-2 ${
+                        dragActive ? 'border-emerald-500 bg-emerald-500/10 animate-pulse' : 'border-white/15 hover:border-white/30 bg-black/20'
+                      }`}
+                    >
+                      <Upload className="w-8 h-8 text-indigo-300" />
+                      <div className="text-xs">
+                        <span className="font-bold text-white">Arrastra un escudo aquí</span>
+                        <span className="text-white/60 block mt-0.5">o haz clic para seleccionar</span>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="logo-file-input"
+                      />
+                      <label
+                        htmlFor="logo-file-input"
+                        className="mt-2 text-[10px] bg-white/5 hover:bg-white/10 border border-white/10 text-white px-3 py-1.5 rounded-lg cursor-pointer transition font-bold"
+                      >
+                        Seleccionar Archivo
+                      </label>
+                    </div>
+
+                    {logoBase64 && (
+                      <div className="flex items-center gap-4 p-3 bg-black/30 border border-white/5 rounded-xl">
+                        <img src={logoBase64} alt="Vista previa" className="w-12 h-12 object-contain bg-neutral-900 rounded-lg p-1 border border-white/10" />
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-emerald-400">Escudo cargado y optimizado</p>
+                          <p className="text-[10px] text-white/50">Listo para sincronizar</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setLogoBase64('')}
+                          className="text-rose-400 hover:text-rose-300 text-xs font-bold cursor-pointer"
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-indigo-250 font-bold block">URL de la Imagen</label>
+                      <input
+                        type="url"
+                        placeholder="https://ejemplo.com/escudo.png"
+                        value={logoUrl}
+                        onChange={(e) => setLogoUrl(e.target.value)}
+                        className="w-full bg-[#0d4f32]/40 border border-white/15 rounded-lg py-2 px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-sans"
+                      />
+                    </div>
+
+                    {logoUrl && (
+                      <div className="flex items-center gap-4 p-3 bg-black/30 border border-white/5 rounded-xl">
+                        <img 
+                          src={logoUrl} 
+                          alt="Vista previa URL" 
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://placehold.co/128x128?text=Error+Carga';
+                          }}
+                          className="w-12 h-12 object-contain bg-neutral-900 rounded-lg p-1 border border-white/10" 
+                        />
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-indigo-300">Vista previa de URL</p>
+                          <p className="text-[10px] text-white/50 truncate max-w-[200px]" title={logoUrl}>{logoUrl}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setLogoUrl('')}
+                          className="text-rose-400 hover:text-rose-300 text-xs font-bold cursor-pointer"
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Restablecer logo */}
+                <button
+                  type="button"
+                  onClick={handleDeleteLogo}
+                  className="w-full py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/30 text-rose-400 hover:text-rose-300 rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  Restablecer a Escudo Predeterminado
+                </button>
+              </div>
 
             </div>
 
