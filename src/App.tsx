@@ -1,4 +1,4 @@
-/**
+**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -49,6 +49,7 @@ import {
   subscribeToCollection, 
   seedInitialDataIfCollectionIsEmpty, 
   syncCollection,
+  updateMatchDirectly,
   saveDocument,
   deleteDocument,
   auth,
@@ -104,6 +105,38 @@ export default function App() {
 
   // Listen to Auth State dynamically and evaluate admin permissions on the fly
   useEffect(() => {
+    const checkDevToken = () => {
+      if (import.meta.env.DEV) {
+        const devTokenData = localStorage.getItem('srtc_dev_admin_token');
+        if (devTokenData) {
+          try {
+            const token = JSON.parse(devTokenData);
+            if (token.expiresAt > Date.now()) {
+              // Dev token is valid
+              setUserRole('admin');
+              setCurrentUserEmail(token.email);
+              return;
+            } else {
+              // Token expired
+              localStorage.removeItem('srtc_dev_admin_token');
+            }
+          } catch (e) {
+            localStorage.removeItem('srtc_dev_admin_token');
+          }
+        }
+      }
+      
+      // Fall back to Firebase Auth for production and expired/missing dev tokens
+      return undefined;
+    };
+
+    // Check dev token first
+    const devTokenStatus = checkDevToken();
+    if (devTokenStatus !== undefined) {
+      return;
+    }
+
+    // If no valid dev token, use Firebase Auth
     const unsubAuth = onAuthStateChanged(auth, async (user) => {
       if (user && user.email && ADMIN_EMAILS.includes(user.email)) {
         setUserRole('admin');
@@ -121,7 +154,17 @@ export default function App() {
       }
     });
 
-    return () => unsubAuth();
+    // Listen for dev login events
+    const handleDevLogin = (e: any) => {
+      setUserRole('admin');
+      setCurrentUserEmail(e.detail.email);
+    };
+    window.addEventListener('srtc-dev-login', handleDevLogin);
+
+    return () => {
+      unsubAuth();
+      window.removeEventListener('srtc-dev-login', handleDevLogin);
+    };
   }, []);
 
   // Bind real-time Firestore synchronization on load
@@ -580,11 +623,22 @@ export default function App() {
   const handleUpdateMatches = async (updated: Match[]) => {
     setMatches(updated);
     try {
-      await syncCollection('matches', matches, updated);
+      // Find which matches changed and update them directly
+      for (const updatedMatch of updated) {
+        const originalMatch = matches.find(m => m.id === updatedMatch.id);
+        // If match is new or has changed goals/estado, update directly
+        if (!originalMatch || 
+            originalMatch.golesPropios !== updatedMatch.golesPropios ||
+            originalMatch.golesRival !== updatedMatch.golesRival ||
+            originalMatch.estado !== updatedMatch.estado) {
+          await updateMatchDirectly(updatedMatch.id, updatedMatch);
+        }
+      }
+      
       showToast('Partidos actualizados', 'Se han sincronizado los resultados del torneo en tiempo real.', 'success');
       await recalculateAndSyncPlayersAndStandings(updated);
     } catch (e) {
-      console.error(e);
+      console.error('Error updating matches:', e);
       showToast('Error de guardado', 'Resultados guardados localmente.', 'error');
     }
   };
