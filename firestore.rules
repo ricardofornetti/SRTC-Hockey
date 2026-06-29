@@ -19,10 +19,10 @@ service cloud.firestore {
     // 2. Add or remove their email here in this rules file AND in src/firebase.ts (ADMIN_EMAILS).
     // 3. Publish these Firestore security rules.
     function isStaff() {
-      return isSignedIn() && request.auth.token.email in [
-        'fornettiricardo@gmail.com'
-        // Add more authorized staff emails here (separated by commas)
-      ];
+      return isSignedIn() && (
+        request.auth.token.email == 'fornettiricardo@gmail.com' ||
+        request.auth.token.email == 'admin@sanrafaeltenisclub.com'
+      );
     }
 
     // Image size validators

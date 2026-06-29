@@ -35,7 +35,7 @@ export const db = ((firebaseConfig as any).firestoreDatabaseId && (firebaseConfi
 export const auth = getAuth();
 
 // Admin / authorized staff emails
-export const ADMIN_EMAILS = ['fornettiricardo@gmail.com'];
+export const ADMIN_EMAILS = ['fornettiricardo@gmail.com', 'admin@sanrafaeltenisclub.com'];
 
 // Verification of Connection
 async function testConnection() {

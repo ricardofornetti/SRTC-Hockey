@@ -54,7 +54,7 @@ import {
   auth,
   ADMIN_EMAILS
 } from './firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
 
 import RoleSelector from './components/RoleSelector';
@@ -107,7 +107,11 @@ export default function App() {
     const checkLocalAdmin = () => {
       if (localStorage.getItem('srtc_local_admin') === 'true') {
         setUserRole('admin');
-        setCurrentUserEmail('fornettiricardo@gmail.com');
+        setCurrentUserEmail('admin@sanrafaeltenisclub.com');
+        if (!auth.currentUser) {
+          signInWithEmailAndPassword(auth, 'admin@sanrafaeltenisclub.com', 'sanrafaeltenisclub2026')
+            .catch(err => console.warn('Background auto-login failed/skipped:', err));
+        }
         return true;
       }
       return false;

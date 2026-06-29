@@ -47,7 +47,7 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
 
     // 2. Intentar autenticar con Firebase usando el email administrativo predefinido
     try {
-      const email = 'fornettiricardo@gmail.com';
+      const email = 'admin@sanrafaeltenisclub.com';
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (signInError: any) {
@@ -56,13 +56,20 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
         if (
           signInError?.code === 'auth/user-not-found' || 
           signInError?.code === 'auth/invalid-credential' ||
-          signInError?.code === 'auth/wrong-password'
+          signInError?.code === 'auth/wrong-password' ||
+          signInError?.code === 'auth/cannot-find-user'
         ) {
           try {
             await createUserWithEmailAndPassword(auth, email, password);
           } catch (createError: any) {
             if (createError?.code === 'auth/email-already-in-use') {
               console.info('El correo ya está registrado en Firebase Auth. Iniciando sesión localmente.');
+              // Intentar iniciar sesión de nuevo en caso de colisión menor
+              try {
+                await signInWithEmailAndPassword(auth, email, password);
+              } catch (retryError) {
+                console.error('Retry sign in failed:', retryError);
+              }
             } else {
               console.error('Registration failed:', createError);
             }
@@ -157,8 +164,8 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
               <div>
                 <div className="bg-neutral-900 p-3 rounded-lg border border-neutral-800 mb-3">
                   <p className="text-[10px] text-neutral-400">Administrador activo:</p>
-                  <p className="font-mono text-neutral-200 text-xs truncate mt-0.5" title={currentUserEmail || 'fornettiricardo@gmail.com'}>
-                    {currentUserEmail || 'fornettiricardo@gmail.com'}
+                  <p className="font-mono text-neutral-200 text-xs truncate mt-0.5" title={currentUserEmail || 'admin@sanrafaeltenisclub.com'}>
+                    {currentUserEmail || 'admin@sanrafaeltenisclub.com'}
                   </p>
                 </div>
                 <button
