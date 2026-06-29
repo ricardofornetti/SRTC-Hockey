@@ -52,7 +52,8 @@ import {
   saveDocument,
   deleteDocument,
   auth,
-  ADMIN_EMAILS
+  ADMIN_EMAILS,
+  updateMatchDirectly
 } from './firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
@@ -619,12 +620,24 @@ export default function App() {
     setMatches(updated);
     try {
       if (userRole === 'admin') {
-        await syncCollection('matches', matches, updated);
+        // Encontrar qué partidos específicos cambiaron y guardarlos de forma directa y atómica
+        const currentById = new Map(matches.map(m => [m.id, m]));
+        const changedMatches = updated.filter(m => {
+          const existing = currentById.get(m.id);
+          return !existing || JSON.stringify(existing) !== JSON.stringify(m);
+        });
+
+        console.log('[App.tsx] Guardando partidos modificados:', changedMatches);
+
+        for (const m of changedMatches) {
+          await updateMatchDirectly(m.id, m);
+        }
+
         showToast('Partidos actualizados', 'Se han sincronizado los resultados del torneo en tiempo real.', 'success');
         await recalculateAndSyncPlayersAndStandings(updated);
       }
     } catch (e) {
-      console.error(e);
+      console.error('[App.tsx] Error al actualizar partidos:', e);
       showToast('Error de guardado', 'Resultados guardados localmente.', 'error');
     }
   };

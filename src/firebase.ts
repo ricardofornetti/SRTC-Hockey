@@ -151,6 +151,23 @@ export async function saveDocument(
 }
 
 /**
+ * Direct update for a single match in Firestore.
+ * Bypasses full collection comparison to ensure immediate, robust updates.
+ */
+export async function updateMatchDirectly(matchId: string, matchData: any): Promise<void> {
+  console.log(`[firebase.ts] updateMatchDirectly: Iniciando guardado del partido ${matchId}`, matchData);
+  const docRef = doc(db, 'matches', matchId);
+  try {
+    const cleanedData = cleanUndefined(matchData);
+    await setDoc(docRef, cleanedData, { merge: true });
+    console.log(`[firebase.ts] updateMatchDirectly: Partido ${matchId} guardado con éxito en Firestore.`);
+  } catch (error) {
+    console.error(`[firebase.ts] Error en updateMatchDirectly para partido ${matchId}:`, error);
+    handleFirestoreError(error, OperationType.WRITE, `matches/${matchId}`);
+  }
+}
+
+/**
  * Deletes a document from a specific collection.
  */
 export async function deleteDocument(
@@ -199,15 +216,19 @@ export async function seedInitialDataIfCollectionIsEmpty(): Promise<void> {
         await setDoc(doc(db, 'matches', m.id), m);
       }
     } else {
-      // Overwrite/backport playoff matches to ensure they reflect the actual team names
+      // SOLO sembramos partidos de playoff que NO existan en Firestore para evitar sobreescribir los goles cargados por el usuario
+      const existingMatchIds = new Set(matchesSnap.docs.map(doc => doc.id));
       const playoffMatches = INITIAL_MATCH_LIST.filter(m => m.fase === 'cuartos' || m.fase === 'semifinal' || m.fase === 'final');
       let backportedCount = 0;
       for (const m of playoffMatches) {
-        await setDoc(doc(db, 'matches', m.id), m);
-        backportedCount++;
+        if (!existingMatchIds.has(m.id)) {
+          console.log(`[firebase.ts] Sembrando partido de playoff faltante: ${m.id}`);
+          await setDoc(doc(db, 'matches', m.id), m);
+          backportedCount++;
+        }
       }
       if (backportedCount > 0) {
-        console.log(`Ensured/backported ${backportedCount} playoff matches in Firestore.`);
+        console.log(`[firebase.ts] Se crearon ${backportedCount} partidos de playoff faltantes en Firestore.`);
       }
     }
 
