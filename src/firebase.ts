@@ -37,29 +37,6 @@ export const auth = getAuth();
 // Admin / authorized staff emails
 export const ADMIN_EMAILS = ['fornettiricardo@gmail.com'];
 
-// Development-only bypass for Google AI Studio and other sandbox environments
-// This allows quick testing without Google OAuth popups in restrictive iframes
-// Production builds (import.meta.env.DEV === false) ignore this entirely
-export const DEV_ADMIN_PASSWORD = 'complejocenter2026';
-
-/**
- * Verifies a development admin password (only in dev mode).
- * Returns the admin email if password is correct, otherwise null.
- * SECURITY: This is completely disabled in production builds.
- */
-export function verifyDevAdminPassword(password: string): string | null {
-  // Completely disabled in production - import.meta.env.DEV is false in built code
-  if (!import.meta.env.DEV) {
-    return null;
-  }
-  
-  if (password === DEV_ADMIN_PASSWORD) {
-    return ADMIN_EMAILS[0]; // Return the primary admin email
-  }
-  
-  return null;
-}
-
 // Verification of Connection
 async function testConnection() {
   try {
@@ -298,23 +275,6 @@ export async function seedInitialDataIfCollectionIsEmpty(): Promise<void> {
 }
 
 /**
- * Directly updates a single match document in Firestore.
- * Used for immediate persistence of match results without comparison logic.
- */
-export async function updateMatchDirectly(matchId: string, matchData: any): Promise<void> {
-  try {
-    const docRef = doc(db, 'matches', matchId);
-    const cleanedData = cleanUndefined(matchData);
-    console.log('Updating match directly:', { matchId, data: cleanedData });
-    await setDoc(docRef, cleanedData, { merge: true });
-    console.log('Match updated successfully in Firestore:', matchId);
-  } catch (error) {
-    console.error('Error updating match directly:', error);
-    handleFirestoreError(error, OperationType.WRITE, `matches/${matchId}`);
-  }
-}
-
-/**
  * Automatically calculates differences between local state changes and Firestore,
  * applying the required additions, updates, or deletions.
  */
@@ -323,17 +283,14 @@ export async function syncCollection<T extends { id: string }>(
   currentItems: T[],
   newItems: T[]
 ): Promise<void> {
-  const currentById = new Map(currentItems.map(item => [item.id, JSON.stringify(cleanUndefined(item))]));
-  const newById = new Map(newItems.map(item => [item.id, JSON.stringify(cleanUndefined(item))]));
+  const currentById = new Map(currentItems.map(item => [item.id, item]));
+  const newById = new Map(newItems.map(item => [item.id, item]));
 
   // Find added or modified items
   const toUpsert: T[] = [];
   for (const item of newItems) {
-    const itemKey = item.id;
-    const currentJson = currentById.get(itemKey);
-    const newJson = newById.get(itemKey);
-    
-    if (!currentJson || currentJson !== newJson) {
+    const existing = currentById.get(item.id);
+    if (!existing || JSON.stringify(existing) !== JSON.stringify(item)) {
       toUpsert.push(item);
     }
   }

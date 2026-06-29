@@ -104,7 +104,12 @@ export default function Tabla({ matches, selectedCategory, onShare, userRole, st
   const [editGC, setEditGC] = useState(0);
 
   // 2. Compute dynamic standings on top of baselines
-  const activeMatches = matches.filter(m => m.categoria === selectedCategory && m.estado === 'Finalizado');
+  // Solo considerar partidos de la fase regular para calcular la tabla (los playoffs no suman en la general)
+  const activeMatches = matches.filter(
+    m => m.categoria === selectedCategory && 
+         m.estado === 'Finalizado' && 
+         (!m.fase || m.fase === 'regular')
+  );
 
   // Clone baselines so we compute dynamic results safely
   const workingBaselines = JSON.parse(JSON.stringify(baselines)) as {

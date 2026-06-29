@@ -1,4 +1,4 @@
-**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -49,7 +49,6 @@ import {
   subscribeToCollection, 
   seedInitialDataIfCollectionIsEmpty, 
   syncCollection,
-  updateMatchDirectly,
   saveDocument,
   deleteDocument,
   auth,
@@ -105,38 +104,15 @@ export default function App() {
 
   // Listen to Auth State dynamically and evaluate admin permissions on the fly
   useEffect(() => {
-    const checkDevToken = () => {
-      if (import.meta.env.DEV) {
-        const devTokenData = localStorage.getItem('srtc_dev_admin_token');
-        if (devTokenData) {
-          try {
-            const token = JSON.parse(devTokenData);
-            if (token.expiresAt > Date.now()) {
-              // Dev token is valid
-              setUserRole('admin');
-              setCurrentUserEmail(token.email);
-              return;
-            } else {
-              // Token expired
-              localStorage.removeItem('srtc_dev_admin_token');
-            }
-          } catch (e) {
-            localStorage.removeItem('srtc_dev_admin_token');
-          }
-        }
+    const checkLocalAdmin = () => {
+      if (localStorage.getItem('srtc_local_admin') === 'true') {
+        setUserRole('admin');
+        setCurrentUserEmail('fornettiricardo@gmail.com');
+        return true;
       }
-      
-      // Fall back to Firebase Auth for production and expired/missing dev tokens
-      return undefined;
+      return false;
     };
 
-    // Check dev token first
-    const devTokenStatus = checkDevToken();
-    if (devTokenStatus !== undefined) {
-      return;
-    }
-
-    // If no valid dev token, use Firebase Auth
     const unsubAuth = onAuthStateChanged(auth, async (user) => {
       if (user && user.email && ADMIN_EMAILS.includes(user.email)) {
         setUserRole('admin');
@@ -149,21 +125,29 @@ export default function App() {
           console.warn('Initial seeding lookup bypassed.', err);
         }
       } else {
-        setUserRole('public');
-        setCurrentUserEmail('');
+        if (!checkLocalAdmin()) {
+          setUserRole('public');
+          setCurrentUserEmail('');
+        }
       }
     });
 
-    // Listen for dev login events
-    const handleDevLogin = (e: any) => {
-      setUserRole('admin');
-      setCurrentUserEmail(e.detail.email);
+    const handleAuthEvent = () => {
+      if (!auth.currentUser) {
+        if (!checkLocalAdmin()) {
+          setUserRole('public');
+          setCurrentUserEmail('');
+        }
+      }
     };
-    window.addEventListener('srtc-dev-login', handleDevLogin);
+
+    window.addEventListener('srtc_auth_changed', handleAuthEvent);
+    window.addEventListener('storage', handleAuthEvent);
 
     return () => {
       unsubAuth();
-      window.removeEventListener('srtc-dev-login', handleDevLogin);
+      window.removeEventListener('srtc_auth_changed', handleAuthEvent);
+      window.removeEventListener('storage', handleAuthEvent);
     };
   }, []);
 
@@ -407,7 +391,12 @@ export default function App() {
       return teamName.toUpperCase().trim();
     }
 
-    const activeMatches = updatedMatches.filter(m => m.categoria === selectedCategory && m.estado === 'Finalizado');
+    // Solo considerar partidos de la fase regular para calcular la tabla (los playoffs no suman en la general)
+    const activeMatches = updatedMatches.filter(
+      m => m.categoria === selectedCategory && 
+           m.estado === 'Finalizado' && 
+           (!m.fase || m.fase === 'regular')
+    );
     const workingBaselines = JSON.parse(JSON.stringify(baselinesMap));
 
     activeMatches.forEach(match => {
@@ -612,8 +601,10 @@ export default function App() {
   const handleUpdatePlayers = async (updated: Player[]) => {
     setPlayers(updated);
     try {
-      await syncCollection('players', players, updated);
-      showToast('Plantel actualizado', 'Se han sincronizado los cambios del plantel con Firestore en tiempo real.', 'success');
+      if (userRole === 'admin') {
+        await syncCollection('players', players, updated);
+        showToast('Plantel actualizado', 'Se han sincronizado los cambios del plantel con Firestore en tiempo real.', 'success');
+      }
     } catch (e) {
       console.error(e);
       showToast('Error de guardado', 'Sus cambios se guardaron localmente pero falló la sincronización con el servidor.', 'error');
@@ -623,22 +614,13 @@ export default function App() {
   const handleUpdateMatches = async (updated: Match[]) => {
     setMatches(updated);
     try {
-      // Find which matches changed and update them directly
-      for (const updatedMatch of updated) {
-        const originalMatch = matches.find(m => m.id === updatedMatch.id);
-        // If match is new or has changed goals/estado, update directly
-        if (!originalMatch || 
-            originalMatch.golesPropios !== updatedMatch.golesPropios ||
-            originalMatch.golesRival !== updatedMatch.golesRival ||
-            originalMatch.estado !== updatedMatch.estado) {
-          await updateMatchDirectly(updatedMatch.id, updatedMatch);
-        }
+      if (userRole === 'admin') {
+        await syncCollection('matches', matches, updated);
+        showToast('Partidos actualizados', 'Se han sincronizado los resultados del torneo en tiempo real.', 'success');
+        await recalculateAndSyncPlayersAndStandings(updated);
       }
-      
-      showToast('Partidos actualizados', 'Se han sincronizado los resultados del torneo en tiempo real.', 'success');
-      await recalculateAndSyncPlayersAndStandings(updated);
     } catch (e) {
-      console.error('Error updating matches:', e);
+      console.error(e);
       showToast('Error de guardado', 'Resultados guardados localmente.', 'error');
     }
   };
@@ -646,8 +628,10 @@ export default function App() {
   const handleUpdateStandings = async (updated: Standing[]) => {
     setStandings(updated);
     try {
-      await syncCollection('standings', standings, updated);
-      showToast('Tabla armada', 'Historial y puntos recalculados correctamente en la nube.', 'success');
+      if (userRole === 'admin') {
+        await syncCollection('standings', standings, updated);
+        showToast('Tabla armada', 'Historial y puntos recalculados correctamente en la nube.', 'success');
+      }
     } catch (e) {
       console.error(e);
     }
@@ -656,8 +640,10 @@ export default function App() {
   const handleUpdateNews = async (updated: NewsItem[]) => {
     setNews(updated);
     try {
-      await syncCollection('news', news, updated);
-      showToast('Publicación agregada', 'La noticia fue publicada de forma exitosa.', 'success');
+      if (userRole === 'admin') {
+        await syncCollection('news', news, updated);
+        showToast('Publicación agregada', 'La noticia fue publicada de forma exitosa.', 'success');
+      }
     } catch (e) {
       console.error(e);
     }
@@ -671,7 +657,7 @@ export default function App() {
   const handleUpdateConvocations = async (updated: Convocation[]) => {
     setConvocations(updated);
     try {
-      if (updated.length > 0) {
+      if (userRole === 'admin' && updated.length > 0) {
         await syncCollection('convocations', convocations, updated);
         showToast('Lista de convocadas', 'La nómina del próximo partido fue sincronizada.', 'success');
       }
@@ -683,7 +669,9 @@ export default function App() {
   const handleUpdateNotifications = async (updated: NotificationLog[]) => {
     setNotifications(updated);
     try {
-      await syncCollection('notifications', notifications, updated);
+      if (userRole === 'admin') {
+        await syncCollection('notifications', notifications, updated);
+      }
     } catch (e) {
       console.error(e);
     }
