@@ -61,7 +61,11 @@ export default function RoleSelector({ currentRole, currentUserEmail, showToast 
           try {
             await createUserWithEmailAndPassword(auth, email, password);
           } catch (createError: any) {
-            console.error('Registration failed:', createError);
+            if (createError?.code === 'auth/email-already-in-use') {
+              console.info('El correo ya está registrado en Firebase Auth. Iniciando sesión localmente.');
+            } else {
+              console.error('Registration failed:', createError);
+            }
           }
         }
       }
